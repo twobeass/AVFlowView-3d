@@ -54,6 +54,41 @@ Custom Renderers (DeviceRenderer, AreaRenderer, EdgeRenderer)
 FocusManager (uses: graph traversal utils)
 ```
 
+## src/ Directory Template
+```
+src/
+├── main.js                    # Entry point
+├── AVFlowView3dApp.js         # Main application class
+├── converters/
+│   ├── AVToELKConverter.js
+│   └── index.js
+├── validation/
+│   ├── SchemaValidator.js
+│   └── index.js
+├── styling/
+│   ├── CategoryStyler.js
+│   ├── PortDirectionResolver.js
+│   └── index.js
+├── renderers/
+│   ├── DeviceRenderer.js
+│   ├── AreaRenderer.js
+│   ├── EdgeRenderer.js
+│   └── index.js
+├── interaction/
+│   ├── FocusManager.js
+│   ├── SearchManager.js
+│   └── index.js
+└── utils/
+    ├── graph-traversal.js
+    └── index.js
+```
+
+## Common Pitfalls (What Previous Agents Got Wrong)
+1. Forgetting to handle nested areas – Must recursively process parentId chains
+2. Hardcoding port positions – Must compute from alignment + layout direction
+3. Ignoring bidirectional edge direction – Creates incorrect flow visualization
+4. Not handling missing optional fields – Schema allows omission, code must have defaults
+
 ## Non-Negotiable Requirements
 1. All input MUST validate against avflowview-wiring.schema.json
 2. Layout MUST be deterministic (same input = same output)
