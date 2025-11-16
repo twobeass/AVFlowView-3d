@@ -1,7 +1,7 @@
 // src/renderers/HwSchematicRenderer.js
 
 import * as d3 from 'd3';
-import d3HwSchematic from 'd3-hwschematic';
+import * as d3HwSchematic from 'd3-hwschematic';
 
 class HwSchematicRenderer {
   constructor(containerSelector) {
