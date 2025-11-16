@@ -1,0 +1,179 @@
+{
+  "$schema": "https://example.com/schemas/av-wiring-graph.schema.json",
+  "layout": {
+    "direction": "LR",
+    "portBinding": "auto",
+    "areaFirst": true,
+    "areaPadding": 24
+  },
+  "areas": [
+    {
+      "id": "control-room",
+      "label": "Control Room"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "camera-1",
+      "manufacturer": "Sony",
+      "model": "PXW-Z450",
+      "category": "video",
+      "subcategory": "camera",
+      "status": "Existing",
+      "label": "Main Camera",
+      "areaId": "control-room",
+      "ports": {
+        "sdi-out-1": {
+          "alignment": "Out",
+          "label": "SDI OUT 1",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "switcher-1",
+      "manufacturer": "Blackmagic",
+      "model": "ATEM 2 M/E",
+      "category": "video",
+      "subcategory": "switcher",
+      "status": "Existing",
+      "label": "Video Switcher",
+      "areaId": "control-room",
+      "ports": {
+        "sdi-in-1": {
+          "alignment": "In",
+          "label": "SDI IN 1",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "sdi-in-2": {
+          "alignment": "In",
+          "label": "SDI IN 2",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "sdi-out-pgm": {
+          "alignment": "Out",
+          "label": "SDI PGM OUT",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "camera-2",
+      "manufacturer": "Sony",
+      "model": "PXW-Z450",
+      "category": "video",
+      "subcategory": "camera",
+      "status": "Existing",
+      "label": "Side Camera",
+      "areaId": "control-room",
+      "ports": {
+        "sdi-out-1": {
+          "alignment": "Out",
+          "label": "SDI OUT 1",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "monitor-1",
+      "manufacturer": "Sony",
+      "model": "BVM-HX310",
+      "category": "video",
+      "subcategory": "monitor",
+      "status": "Existing",
+      "label": "Program Monitor",
+      "areaId": "control-room",
+      "ports": {
+        "sdi-in-1": {
+          "alignment": "In",
+          "label": "SDI IN 1",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "router-1",
+      "manufacturer": "Cisco",
+      "model": "Catalyst 2960",
+      "category": "network",
+      "subcategory": "switch",
+      "status": "Existing",
+      "label": "Network Switch",
+      "areaId": "control-room",
+      "ports": {
+        "eth-1": {
+          "alignment": "Bidirectional",
+          "label": "ETH 1",
+          "type": "RJ45",
+          "gender": "F"
+        },
+        "eth-2": {
+          "alignment": "Bidirectional",
+          "label": "ETH 2",
+          "type": "RJ45",
+          "gender": "F"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "wireId": "SDI-001",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Camera 1 to Switcher",
+      "source": "camera-1",
+      "sourcePortKey": "sdi-out-1",
+      "target": "switcher-1",
+      "targetPortKey": "sdi-in-1",
+      "binding": "exact"
+    },
+    {
+      "id": "edge-2",
+      "wireId": "SDI-002",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Camera 2 to Switcher",
+      "source": "camera-2",
+      "sourcePortKey": "sdi-out-1",
+      "target": "switcher-1",
+      "targetPortKey": "sdi-in-2",
+      "binding": "exact"
+    },
+    {
+      "id": "edge-3",
+      "wireId": "SDI-003",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Switcher to Monitor",
+      "source": "switcher-1",
+      "sourcePortKey": "sdi-out-pgm",
+      "target": "monitor-1",
+      "targetPortKey": "sdi-in-1",
+      "binding": "exact"
+    },
+    {
+      "id": "edge-4",
+      "wireId": "CAT6-001",
+      "category": "network",
+      "cableType": "CAT6",
+      "label": "Switcher Network",
+      "source": "switcher-1",
+      "target": "router-1",
+      "targetPortKey": "eth-1",
+      "binding": "auto"
+    }
+  ],
+  "metadata": {
+    "project": "Simple AV Setup",
+    "description": "Basic example with 5 devices and 4 connections",
+    "version": "1.0"
+  }
+}
