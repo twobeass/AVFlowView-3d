@@ -4,7 +4,7 @@ import * as d3HwSchematic from 'd3-hwschematic';
 class HwSchematicRenderer {
   constructor(containerSelector) {
     // eslint-disable-next-line no-console
-    console.log('d3HwSchematic exports:', d3HwSchematic);
+    //console.log('d3HwSchematic exports:', d3HwSchematic);
     this.container = d3.select(containerSelector);
     this.initSVG();
     this.setupZoomPan();
