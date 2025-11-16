@@ -1,0 +1,24 @@
+{
+  "$schema": "https://example.com/schemas/av-wiring-graph.schema.json",
+  "nodes": [
+    {
+      "id": "device-1",
+      "manufacturer": "Test",
+      "model": "Model-1",
+      "category": "video",
+      "status": "Existing",
+      "ports": {
+        "port-1": {
+          "alignment": "InvalidAlignment",
+          "label": "Port 1",
+          "type": "HDMI",
+          "gender": "M"
+        }
+      }
+    }
+  ],
+  "edges": [],
+  "metadata": {
+    "description": "INVALID: Port alignment must be 'In', 'Out', or 'Bidirectional'"
+  }
+}
