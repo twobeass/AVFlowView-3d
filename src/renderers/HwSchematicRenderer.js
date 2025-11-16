@@ -7,8 +7,7 @@ class HwSchematicRenderer {
     this.container = d3.select(containerSelector);
     this.initSVG();
     this.setupZoomPan();
-    // Temporarily comment out schematic usage until export is identified
-    // this.schematic = d3HwSchematic.schematic ? d3HwSchematic.schematic() : null;
+    this.schematic = d3HwSchematic.schematic ? d3HwSchematic.schematic() : null;
   }
 
   initSVG() {
