@@ -31,7 +31,9 @@ function buildCrossReferenceErrors(json) {
 
   // Edge → node reference checks
   edges.forEach((edge, index) => {
-    if (!edge || typeof edge !== 'object') return;
+    if (!edge || typeof edge !== 'object') {
+      return;
+    }
 
     if (edge.source && !nodeIds.has(edge.source)) {
       errors.push({
@@ -54,7 +56,9 @@ function buildCrossReferenceErrors(json) {
 
   // Area → parent area reference checks
   areas.forEach((area, index) => {
-    if (!area || typeof area !== 'object') return;
+    if (!area || typeof area !== 'object') {
+      return;
+    }
 
     if (area.parentId && !areaIds.has(area.parentId)) {
       errors.push({

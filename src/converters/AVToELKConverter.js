@@ -37,7 +37,9 @@ function createAreaNodes(graph, elkGraph) {
 
   // First pass: create ELK nodes for all areas.
   areas.forEach((area) => {
-    if (!area || !area.id) return;
+    if (!area || !area.id) {
+      return;
+    }
 
     const elkArea = {
       id: area.id,
@@ -54,7 +56,9 @@ function createAreaNodes(graph, elkGraph) {
 
   // Second pass: attach areas to their parent or to the root graph.
   areas.forEach((area) => {
-    if (!area || !area.id) return;
+    if (!area || !area.id) {
+      return;
+    }
 
     const elkArea = areaNodeMap.get(area.id);
 
@@ -74,7 +78,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
   const nodeMap = new Map();
 
   nodes.forEach((node) => {
-    if (!node || !node.id) return;
+    if (!node || !node.id) {
+      return;
+    }
 
     const label =
       node.label || `${node.manufacturer ?? ''} ${node.model ?? ''}`.trim() || node.id;
@@ -95,7 +101,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     const ports = node.ports && typeof node.ports === 'object' ? node.ports : {};
 
     Object.entries(ports).forEach(([portKey, port]) => {
-      if (!port) return;
+      if (!port) {
+        return;
+      }
 
       const side = computePortSide(port.alignment, layoutDirection);
 
@@ -128,12 +136,18 @@ function createEdges(graph, elkGraph) {
   const edges = Array.isArray(graph.edges) ? graph.edges : [];
 
   edges.forEach((edge) => {
-    if (!edge || !edge.id || !edge.source || !edge.target) return;
+    if (!edge || !edge.id || !edge.source || !edge.target) {
+      return;
+    }
 
     const sourcePortId =
-      edge.sourcePortKey != null ? `${edge.source}/${edge.sourcePortKey}` : undefined;
+      edge.sourcePortKey !== null && edge.sourcePortKey !== undefined
+        ? `${edge.source}/${edge.sourcePortKey}`
+        : undefined;
     const targetPortId =
-      edge.targetPortKey != null ? `${edge.target}/${edge.targetPortKey}` : undefined;
+      edge.targetPortKey !== null && edge.targetPortKey !== undefined
+        ? `${edge.target}/${edge.targetPortKey}`
+        : undefined;
 
     const elkEdge = {
       id: edge.id,

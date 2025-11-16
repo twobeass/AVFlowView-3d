@@ -3,6 +3,7 @@ import * as d3HwSchematic from 'd3-hwschematic';
 
 class HwSchematicRenderer {
   constructor(containerSelector) {
+    // eslint-disable-next-line no-console
     console.log('d3HwSchematic exports:', d3HwSchematic);
     this.container = d3.select(containerSelector);
     this.initSVG();
@@ -30,10 +31,11 @@ class HwSchematicRenderer {
   }
 
   render(data) {
-    if(this.schematic) {
+    if (this.schematic) {
       this.schematic.data(data)
         .render(this.g.node());
     } else {
+      // eslint-disable-next-line no-console
       console.error('Schematic factory not set.');
     }
   }
@@ -51,14 +53,14 @@ class HwSchematicRenderer {
       .attr('class', 'device-header')
       .attr('x', 10)
       .attr('y', 20)
-      .text(d => d.name || 'Device');
+      .text((d) => d.name || 'Device');
   }
 
   AreaRenderer(selection) {
     selection.append('rect')
       .attr('class', 'area-container')
-      .attr('width', d => d.width || 200)
-      .attr('height', d => d.height || 150)
+      .attr('width', (d) => d.width || 200)
+      .attr('height', (d) => d.height || 150)
       .attr('rx', 8)
       .attr('ry', 8)
       .attr('fill', '#f7f7f7')
@@ -68,13 +70,13 @@ class HwSchematicRenderer {
       .attr('class', 'area-label')
       .attr('x', 10)
       .attr('y', 20)
-      .text(d => d.label || 'Area');
+      .text((d) => d.label || 'Area');
   }
 
   EdgeRenderer(selection) {
     selection.append('path')
       .attr('class', 'edge-path')
-      .attr('stroke', d => d.color || '#333')
+      .attr('stroke', (d) => d.color || '#333')
       .attr('fill', 'none')
       .attr('stroke-width', 2)
       .attr('stroke-dasharray', '5,5');

@@ -7,8 +7,8 @@
 // - d3-hwschematic + custom renderers (visualization)
 // - FocusManager & SearchManager (interaction)
 
-import { SchemaValidator } from './validation/index.js';
 import { AVToELKConverter } from './converters/index.js';
+import { SchemaValidator } from './validation/index.js';
 
 export class AVFlowView3dApp {
   /**
