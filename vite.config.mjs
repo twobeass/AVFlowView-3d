@@ -10,8 +10,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['d3', 'd3-hwschematic'],
-    exclude: ['elkjs'],
+    include: ['d3', 'd3-hwschematic', 'elkjs'],
     esbuildOptions: {
       define: {
         global: 'globalThis',
@@ -20,7 +19,14 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'web-worker': 'web-worker/polyfill',
+      // Polyfill web-worker for browser context
+      'web-worker': 'elkjs/lib/elk-api.js',
+    },
+  },
+  server: {
+    fs: {
+      // Allow serving files from node_modules
+      strict: false,
     },
   },
 });
