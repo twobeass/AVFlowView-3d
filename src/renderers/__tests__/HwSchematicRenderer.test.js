@@ -4,11 +4,11 @@ await jest.unstable_mockModule('d3-hwschematic', () => ({
   schematic: () => ({
     data: () => ({
       render: () => {}
-    })
-  })
+    }),
+  }),
 }));
 
-const HwSchematicRenderer = await import('../HwSchematicRenderer.js');
+const { default: HwSchematicRenderer } = await import('../HwSchematicRenderer.js');
 
 describe('HwSchematicRenderer', () => {
   let container;
