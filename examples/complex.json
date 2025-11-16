@@ -1,0 +1,24 @@
+{
+  "layout": { "direction": "TB" },
+  "areas": [
+    { "id": "core", "label": "Central AV Core" },
+    { "id": "hallA", "label": "Hall A" },
+    { "id": "hallB", "label": "Hall B" },
+    { "id": "control", "label": "Control Room" },
+    { "id": "rackNorth", "label": "Rack North", "parentId": "core" }
+  ],
+  "nodes": [
+    { "id": "mix1", "manufacturer": "Yamaha", "model": "PrimeMix", "category": "Audio", "status": "Regular", "areaId": "core", "ports": { "outA": { "alignment": "Out", "label": "Stereo Out A", "type": "XLR", "gender": "M" }, "outB": { "alignment": "Out", "label": "Stereo Out B", "type": "XLR", "gender": "M" }, "in": { "alignment": "In", "label": "Main In", "type": "XLR", "gender": "F" } } },
+    { "id": "ctrl1", "manufacturer": "Crestron", "model": "CP3", "category": "Control", "status": "Existing", "areaId": "control", "ports": { "eth": { "alignment": "Bidirectional", "label": "LAN", "type": "RJ45", "gender": "N/A" }, "serial": { "alignment": "Bidirectional", "label": "RS232", "type": "DB9", "gender": "N/A" } } },
+    { "id": "prjA", "manufacturer": "Barco", "model": "LaserPro", "category": "Video", "status": "Regular", "areaId": "hallA", "ports": { "inH": { "alignment": "In", "label": "HDMI In", "type": "HDMI", "gender": "F" }, "ctrl": { "alignment": "In", "label": "Control", "type": "RJ45", "gender": "N/A" } } },
+    { "id": "camA", "manufacturer": "Panasonic", "model": "AutoCam", "category": "Video", "status": "Existing", "areaId": "hallA", "ports": { "outS": { "alignment": "Out", "label": "SDI Out", "type": "SDI", "gender": "M" }, "ptz": { "alignment": "Bidirectional", "label": "PTZ Ctrl", "type": "RJ45", "gender": "N/A" } } }
+    // ... 46 more nodes with various areas, categories, and ports
+  ],
+  "edges": [
+    { "id": "e1", "source": "mix1", "sourcePortKey": "outA", "target": "core.amp", "targetPortKey": "ampIn", "category": "Audio", "cableType": "XLR", "label": "Mix-A to Amp" },
+    { "id": "e2", "source": "ctrl1", "sourcePortKey": "eth", "target": "prjA", "targetPortKey": "ctrl", "category": "Control", "cableType": "CAT7", "label": "Net Ctrl" },
+    { "id": "e3", "source": "camA", "sourcePortKey": "outS", "target": "prjA", "targetPortKey": "inH", "category": "Video", "cableType": "SDI", "label": "Camera A Feed" },
+    { "id": "e4", "source": "ctrl1", "sourcePortKey": "serial", "target": "core.encoder", "targetPortKey": "serIn", "category": "Control", "cableType": "DB9", "label": "Serial Bridge" }
+    // ... 76 more edges forming a complex, multi-area, multi-category graph
+  ]
+}
