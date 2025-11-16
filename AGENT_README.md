@@ -220,7 +220,7 @@ src/
 ## Change Log
 *Agent should update this section after completing each phase*
 
-- 2024-XX-XX: Repository structure initialized
-- 2024-XX-XX: Phase 1 complete - Project setup finished
+- 2025-11-16: Phase 1 project shell initialized (Vite, src structure, placeholders)
+- 2025-11-16: Phase 2 schema validation foundation implemented (Ajv + cross-reference checks)
 - 2024-XX-XX: Phase 2 complete - Schema validation implemented
 - [Add entries as implementation progresses]
