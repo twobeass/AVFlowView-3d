@@ -1,12 +1,14 @@
 import * as d3 from 'd3';
-import { schematic } from 'd3-hwschematic';
+import * as d3HwSchematic from 'd3-hwschematic';
 
 class HwSchematicRenderer {
   constructor(containerSelector) {
+    console.log('d3HwSchematic exports:', d3HwSchematic);
     this.container = d3.select(containerSelector);
     this.initSVG();
     this.setupZoomPan();
-    this.schematic = schematic();
+    // You can later replace below with actual schematic factory once found:
+    this.schematic = d3HwSchematic.schematic ? d3HwSchematic.schematic() : null;
   }
 
   initSVG() {
@@ -29,13 +31,15 @@ class HwSchematicRenderer {
   }
 
   render(data) {
-    this.schematic.data(data)
-      .render(this.g.node());
+    if(this.schematic) {
+      this.schematic.data(data)
+        .render(this.g.node());
+    } else {
+      console.error('Schematic factory not found in d3-hwschematic exports');
+    }
   }
 
-  // Placeholder for custom device rendering
   DeviceRenderer(selection) {
-    // Render device boxes with header and label
     selection.append('rect')
       .attr('class', 'device-box')
       .attr('width', 120)
@@ -51,9 +55,7 @@ class HwSchematicRenderer {
       .text(d => d.name || 'Device');
   }
 
-  // Placeholder for custom area rendering
   AreaRenderer(selection) {
-    // Render area container
     selection.append('rect')
       .attr('class', 'area-container')
       .attr('width', d => d.width || 200)
@@ -70,9 +72,7 @@ class HwSchematicRenderer {
       .text(d => d.label || 'Area');
   }
 
-  // Placeholder for custom edge rendering
   EdgeRenderer(selection) {
-    // Render orthogonal edges with category colors and cable patterns
     selection.append('path')
       .attr('class', 'edge-path')
       .attr('stroke', d => d.color || '#333')
