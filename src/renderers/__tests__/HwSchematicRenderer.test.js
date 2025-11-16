@@ -1,4 +1,6 @@
-jest.mock('d3-hwschematic', () => ({
+import { jest } from '@jest/globals';
+
+await jest.unstable_mockModule('d3-hwschematic', () => ({
   schematic: () => ({
     data: () => ({
       render: () => {}
@@ -6,7 +8,7 @@ jest.mock('d3-hwschematic', () => ({
   })
 }));
 
-import HwSchematicRenderer from '../HwSchematicRenderer.js';
+const HwSchematicRenderer = await import('../HwSchematicRenderer.js');
 
 describe('HwSchematicRenderer', () => {
   let container;
