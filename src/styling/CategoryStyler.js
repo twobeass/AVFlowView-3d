@@ -1,25 +1,43 @@
-// Placeholder for category-based styling logic.
+// src/styling/CategoryStyler.js
+
 // Responsible for mapping AV categories and statuses to cssClass/cssStyle.
 
 export class CategoryStyler {
   constructor() {
     this.categoryColors = {
-      Audio: '#4A90E2',
-      Video: '#E24A6F',
-      Network: '#50C878',
-      Control: '#F5A623',
-      Power: '#D0021B',
-      Default: '#999999',
+      Audio: '#1f77b4', // blue
+      Video: '#ff7f0e', // orange
+      Network: '#2ca02c', // green
+      Control: '#d62728', // red
+      Power: '#9467bd', // purple
+      Default: '#cccccc'
+    };
+
+    this.statusStyles = {
+      Existing: {opacity: 0.6, borderColor: '#555555'},
+      Regular: {opacity: 1.0, borderColor: '#000000'},
+      Defect: {opacity: 1.0, borderColor: '#ff0000'},
+      Default: {opacity: 1.0, borderColor: '#000000'}
     };
   }
 
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
   getNodeStyle(category, status) {
-    throw new Error('CategoryStyler.getNodeStyle is not implemented yet.');
+    const baseColor = this.categoryColors[category] || this.categoryColors.Default;
+    const statusStyle = this.statusStyles[status] || this.statusStyles.Default;
+    return {
+      fill: baseColor,
+      stroke: statusStyle.borderColor,
+      opacity: statusStyle.opacity
+    };
   }
 
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  getEdgeStyle(category) {
-    throw new Error('CategoryStyler.getEdgeStyle is not implemented yet.');
+  getEdgeStyle(category, status) {
+    const baseColor = this.categoryColors[category] || this.categoryColors.Default;
+    const statusStyle = this.statusStyles[status] || this.statusStyles.Default;
+    return {
+      stroke: baseColor,
+      strokeWidth: status === 'Defect' ? 3 : 1.5,
+      opacity: statusStyle.opacity
+    };
   }
 }
