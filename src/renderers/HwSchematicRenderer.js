@@ -1,12 +1,12 @@
 import * as d3 from 'd3';
-import { hwschematic } from 'd3-hwschematic';
+import { schematic } from 'd3-hwschematic';
 
 class HwSchematicRenderer {
   constructor(containerSelector) {
     this.container = d3.select(containerSelector);
     this.initSVG();
     this.setupZoomPan();
-    this.schematic = hwschematic();
+    this.schematic = schematic();
   }
 
   initSVG() {
