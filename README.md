@@ -1,5 +1,7 @@
 # AVFlowView-3d
 
+[![CI](https://github.com/twobeass/AVFlowView-3d/actions/workflows/ci.yml/badge.svg)](https://github.com/twobeass/AVFlowView-3d/actions/workflows/ci.yml)
+
 D3.js and d3-hwschematic based interactive AV wiring diagram visualizer using the AVFlowView JSON schema.
 
 ## Overview
@@ -56,6 +58,19 @@ npm run dev
 npm run build
 ```
 
+### Available Scripts
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build locally
+- `npm test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run lint` - Check code quality with ESLint
+- `npm run lint:fix` - Fix auto-fixable linting issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+
 ### Usage Example
 
 ```javascript
@@ -79,6 +94,7 @@ fetch('examples/simple.json')
 AVFlowView-3d/
 ├── AGENT_README.md              # Master entry-point for autonomous agents
 ├── README.md                    # This file (user-facing overview)
+├── SECURITY.md                  # Security policy and known vulnerabilities
 ├── avflowview-wiring.schema.json # JSON Schema for AV wiring graphs
 ├── docs/
 │   ├── CONTEXT.md               # Design philosophy and concepts
@@ -88,9 +104,16 @@ AVFlowView-3d/
 ├── examples/
 │   ├── simple.json              # Basic 5-node example
 │   └── invalid-examples/        # Examples of validation errors
-└── src/
-    ├── schemas/                 # Schema files
-    └── notes/                   # Implementation notes
+├── src/
+│   ├── converters/              # AV to ELK graph conversion
+│   ├── renderers/               # D3/d3-hwschematic rendering
+│   ├── styling/                 # Category colors and styles
+│   ├── validation/              # JSON schema validation
+│   └── utils/                   # Utility functions
+└── tests/
+    ├── converters/              # Converter unit tests
+    ├── validation/              # Validator unit tests
+    └── e2e/                     # End-to-end tests (Playwright)
 ```
 
 ## Technology Stack
@@ -100,6 +123,8 @@ AVFlowView-3d/
 - **[ELK.js](https://eclipse.dev/elk/)** - Graph layout engine
 - **[ajv](https://ajv.js.org/)** - JSON Schema validation
 - **[Vite](https://vitejs.dev/)** - Build tool and dev server
+- **[Jest](https://jestjs.io/)** - Unit testing framework
+- **[Playwright](https://playwright.dev/)** - E2E testing framework
 
 ## Schema
 
@@ -118,6 +143,12 @@ See [`avflowview-wiring.schema.json`](avflowview-wiring.schema.json) for the com
 - **[simple.json](examples/simple.json)** - Basic setup with 5 devices
 - **[invalid-examples/](examples/invalid-examples/)** - Common validation errors
 
+## Security
+
+⚠️ **Known Vulnerabilities**: This project has a known transitive dependency vulnerability in `d3-color` via `d3-hwschematic`. This is low-risk for the intended use case and is being monitored. See [SECURITY.md](SECURITY.md) for details.
+
+For security issues, please review our [Security Policy](SECURITY.md) before reporting.
+
 ## Related Projects
 
 - **[AVFlowView](https://github.com/twobeass/AVFlowView)** - Original React Flow implementation
@@ -135,9 +166,26 @@ Contributions are welcome! Please:
 2. Follow the existing code structure and style
 3. Add tests for new features
 4. Update documentation as needed
+5. Run `npm run lint` and `npm test` before submitting
 
 ## Status
 
-**Current Status**: Repository structure and documentation complete. Implementation in progress.
+**Current Status**: Phases 1-5 complete. Interactive features (Phase 6) and UI shell (Phase 7) in progress.
 
 See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
+
+### Completed Features
+
+✅ Schema validation with comprehensive error reporting  
+✅ AV to ELK graph conversion  
+✅ Category-based styling system  
+✅ D3-based rendering with zoom/pan  
+✅ Custom device, area, and edge renderers  
+✅ 79 passing unit tests  
+
+### In Progress
+
+🚧 Interactive selection and focus/context  
+🚧 Search and filtering UI  
+🚧 Complete application shell  
+🚧 E2E testing with Playwright  

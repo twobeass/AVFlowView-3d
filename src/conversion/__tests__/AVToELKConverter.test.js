@@ -1,10 +1,8 @@
-import AVToELKConverter from '../AVToELKConverter.js';
-import { CategoryStyler } from '../../styling/CategoryStyler.js';
-import { PortDirectionResolver } from '../../styling/PortDirectionResolver.js';
-
 // src/conversion/__tests__/AVToELKConverter.test.js
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
+
+import AVToELKConverter from '../AVToELKConverter.js';
 
 // Mock data sets for tests
 const sampleAVJson = {
@@ -41,9 +39,7 @@ const sampleAVJson = {
       edges: [],
     },
   ],
-  edges: [
-    { id: 'connection1', source: 'node1', target: 'node2' },
-  ],
+  edges: [{ id: 'connection1', source: 'node1', target: 'node2' }],
 };
 
 describe('AVToELKConverter', () => {
@@ -54,11 +50,11 @@ describe('AVToELKConverter', () => {
 
     expect(elkGraph.children).toHaveLength(2);
 
-    elkGraph.children.forEach(node => {
+    elkGraph.children.forEach((node) => {
       expect(node.style).toHaveProperty('fill');
       expect(node.style).toHaveProperty('stroke');
 
-      node.ports.forEach(port => {
+      node.ports.forEach((port) => {
         expect(['left', 'right', 'top']).toContain(port.side);
       });
     });
@@ -68,7 +64,7 @@ describe('AVToELKConverter', () => {
     const elkGraph = converter.convert(sampleAVJson);
 
     expect(elkGraph.edges).toHaveLength(1);
-    elkGraph.edges.forEach(edge => {
+    elkGraph.edges.forEach((edge) => {
       expect(edge.style).toHaveProperty('stroke');
       expect(edge.style).toHaveProperty('strokeWidth');
     });

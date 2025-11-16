@@ -15,10 +15,13 @@ class AVToELKConverter {
     const style = this.categoryStyler.getNodeStyle(category, status);
 
     // Analyze and resolve port directions
-    const ports = this.portDirectionResolver.resolve(avNode.ports || [], avNode.edges || []);
+    const ports = this.portDirectionResolver.resolve(
+      avNode.ports || [],
+      avNode.edges || []
+    );
 
     // Map ports with resolved sides
-    const elkPorts = ports.map(port => ({
+    const elkPorts = ports.map((port) => ({
       id: port.id,
       label: port.label || '',
       side: port.side || 'top',
@@ -53,8 +56,8 @@ class AVToELKConverter {
 
   convert(avJson) {
     // Assuming avJson has nodes and edges arrays
-    const elkNodes = avJson.nodes.map(node => this.convertNode(node));
-    const elkEdges = avJson.edges.map(edge => this.convertEdge(edge));
+    const elkNodes = avJson.nodes.map((node) => this.convertNode(node));
+    const elkEdges = avJson.edges.map((edge) => this.convertEdge(edge));
 
     return {
       id: avJson.id || 'elkGraph',
