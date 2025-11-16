@@ -1,9 +1,9 @@
-import Ajv from 'ajv';
+import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
 import schema from '../schemas/av-wiring-graph.schema.json';
 
-const ajv = new Ajv({
+const ajv = new Ajv2020({
   strict: false,
   allErrors: true,
   allowUnionTypes: true,
