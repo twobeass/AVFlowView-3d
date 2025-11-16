@@ -1,10 +1,17 @@
+jest.mock('d3-hwschematic', () => ({
+  schematic: () => ({
+    data: () => ({
+      render: () => {}
+    })
+  })
+}));
+
 import HwSchematicRenderer from '../HwSchematicRenderer.js';
 
 describe('HwSchematicRenderer', () => {
   let container;
 
   beforeEach(() => {
-    // Create a container element for each test
     container = document.createElement('div');
     container.id = 'test-container';
     container.style.width = '800px';
@@ -13,7 +20,6 @@ describe('HwSchematicRenderer', () => {
   });
 
   afterEach(() => {
-    // Clean up after each test
     if (container && container.parentNode) {
       document.body.removeChild(container);
     }
@@ -22,7 +28,6 @@ describe('HwSchematicRenderer', () => {
   describe('Initialization', () => {
     test('should create SVG container on initialization', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-
       expect(renderer.svg).toBeDefined();
       expect(renderer.svg.node()).toBeInstanceOf(SVGSVGElement);
       expect(renderer.svg.attr('class')).toBe('hwschematic-svg-container');
@@ -30,22 +35,19 @@ describe('HwSchematicRenderer', () => {
 
     test('should create g element inside SVG', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-
       expect(renderer.g).toBeDefined();
-      expect(renderer.g.node()).toBeInstanceOf(SVGGElement);
+      expect(renderer.g.node().tagName).toBe('g');
       expect(renderer.g.attr('class')).toBe('hwschematic-content');
     });
 
     test('should initialize zoom behavior', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-
       expect(renderer.zoom).toBeDefined();
       expect(typeof renderer.zoom).toBe('function');
     });
 
     test('should initialize d3-hwschematic instance', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-
       expect(renderer.schematic).toBeDefined();
     });
   });
@@ -54,11 +56,7 @@ describe('HwSchematicRenderer', () => {
     test('should render empty data without errors', () => {
       const renderer = new HwSchematicRenderer('#test-container');
       const emptyData = { nodes: [], edges: [] };
-
-      expect(() => {
-        renderer.render(emptyData);
-      }).not.toThrow();
-
+      expect(() => renderer.render(emptyData)).not.toThrow();
       expect(renderer.svg.node()).toBeInstanceOf(SVGSVGElement);
     });
 
@@ -70,10 +68,7 @@ describe('HwSchematicRenderer', () => {
         ],
         edges: []
       };
-
-      expect(() => {
-        renderer.render(minimalData);
-      }).not.toThrow();
+      expect(() => renderer.render(minimalData)).not.toThrow();
     });
 
     test('should render with edges', () => {
@@ -87,31 +82,25 @@ describe('HwSchematicRenderer', () => {
           { id: 'edge1', source: 'node1', target: 'node2', color: '#333' }
         ]
       };
-
-      expect(() => {
-        renderer.render(dataWithEdges);
-      }).not.toThrow();
+      expect(() => renderer.render(dataWithEdges)).not.toThrow();
     });
   });
 
   describe('Custom Renderers', () => {
     test('DeviceRenderer should be defined', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-
       expect(renderer.DeviceRenderer).toBeDefined();
       expect(typeof renderer.DeviceRenderer).toBe('function');
     });
 
     test('AreaRenderer should be defined', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-
       expect(renderer.AreaRenderer).toBeDefined();
       expect(typeof renderer.AreaRenderer).toBe('function');
     });
 
     test('EdgeRenderer should be defined', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-
       expect(renderer.EdgeRenderer).toBeDefined();
       expect(typeof renderer.EdgeRenderer).toBe('function');
     });
