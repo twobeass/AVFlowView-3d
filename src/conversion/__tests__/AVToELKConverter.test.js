@@ -1,6 +1,6 @@
-import AVToELKConverter from '../conversion/AVToELKConverter.js';
-import { CategoryStyler } from '../styling/CategoryStyler.js';
-import { PortDirectionResolver } from '../styling/PortDirectionResolver.js';
+import AVToELKConverter from '../AVToELKConverter.js';
+import { CategoryStyler } from '../../styling/CategoryStyler.js';
+import { PortDirectionResolver } from '../../styling/PortDirectionResolver.js';
 
 // src/conversion/__tests__/AVToELKConverter.test.js
 
