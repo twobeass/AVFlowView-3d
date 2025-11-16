@@ -1,0 +1,16 @@
+{
+  "$schema": "https://example.com/schemas/av-wiring-graph.schema.json",
+  "layout": {
+    "direction": "LR"
+  },
+  "edges": [
+    {
+      "id": "edge-1",
+      "source": "device-1",
+      "target": "device-2"
+    }
+  ],
+  "metadata": {
+    "description": "INVALID: Missing required 'nodes' field"
+  }
+}
