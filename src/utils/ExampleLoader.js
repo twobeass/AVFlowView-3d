@@ -7,13 +7,11 @@ export class ExampleLoader {
 
   async listExamples() {
     try {
-      // Dummy list. In real app, this might come from an API endpoint or manifest file.
-      return [
-        'simple.json',
-        'complex-setup.json',
-        'networked-room.json'
-      ];
+      // List of available example files in the repository
+      // These correspond to actual files in the /examples/ directory
+      return ['simple.json', 'medium.json', 'complex.json'];
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to list examples:', error);
       return [];
     }
@@ -22,10 +20,12 @@ export class ExampleLoader {
   async loadExample(name) {
     try {
       const response = await fetch(this.basePath + name);
-      if (!response.ok) throw new Error(`Failed to fetch example: ${name}`);
+      if (!response.ok)
+        throw new Error(`Failed to fetch example: ${name} (${response.status})`);
       const json = await response.json();
       return json;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Error loading example ${name}:`, error);
       throw error;
     }
