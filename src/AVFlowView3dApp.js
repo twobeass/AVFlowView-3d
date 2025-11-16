@@ -8,6 +8,7 @@
 // - FocusManager & SearchManager (interaction)
 
 import { SchemaValidator } from './validation/index.js';
+import { AVToELKConverter } from './converters/index.js';
 
 export class AVFlowView3dApp {
   /**
@@ -30,6 +31,7 @@ export class AVFlowView3dApp {
     };
 
     this.schemaValidator = new SchemaValidator();
+    this.converter = new AVToELKConverter();
 
     if (this.options.debug) {
       // eslint-disable-next-line no-console
@@ -57,7 +59,7 @@ export class AVFlowView3dApp {
     const message = document.createElement('div');
     message.innerHTML = `
       <h1>AVFlowView-3d</h1>
-      <p>Project shell is ready. Validation is wired; data transformation and visualization will follow in next phases.</p>
+      <p>Project shell is ready. Validation and data transformation are wired; visualization will follow in next phases.</p>
     `;
 
     wrapper.appendChild(message);
@@ -65,30 +67,36 @@ export class AVFlowView3dApp {
   }
 
   /**
-   * Validate and (in later phases) render the provided AV wiring graph.
-   * For now, this performs validation only and returns a structured result.
+   * Validate and convert the provided AV wiring graph.
+   * Rendering will be added in later phases.
    *
    * @param {unknown} graphJson
-   * @returns {{ success: true } | { success: false; error: { code: string; message: string; details: Array<{ path: string; message?: string; keyword: string; params: Record<string, unknown> }> } }}
+   * @returns {{ success: true; elkGraph: object } | { success: false; error: { code: string; message: string; details: Array<{ path: string; message?: string; keyword: string; params: Record<string, unknown> }> } }}
    */
   load(graphJson) {
-    const result = this.schemaValidator.validateGraph(graphJson);
+    const validation = this.schemaValidator.validateGraph(graphJson);
 
-    if (!result.success) {
+    if (!validation.success) {
       if (this.options.debug) {
         // eslint-disable-next-line no-console
-        console.error('AVFlowView3dApp.load validation failed', result.error);
+        console.error('AVFlowView3dApp.load validation failed', validation.error);
       }
 
-      return result;
+      return validation;
     }
 
-    // Phase 3+ will continue from here: AVToELKConverter → renderers.
+    const elkGraph = this.converter.convert(graphJson);
+
     if (this.options.debug) {
       // eslint-disable-next-line no-console
-      console.log('AVFlowView3dApp.load validation succeeded');
+      console.log('AVFlowView3dApp.load validation and conversion succeeded', {
+        elkGraph,
+      });
     }
 
-    return result;
+    return {
+      success: true,
+      elkGraph,
+    };
   }
 }
