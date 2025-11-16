@@ -1,11 +1,13 @@
 // AVFlowView3dApp
 // ---------------
-// Thin application shell that will, in later phases, orchestrate:
+// Thin application shell that will orchestrate:
 // - SchemaValidator (validation)
 // - AVToELKConverter (data transformation)
 // - CategoryStyler & PortDirectionResolver (styling & semantics)
 // - d3-hwschematic + custom renderers (visualization)
 // - FocusManager & SearchManager (interaction)
+
+import { SchemaValidator } from './validation/index.js';
 
 export class AVFlowView3dApp {
   /**
@@ -26,6 +28,8 @@ export class AVFlowView3dApp {
       debug: false,
       ...options,
     };
+
+    this.schemaValidator = new SchemaValidator();
 
     if (this.options.debug) {
       // eslint-disable-next-line no-console
@@ -53,7 +57,7 @@ export class AVFlowView3dApp {
     const message = document.createElement('div');
     message.innerHTML = `
       <h1>AVFlowView-3d</h1>
-      <p>Project shell is ready. Next phases will add schema validation, data transformation, and visualization.</p>
+      <p>Project shell is ready. Validation is wired; data transformation and visualization will follow in next phases.</p>
     `;
 
     wrapper.appendChild(message);
@@ -61,12 +65,30 @@ export class AVFlowView3dApp {
   }
 
   /**
-   * Public API placeholder.
-   * In later phases this will validate and render the provided AV wiring graph.
+   * Validate and (in later phases) render the provided AV wiring graph.
+   * For now, this performs validation only and returns a structured result.
+   *
    * @param {unknown} graphJson
+   * @returns {{ success: true } | { success: false; error: { code: string; message: string; details: Array<{ path: string; message?: string; keyword: string; params: Record<string, unknown> }> } }}
    */
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
   load(graphJson) {
-    throw new Error('AVFlowView3dApp.load is not implemented yet (Phase 2+).');
+    const result = this.schemaValidator.validateGraph(graphJson);
+
+    if (!result.success) {
+      if (this.options.debug) {
+        // eslint-disable-next-line no-console
+        console.error('AVFlowView3dApp.load validation failed', result.error);
+      }
+
+      return result;
+    }
+
+    // Phase 3+ will continue from here: AVToELKConverter → renderers.
+    if (this.options.debug) {
+      // eslint-disable-next-line no-console
+      console.log('AVFlowView3dApp.load validation succeeded');
+    }
+
+    return result;
   }
 }
