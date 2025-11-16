@@ -161,7 +161,7 @@ export class AVToELKConverter {
    */
   // eslint-disable-next-line class-methods-use-this
   convert(json) {
-    if (!json || typeof json !== 'object') {
+    if (!json || typeof json !== 'object' || Array.isArray(json)) {
       throw new Error('AVToELKConverter.convert expects a non-null object');
     }
 
