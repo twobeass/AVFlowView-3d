@@ -7,8 +7,8 @@ class HwSchematicRenderer {
     this.container = d3.select(containerSelector);
     this.initSVG();
     this.setupZoomPan();
-    // You can later replace below with actual schematic factory once found:
-    this.schematic = d3HwSchematic.schematic ? d3HwSchematic.schematic() : null;
+    // Temporarily comment out schematic usage until export is identified
+    // this.schematic = d3HwSchematic.schematic ? d3HwSchematic.schematic() : null;
   }
 
   initSVG() {
@@ -35,7 +35,7 @@ class HwSchematicRenderer {
       this.schematic.data(data)
         .render(this.g.node());
     } else {
-      console.error('Schematic factory not found in d3-hwschematic exports');
+      console.error('Schematic factory not set.');
     }
   }
 
