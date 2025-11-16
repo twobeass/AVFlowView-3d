@@ -27,11 +27,18 @@ It focuses on three aspects at once: neat arrangement of devices, readable cable
 - **Color language**: Nodes and cables are color-coded by category (e.g. audio, video, network, control, power) using a centralized style definition.
 - **Engineering style**: The overall look is closer to a clean engineering drawing than to a freehand sketch: wide boxes, aligned ports, minimal diagonals.
 
+## Schematic Visualization (Phase 5)
+
+- **d3-hwschematic integration**: The project leverages d3.js and ELK graph layouts for interactive hardware schematic visualization.
+- **Scalable graphics**: SVG-based rendering enables smooth zoom and pan from system overview to individual port details.
+- **Custom renderers**: Device, area, and edge renderers provide specialized visualization for AV system components.
+- **Interactive hardware schematics**: Users can navigate complex AV system topologies with responsive, real-time interactions.
+
 ## Interaction Model
 
 - **Map-like navigation**: Users can zoom and pan smoothly from an overview down to port-level details.
 - **Selection & details**: Clicking a device or cable highlights it and reveals detailed information (metadata, ports, connected elements).
-- **Focus/context**: Given a selected device or cable, the user can highlight the neighborhood within N steps (e.g. 12 hops) and fade out the rest for clarity.
+- **Focus/context**: Given a selected device or cable, the user can highlight the neighborhood within N steps (e.g. 12 hops) and fade out the rest for clarity.
 - **Search & filters**: Users can search for devices or cables and filter by category, status, or area to reduce visual noise in large systems.
 
 ## Data Validation & Reliability
