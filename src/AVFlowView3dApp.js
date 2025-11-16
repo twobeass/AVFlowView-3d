@@ -13,7 +13,7 @@ import { SchemaValidator } from './validation/index.js';
 import { ControlsPanel } from './ui/ControlsPanel.js';
 import { ExampleLoader } from './utils/ExampleLoader.js';
 import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
-import ELK from 'elkjs/lib/elk.bundled.js';
+import ELK from 'elkjs';
 
 export class AVFlowView3dApp {
   /**
