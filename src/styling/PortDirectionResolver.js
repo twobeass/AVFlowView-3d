@@ -10,11 +10,11 @@ export class PortDirectionResolver {
   analyzeBidirectionalPorts(ports, edges) {
     // Collect connected edges for each port
     const portEdgeMap = new Map();
-    ports.forEach(port => {
+    ports.forEach((port) => {
       portEdgeMap.set(port.id, []);
     });
 
-    edges.forEach(edge => {
+    edges.forEach((edge) => {
       if (portEdgeMap.has(edge.source)) {
         portEdgeMap.get(edge.source).push(edge);
       }
@@ -24,13 +24,13 @@ export class PortDirectionResolver {
     });
 
     // Infer direction for bidirectional ports
-    ports.forEach(port => {
+    ports.forEach((port) => {
       if (port.direction === 'bidirectional') {
         const connectedEdges = portEdgeMap.get(port.id);
         let outCount = 0;
         let inCount = 0;
 
-        connectedEdges.forEach(edge => {
+        connectedEdges.forEach((edge) => {
           if (edge.source === port.id) {
             outCount++;
           } else if (edge.target === port.id) {
@@ -53,7 +53,7 @@ export class PortDirectionResolver {
   }
 
   assignPortSides(ports) {
-    ports.forEach(port => {
+    ports.forEach((port) => {
       // Assign sides based on inferred direction
       if (port.inferredDirection === 'in') {
         port.side = 'left';

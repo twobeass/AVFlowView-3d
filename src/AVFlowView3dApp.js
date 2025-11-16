@@ -54,7 +54,8 @@ export class AVFlowView3dApp {
     wrapper.style.alignItems = 'center';
     wrapper.style.justifyContent = 'center';
     wrapper.style.height = '100vh';
-    wrapper.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+    wrapper.style.fontFamily =
+      'system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
 
     const message = document.createElement('div');
     message.innerHTML = `
@@ -79,7 +80,10 @@ export class AVFlowView3dApp {
     if (!validation.success) {
       if (this.options.debug) {
         // eslint-disable-next-line no-console
-        console.error('AVFlowView3dApp.load validation failed', validation.error);
+        console.error(
+          'AVFlowView3dApp.load validation failed',
+          validation.error
+        );
       }
 
       return validation;

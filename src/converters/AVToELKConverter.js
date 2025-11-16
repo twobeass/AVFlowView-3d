@@ -83,7 +83,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     }
 
     const label =
-      node.label || `${node.manufacturer ?? ''} ${node.model ?? ''}`.trim() || node.id;
+      node.label ||
+      `${node.manufacturer ?? ''} ${node.model ?? ''}`.trim() ||
+      node.id;
 
     const elkNode = {
       id: node.id,
@@ -98,7 +100,8 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     };
 
     // Ports
-    const ports = node.ports && typeof node.ports === 'object' ? node.ports : {};
+    const ports =
+      node.ports && typeof node.ports === 'object' ? node.ports : {};
 
     Object.entries(ports).forEach(([portKey, port]) => {
       if (!port) {
