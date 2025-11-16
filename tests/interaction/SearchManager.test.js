@@ -1,4 +1,4 @@
-import SearchManager from '../../src/interaction/SearchManager.js';
+import { SearchManager } from '../../src/interaction/SearchManager.js';
 
 describe('SearchManager', () => {
   it('should be defined', () => {

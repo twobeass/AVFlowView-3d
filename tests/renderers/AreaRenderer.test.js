@@ -1,4 +1,4 @@
-import AreaRenderer from '../../src/renderers/AreaRenderer.js';
+import { AreaRenderer } from '../../src/renderers/AreaRenderer.js';
 
 describe('AreaRenderer', () => {
   it('should be defined', () => {

@@ -1,4 +1,4 @@
-import EdgeRenderer from '../../src/renderers/EdgeRenderer.js';
+import { EdgeRenderer } from '../../src/renderers/EdgeRenderer.js';
 
 describe('EdgeRenderer', () => {
   it('should be defined', () => {

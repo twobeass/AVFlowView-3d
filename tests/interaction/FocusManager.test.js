@@ -1,4 +1,4 @@
-import FocusManager from '../../src/interaction/FocusManager.js';
+import { FocusManager } from '../../src/interaction/FocusManager.js';
 
 describe('FocusManager', () => {
   it('should be defined', () => {
