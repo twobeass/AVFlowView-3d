@@ -34,7 +34,7 @@ Build an interactive AV wiring diagram visualizer using D3.js and d3-hwschematic
 - **d3-hwschematic → d3 (<=6.7.0) → d3-color (<3.1.0)** – see audit warning. No fix possible until upstream releases an update.
 - **Jest, Vite, and related ecosystem** – Upgrading past currently-tested versions may break ESM or config. Only update deliberately and check tests.
 - **Other transitive dependencies** – Most are not under direct project control and are considered low risk for this visualization tool.
-- Vulnerabilities and deprecation warnings should be reviewed, not ignored, but addressed only when upstream projects release safe updates. Do NOT [36mforce fixes that break working tests unless you will update code/config to match new major APIs.
+- Vulnerabilities and deprecation warnings should be reviewed, not ignored, but addressed only when upstream projects release safe updates. Do NOT force fixes that break working tests unless you will update code/config to match new major APIs.
 
 ## Rebuilding a Stable Environment
 1. To recover from a broken `npm install` or broken tests after an audit fix/force:
@@ -54,7 +54,7 @@ Build an interactive AV wiring diagram visualizer using D3.js and d3-hwschematic
 ## Change Log
 *Agent should update this section after completing each phase/maintenance*
 - 2025-11-16: Full dependency/test restore & documentation update after audit/recovery session. Jest/ajv/ESM/known issues all documented.
-- (see commit history for detailed steps and tips)
+- 2025-11-16: Completed Phase 4 - Styling & Semantics. Implemented CategoryStyler, PortDirectionResolver, AVToELKConverter with styling and port direction integration, and comprehensive unit tests.
 
 ## Extra References
 - See README.md for installation and overview

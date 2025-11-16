@@ -31,7 +31,7 @@ It focuses on three aspects at once: neat arrangement of devices, readable cable
 
 - **Map-like navigation**: Users can zoom and pan smoothly from an overview down to port-level details.
 - **Selection & details**: Clicking a device or cable highlights it and reveals detailed information (metadata, ports, connected elements).
-- **Focus/context**: Given a selected device or cable, the user can highlight the neighborhood within N steps (e.g. 1–2 hops) and fade out the rest for clarity.
+- **Focus/context**: Given a selected device or cable, the user can highlight the neighborhood within N steps (e.g. 12 hops) and fade out the rest for clarity.
 - **Search & filters**: Users can search for devices or cables and filter by category, status, or area to reduce visual noise in large systems.
 
 ## Data Validation & Reliability
@@ -46,3 +46,5 @@ It focuses on three aspects at once: neat arrangement of devices, readable cable
 - **Predictable layouts**: Similar systems should produce similar-looking diagrams; layout rules should be deterministic for given input.
 - **Extensibility**: New device types, categories, and renderers should be addable without rewriting the core.
 - **Performance-conscious**: Should handle realistically sized AV systems (dozens to hundreds of devices and cables) with acceptable performance.
+
+*Last updated: 2025-11-16*
