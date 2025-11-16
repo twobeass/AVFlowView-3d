@@ -1,5 +1,5 @@
 export default {
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   transform: {},
   moduleNameMapper: {
     '^(\\.\\.?\\/.*)\\.js$': '$1',
