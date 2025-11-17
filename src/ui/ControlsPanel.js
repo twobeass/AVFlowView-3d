@@ -44,23 +44,21 @@ export class ControlsPanel {
     this._exampleSelector = this.panel.querySelector('#example-selector');
 
     this._zoomInHandler = () => {
-      if (this.callbacks.onZoomIn) this.callbacks.onZoomIn();
+      if (this.callbacks.onZoomIn) { this.callbacks.onZoomIn(); }
     };
     this._zoomOutHandler = () => {
-      if (this.callbacks.onZoomOut) this.callbacks.onZoomOut();
+      if (this.callbacks.onZoomOut) { this.callbacks.onZoomOut(); }
     };
     this._zoomResetHandler = () => {
-      if (this.callbacks.onReset) this.callbacks.onReset();
+      if (this.callbacks.onReset) { this.callbacks.onReset(); }
     };
     this._layoutChangeHandler = (e) => {
-      if (this.callbacks.onLayoutChange) this.callbacks.onLayoutChange(e.target.value);
+      if (this.callbacks.onLayoutChange) { this.callbacks.onLayoutChange(e.target.value); }
     };
     this._exampleChangeHandler = (e) => {
       if (this.callbacks.onExampleLoad) {
         const val = e.target.value;
-        if(val) {
-          this.callbacks.onExampleLoad(val);
-        }
+        if (val) { this.callbacks.onExampleLoad(val); }
       }
     };
 
@@ -73,8 +71,7 @@ export class ControlsPanel {
 
   setAvailableExamples(examples) {
     this.examples = examples;
-    if(!this._exampleSelector) return;
-    // Clear current options except placeholder
+    if (!this._exampleSelector) { return; }
     this._exampleSelector.innerHTML = '<option value="">Select example...</option>';
     examples.forEach(example => {
       const option = document.createElement('option');
@@ -90,7 +87,7 @@ export class ControlsPanel {
     this._zoomResetBtn.removeEventListener('click', this._zoomResetHandler);
     this._layoutSelect.removeEventListener('change', this._layoutChangeHandler);
     this._exampleSelector.removeEventListener('change', this._exampleChangeHandler);
-    if(this.panel && this.container.contains(this.panel)) {
+    if (this.panel && this.container.contains(this.panel)) {
       this.container.removeChild(this.panel);
     }
   }
