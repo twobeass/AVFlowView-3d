@@ -158,12 +158,12 @@ This checklist provides concrete, verifiable tasks for each phase of the AVFlowV
 
 ## Phase 5: Visualization & UI Controls ✅ COMPLETED
 
-### HwSchematic Setup
+### Custom D3 Rendering with Orthogonal Routing
 - [x] Create `src/renderers/HwSchematicRenderer.js`
-- [x] Initialize HwSchematic with SVG container
-- [x] Configure zoom and pan behavior
-- [x] Implement basic rendering pipeline
-- [x] Add fallback rendering when d3-hwschematic unavailable
+- [x] Initialize D3-based SVG container
+- [x] Configure zoom and pan behavior with d3-zoom
+- [x] Implement custom rendering pipeline
+- [x] Remove d3-hwschematic dependency (2025-11-17)
 
 ### Custom Renderers
 - [x] Create `src/renderers/DeviceRenderer.js`
@@ -180,6 +180,19 @@ This checklist provides concrete, verifiable tasks for each phase of the AVFlowV
   - [x] Apply category colors
   - [x] Add cable type patterns
   - [x] Smooth corners
+
+### Orthogonal Edge Routing (2025-11-17)
+- [x] Create `src/utils/OrthogonalRouter.js`
+- [x] Implement `calculateOrthogonalPath()` for Manhattan-style routing
+- [x] Implement `calculateEdgeOffset()` for parallel edge separation
+- [x] Implement `collectObstacles()` for device bounding boxes
+- [x] Implement `groupEdgesByEndpoints()` for parallel edge detection
+- [x] Integrate OrthogonalRouter into HwSchematicRenderer
+- [x] Add 10px separation between parallel edges
+- [x] Add 20px obstacle padding around devices
+- [x] Remove d3-hwschematic from package.json
+- [x] Test with all example graphs (simple, medium, complex)
+- [x] Create comprehensive documentation (ORTHOGONAL_ROUTING_IMPLEMENTATION.md)
 
 ### Zoom & Pan Controls
 - [x] Implement zoom in method with animation
@@ -375,6 +388,6 @@ This checklist provides concrete, verifiable tasks for each phase of the AVFlowV
 
 **Overall Progress: ~62% Complete**
 
-**Current Status**: Phase 5 complete. Ready for Phase 6 advanced interactions.
+**Current Status**: Phase 5 complete with custom orthogonal routing. Ready for Phase 6 advanced interactions.
 
-**Last Updated**: 2025-11-16
+**Last Updated**: 2025-11-17

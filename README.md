@@ -2,11 +2,11 @@
 
 [![CI](https://github.com/twobeass/AVFlowView-3d/actions/workflows/ci.yml/badge.svg)](https://github.com/twobeass/AVFlowView-3d/actions/workflows/ci.yml)
 
-D3.js and d3-hwschematic based interactive AV wiring diagram visualizer using the AVFlowView JSON schema.
+D3.js and ELK.js based interactive AV wiring diagram visualizer using the AVFlowView JSON schema.
 
 ## Overview
 
-AVFlowView-3d transforms structured JSON descriptions of audio-visual systems into clean, interactive wiring diagrams. It automatically arranges devices, routes cables orthogonally, and provides focus/context visualization for exploring complex AV installations.
+AVFlowView-3d transforms structured JSON descriptions of audio-visual systems into clean, interactive wiring diagrams. It automatically arranges devices with intelligent orthogonal cable routing, and provides focus/context visualization for exploring complex AV installations.
 
 ## Key Features
 
@@ -106,10 +106,10 @@ AVFlowView-3d/
 │   └── invalid-examples/        # Examples of validation errors
 ├── src/
 │   ├── converters/              # AV to ELK graph conversion
-│   ├── renderers/               # D3/d3-hwschematic rendering
+│   ├── renderers/               # D3-based custom rendering with orthogonal routing
 │   ├── styling/                 # Category colors and styles
 │   ├── validation/              # JSON schema validation
-│   └── utils/                   # Utility functions
+│   └── utils/                   # Utility functions (including OrthogonalRouter)
 └── tests/
     ├── converters/              # Converter unit tests
     ├── validation/              # Validator unit tests
@@ -119,8 +119,8 @@ AVFlowView-3d/
 ## Technology Stack
 
 - **[D3.js](https://d3js.org/)** - Visualization and DOM manipulation
-- **[d3-hwschematic](https://github.com/Nic30/d3-hwschematic)** - Hardware schematic rendering
 - **[ELK.js](https://eclipse.dev/elk/)** - Graph layout engine
+- **Custom Orthogonal Router** - Professional Manhattan-style edge routing with obstacle avoidance
 - **[ajv](https://ajv.js.org/)** - JSON Schema validation
 - **[Vite](https://vitejs.dev/)** - Build tool and dev server
 - **[Jest](https://jestjs.io/)** - Unit testing framework
@@ -145,14 +145,11 @@ See [`avflowview-wiring.schema.json`](avflowview-wiring.schema.json) for the com
 
 ## Security
 
-⚠️ **Known Vulnerabilities**: This project has a known transitive dependency vulnerability in `d3-color` via `d3-hwschematic`. This is low-risk for the intended use case and is being monitored. See [SECURITY.md](SECURITY.md) for details.
-
 For security issues, please review our [Security Policy](SECURITY.md) before reporting.
 
 ## Related Projects
 
 - **[AVFlowView](https://github.com/twobeass/AVFlowView)** - Original React Flow implementation
-- **[d3-hwschematic](https://github.com/Nic30/d3-hwschematic)** - Hardware schematic library
 
 ## License
 
@@ -181,6 +178,8 @@ See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
 ✅ Category-based styling system  
 ✅ D3-based rendering with zoom/pan  
 ✅ Custom device, area, and edge renderers  
+✅ **Professional orthogonal edge routing with parallel edge separation**  
+✅ **Obstacle avoidance for clean cable paths**  
 ✅ 79 passing unit tests  
 
 ### In Progress
@@ -188,4 +187,4 @@ See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
 🚧 Interactive selection and focus/context  
 🚧 Search and filtering UI  
 🚧 Complete application shell  
-🚧 E2E testing with Playwright  
+🚧 E2E testing with Playwright

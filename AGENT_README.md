@@ -7,7 +7,7 @@
 4. Validate against: avflowview-wiring.schema.json
 
 ## Project Goal
-Build an interactive AV wiring diagram visualizer using D3.js and d3-hwschematic, driven by JSON schema.
+Build an interactive AV wiring diagram visualizer using D3.js with custom orthogonal edge routing, driven by JSON schema.
 
 ## Technology Stack
 - **Runtime**: Node.js >=18.0.0
@@ -15,8 +15,8 @@ Build an interactive AV wiring diagram visualizer using D3.js and d3-hwschematic
 - **Bundler**: Vite ^5.0.0 (note: do NOT forcibly upgrade beyond 6.x unless tested)
 - **Core Libraries**:
   - d3 ^7.8.5
-  - d3-hwschematic ^0.1.x (note: uses vulnerable d3-color transitively, see below)
   - elkjs ^0.9.0
+  - **Custom OrthogonalRouter** - Professional Manhattan-style edge routing with parallel edge separation
 - **Validation**: ajv ^8.12.0 (with ajv-formats^2.1.1, JSON Schema 2020-12 support)
 - **Testing**: Jest ^29.7.0 (DO NOT downgrade; do NOT use v25 or v30)
 - **Code Quality**: ESLint ^8.0.0+, Prettier ^3.0.0
@@ -31,7 +31,7 @@ Build an interactive AV wiring diagram visualizer using D3.js and d3-hwschematic
 - Some test and build transitive dependencies are not up-to-date (e.g., `inflight`, `d3-color`, `rimraf`). This is normal in the current npm ecosystem but monitor regularly.
 
 ## Known Vulnerabilities
-- **d3-hwschematic → d3 (<=6.7.0) → d3-color (<3.1.0)** – see audit warning. No fix possible until upstream releases an update.
+- **~~d3-hwschematic → d3 (<=6.7.0) → d3-color (<3.1.0)~~** – RESOLVED: d3-hwschematic removed (2025-11-17), custom orthogonal routing implemented
 - **Jest, Vite, and related ecosystem** – Upgrading past currently-tested versions may break ESM or config. Only update deliberately and check tests.
 - **Other transitive dependencies** – Most are not under direct project control and are considered low risk for this visualization tool.
 - Vulnerabilities and deprecation warnings should be reviewed, not ignored, but addressed only when upstream projects release safe updates. Do NOT force fixes that break working tests unless you will update code/config to match new major APIs.
@@ -63,7 +63,9 @@ Build an interactive AV wiring diagram visualizer using D3.js and d3-hwschematic
 - ✅ Automatic schema validation with clear error messages
 - ✅ AV-to-ELK graph conversion with category styling
 - ✅ ELK.js automatic layout (LR/TB direction support)
-- ✅ Interactive d3-hwschematic rendering with custom device/area/edge renderers
+- ✅ Custom D3-based rendering with professional orthogonal edge routing
+- ✅ **Parallel edge separation** - Multiple edges between same devices visually separated
+- ✅ **Obstacle avoidance** - Edges route around device bounding boxes
 - ✅ Zoom controls (in, out, reset) with smooth animations
 - ✅ Pan support with d3-zoom
 - ✅ Layout direction toggle (Left-to-Right ↔ Top-to-Bottom)
@@ -84,6 +86,18 @@ Build an interactive AV wiring diagram visualizer using D3.js and d3-hwschematic
 
 ## Change Log
 *Agent should update this section after completing each phase/maintenance*
+
+- **2025-11-17: Removed d3-hwschematic & Implemented Custom Orthogonal Routing**
+  - Created src/utils/OrthogonalRouter.js (398 lines) with professional Manhattan-style routing
+  - Implemented parallel edge separation (10px offset) to prevent visual stacking
+  - Added obstacle detection and avoidance with 20px device padding
+  - Integrated edge grouping for detecting parallel connections
+  - Removed d3-hwschematic dependency completely from package.json
+  - Updated HwSchematicRenderer to always use custom rendering
+  - Eliminated transitive security vulnerability in d3-color
+  - Created comprehensive implementation documentation (ORTHOGONAL_ROUTING_IMPLEMENTATION.md)
+  - Tested with all 3 examples (simple, medium, complex) - all working
+  - Branch: feature/phase5-ui-controls-panel
 
 - **2025-11-16: Completed Phase 5 - UI Controls Panel**
   - Integrated ControlsPanel (zoom, layout toggle, example selector)
@@ -131,6 +145,7 @@ AVFlowView3dApp
 ├── PortDirectionResolver (semantics)
 ├── ELK (layout engine)
 ├── HwSchematicRenderer (visualization)
+│   └── OrthogonalRouter (edge routing with separation & obstacle avoidance)
 ├── ControlsPanel (UI controls)
 └── ExampleLoader (example management)
     ↓

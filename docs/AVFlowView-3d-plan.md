@@ -1,13 +1,13 @@
 # AVFlowView-3d Autonomous Implementation Plan
 
-This document is the detailed roadmap for an autonomous coding agent to implement **AVFlowView-3d**, a D3.js + d3-hwschematic based viewer for A/V wiring graphs driven by the `av-wiring-graph` JSON schema.
+This document is the detailed roadmap for an autonomous coding agent to implement **AVFlowView-3d**, a D3.js-based viewer for A/V wiring graphs driven by the `av-wiring-graph` JSON schema with custom orthogonal edge routing.
 
 ---
 
 ## 1. Project Overview
 
-AVFlowView-3d turns structured JSON descriptions of areas, devices, ports, and cables into an interactive, auto-layouted wiring diagram using d3-hwschematic and ELK.js.
-The agent must consume JSON conforming to `av-wiring-graph.schema.json`, validate it, convert it into ELK JSON, and render a clear left-to-right or top-to-bottom signal-flow diagram with areas, port directions, category colors, and focus/context highlighting.
+AVFlowView-3d turns structured JSON descriptions of areas, devices, ports, and cables into an interactive, auto-layouted wiring diagram using D3.js and ELK.js with custom professional orthogonal (Manhattan-style) edge routing.
+The agent must consume JSON conforming to `av-wiring-graph.schema.json`, validate it, convert it into ELK JSON, and render a clear left-to-right or top-to-bottom signal-flow diagram with areas, port directions, category colors, parallel edge separation, and focus/context highlighting.
 
 ---
 
@@ -187,7 +187,20 @@ The implementation is split into phases; phases run sequentially, tasks inside a
    - ✅ Documented all features and architecture
    - ✅ Added testing checklist and verification steps
 
-**Exit criteria met:** Example graph renders with devices, areas, ports, and cables; zoom/pan works smoothly; all controls functional; layout toggle works; example selector loads graphs; all tests pass.
+10. **Custom Orthogonal Edge Routing (2025-11-17)**
+   - ✅ Created `src/utils/OrthogonalRouter.js` (398 lines)
+   - ✅ Implemented `calculateOrthogonalPath()` - Manhattan-style routing with L-shape, Z-shape, and complex strategies
+   - ✅ Implemented `calculateEdgeOffset()` - 10px parallel edge separation to prevent visual stacking
+   - ✅ Implemented `collectObstacles()` - Recursive device bounding box collection with 20px padding
+   - ✅ Implemented `groupEdgesByEndpoints()` - Parallel edge detection
+   - ✅ Integrated OrthogonalRouter into HwSchematicRenderer
+   - ✅ Removed d3-hwschematic dependency completely (security vulnerability resolved)
+   - ✅ Updated package.json and ran `npm uninstall d3-hwschematic`
+   - ✅ Tested with all examples (simple, medium, complex)
+   - ✅ Created comprehensive documentation (`docs/ORTHOGONAL_ROUTING_IMPLEMENTATION.md`)
+   - ✅ Updated 7 documentation files (README.md, AGENT_README.md, TECHNICAL_SPECS.md, CONTEXT.md, CHECKLIST.md, AVFlowView-3d-plan.md, new ORTHOGONAL_ROUTING_IMPLEMENTATION.md)
+
+**Exit criteria met:** Example graph renders with devices, areas, ports, and cables; zoom/pan works smoothly; all controls functional; layout toggle works; example selector loads graphs; all tests pass; edges use 100% orthogonal routing with parallel edge separation.
 
 **Key Achievements:**
 - Complete validation → conversion → layout → render pipeline operational
@@ -195,6 +208,9 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 - Smooth interactive zoom/pan with d3-zoom
 - Dynamic layout switching (LR/TB)
 - Example graph loading system
+- **Custom orthogonal edge routing with parallel edge separation**
+- **Removed external dependency and security vulnerability**
+- **Professional Manhattan-style cable paths with obstacle avoidance**
 - 79 unit tests passing
 - Ready for Phase 6 advanced interactions
 

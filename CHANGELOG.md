@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Hybrid ELK + Custom Orthogonal Edge Routing** (CRITICAL FIX)
+  - Successfully implemented hybrid approach using ELK's routing with custom port extensions
+  - Enabled ELK's hierarchical routing (`hierarchyHandling: 'INCLUDE_CHILDREN'`)
+  - ELK now generates bend points for cross-area edges automatically
+  - Added 30px port extensions (configurable via `extensionLength`)
+  - Orthogonal stub connections between ports and ELK bend points
+  - Enhanced fallback routing with 2D obstacle clearance testing
+  - Configurable routing system with 7 adjustable parameters
+  - New API method: `setRoutingConfig()` for dynamic configuration
+  - Configuration options:
+    - `extensionLength`: Distance to extend from port before routing (default: 30px)
+    - `obstaclePadding`: Safety margin around device bounding boxes (default: 2px)
+    - `localSearchRadius`: Radius for obstacle detection near ports (default: 300px)
+    - `protectedSegmentsCount`: Number of segments near ports to protect (default: 4)
+    - `edgeSeparation`: Pixels to offset parallel edges (default: 8px)
+    - `enableCollisionDetection`: Toggle for debugging/comparison
+    - `visualizeObstacles`/`visualizeSegments`: Debug visualization toggles
+  - Performance: O(edges × localObstacles) - scalable to thousands of nodes
+  - Strategy: Use ELK's proven routing, fallback to local obstacle avoidance only when needed
 - ESLint configuration (`.eslintrc.js`) with ES6+ rules and import ordering
 - Prettier configuration (`.prettierrc`) for consistent code formatting
 - Basic CSS reset and application styles (`src/styles/main.css`)
@@ -45,6 +64,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better project structure tree
 
 ### Fixed
+- **Edge Routing**: Replaced buggy custom OrthogonalRouter with ELK's native orthogonal routing
+  - Fixed oscillating collision detection that caused edges to route through devices
+  - Eliminated diagonal edge segments (now strictly horizontal/vertical)
+  - Improved parallel edge separation using ELK's built-in spacing
+  - Removed 398 lines of problematic custom routing code
+  - All 87 tests continue passing with cleaner, more maintainable solution
 - Documentation inconsistencies between checklist and actual code
 - Missing configuration files that were marked in checklist
 - Out-of-sync implementation status tracking

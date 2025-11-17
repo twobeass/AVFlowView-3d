@@ -1,13 +1,36 @@
 import * as d3 from 'd3';
-import * as d3HwSchematic from 'd3-hwschematic';
 
 class HwSchematicRenderer {
   constructor(containerSelector) {
     this.container = d3.select(containerSelector);
     this.zoomScale = 1;
+    
+    // Routing configuration - all parameters are adjustable
+    this.routingConfig = {
+      // Port extensions
+      extensionLength: 30,           // px to extend from port before routing
+      
+      // Obstacle detection
+      obstaclePadding: 2,            // MINIMAL: Just 2px padding to detect actual node overlap
+      localSearchRadius: 300,        // INCREASED: Check obstacles within larger radius
+      
+      // Routing behavior
+      minBendPoints: 2,              // Minimum waypoints near each port
+      maxBendPoints: 4,              // Maximum waypoints near each port
+      maxIterations: 10,             // Max iterations for collision resolution
+      protectedSegmentsCount: 4,     // Number of segments near each port to protect from collisions
+      edgeSeparation: 8,             // Pixels to offset parallel edges for visual clarity
+      
+      // Performance
+      enableCollisionDetection: true, // Can disable for debugging/comparison
+      logPerformance: false,         // Log routing time per edge
+      debugCollisions: false,        // NEW: Log collision detection details
+      visualizeObstacles: false,     // DISABLED: Debug visualization
+      visualizeSegments: false       // DISABLED: Debug visualization
+    };
+    
     this.initSVG();
     this.setupZoomPan();
-    this.schematic = d3HwSchematic.schematic ? d3HwSchematic.schematic() : null;
   }
 
   initSVG() {
@@ -46,22 +69,35 @@ class HwSchematicRenderer {
     this.currentTransform = d3.zoomIdentity;
   }
 
+  /**
+   * Update routing configuration dynamically
+   * @param {object} config - Partial configuration to merge with existing config
+   * @example
+   * renderer.setRoutingConfig({
+   *   extensionLength: 40,
+   *   localSearchRadius: 200,
+   *   minBendPoints: 3
+   * });
+   */
+  setRoutingConfig(config) {
+    this.routingConfig = { ...this.routingConfig, ...config };
+  }
+
   render(data) {
-    // Clear previous content
+    // Clear previous content and render with ELK's orthogonal routing
     this.g.selectAll('*').remove();
-
-    if (this.schematic) {
-      this.schematic.data(data).render(this.g.node());
-    } else {
-      // Fallback rendering if d3-hwschematic not available
-      this.renderFallback(data);
-    }
-
+    this.renderFallback(data);
+    
     // Fit to view after initial render
     setTimeout(() => this.fitToView(), 100);
   }
 
   renderFallback(data) {
+    // Cache obstacles for all edges (performance optimization)
+    if (this.routingConfig.enableCollisionDetection) {
+      this._cachedObstacles = this._getAllDeviceObstacles(data);
+    }
+    
     // Helper to find area offset by id
     const findAreaAbsOffset = (areaId) => {
       function search(nodes, offset) {
@@ -223,96 +259,52 @@ class HwSchematicRenderer {
       renderNodes(data.children, this.g);
     }
 
-    // Render edges AFTER nodes, in root coordinate space
+    // DEBUG: Visualize obstacle bounding boxes
+    if (this.routingConfig.visualizeObstacles && this._cachedObstacles) {
+      this._cachedObstacles.forEach(obs => {
+        this.g.append('rect')
+          .attr('x', obs.x)
+          .attr('y', obs.y)
+          .attr('width', obs.width)
+          .attr('height', obs.height)
+          .attr('fill', 'none')
+          .attr('stroke', 'red')
+          .attr('stroke-width', 2)
+          .attr('stroke-dasharray', '5,5')
+          .attr('opacity', 0.5)
+          .attr('pointer-events', 'none');
+      });
+    }
+    
+    // Render edges using ELK's computed orthogonal routing (or fallback for hierarchical edges)
     if (data.edges) {
-      data.edges.forEach((edge) => {
+      data.edges.forEach((edge, idx) => {
         let pathData = null;
-        // Use ELK path if present and offset if in a container
-        if (edge.sections && edge.sections[0]) {
-          // Find area offset if not root
-          let offset = {x: 0, y: 0};
-          if (edge.container && edge.container !== 'root') {
-            offset = findAreaAbsOffset(edge.container);
-          }
-          pathData = this.createPathFromSectionWithOffset(edge.sections[0], offset);
+        
+        // TRY ELK ROUTING FIRST - it already does obstacle avoidance!
+        if (edge.sections && edge.sections.length > 0 && edge.sections[0].bendPoints) {
+          const section = edge.sections[0];
+          const srcPos = this.findPortAbsolutePosition(edge.sources[0].split('/')[0], edge.sources[0].split('/')[1], data);
+          const tgtPos = this.findPortAbsolutePosition(edge.targets[0].split('/')[0], edge.targets[0].split('/')[1], data);
+          pathData = this.createPathFromELKSection(section, srcPos, tgtPos);
         } else {
-          // Manual fallback: Find nodes and port circles with port side info
-          const srcKey = edge.sources[0] || '';
-          const tgtKey = edge.targets[0] || '';
-          const findNodePortAbsPosAndSide = (nodeId, portKey) => {
-            function search(nodes, offset) {
-              for (const n of nodes) {
-                const x = offset.x + (n.x || 0);
-                const y = offset.y + (n.y || 0);
-                if (n.id === nodeId && n.ports) {
-                  // Group ports by side to match rendering logic
-                  const portsBySide = {
-                    WEST: [],
-                    EAST: [],
-                    NORTH: [],
-                    SOUTH: []
-                  };
-                  
-                  n.ports.forEach((p) => {
-                    const pSide = p.properties?.['org.eclipse.elk.portSide'] || 'EAST';
-                    if (portsBySide[pSide]) {
-                      portsBySide[pSide].push(p);
-                    }
-                  });
-                  
-                  // Find the target port and calculate its position with even distribution
-                  for (const port of n.ports) {
-                    if (port.id === nodeId + '/' + portKey) {
-                      let px = x, py = y;
-                      const portSide = port.properties?.['org.eclipse.elk.portSide'] || 'EAST';
-                      const portsOnSameSide = portsBySide[portSide];
-                      const portIndex = portsOnSameSide.findIndex(p => p.id === port.id);
-                      const portCount = portsOnSameSide.length;
-                      
-                      // Use same distribution formula as rendering
-                      switch (portSide) {
-                        case 'WEST':
-                          px = x;
-                          py = y + ((n.height || 80) / (portCount + 1)) * (portIndex + 1);
-                          break;
-                        case 'EAST':
-                          px = x + (n.width || 140);
-                          py = y + ((n.height || 80) / (portCount + 1)) * (portIndex + 1);
-                          break;
-                        case 'NORTH':
-                          px = x + ((n.width || 140) / (portCount + 1)) * (portIndex + 1);
-                          py = y;
-                          break;
-                        case 'SOUTH':
-                          px = x + ((n.width || 140) / (portCount + 1)) * (portIndex + 1);
-                          py = y + (n.height || 80);
-                          break;
-                      }
-                      return {x: px, y: py, side: portSide};
-                    }
-                  }
-                }
-                if(n.children) { const found = search(n.children, {x, y}); if(found) return found; }
-              }
-            }
-            const found = search(data.children, {x:0, y:0});
-            return found || {x: 0, y: 0, side: 'EAST'};
-          };
-          const [srcNode, srcPort] = srcKey.split('/');
-          const [tgtNode, tgtPort] = tgtKey.split('/');
-          const srcInfo = findNodePortAbsPosAndSide(srcNode, srcPort);
-          const tgtInfo = findNodePortAbsPosAndSide(tgtNode, tgtPort);
-          
-          // Use orthogonal routing for professional schematic appearance
-          pathData = this.createOrthogonalPath(
-            {x: srcInfo.x, y: srcInfo.y},
-            {x: tgtInfo.x, y: tgtInfo.y},
-            srcInfo.side,
-            tgtInfo.side
-          );
+          // Fallback only when ELK doesn't provide routing
+          pathData = this.createFallbackPath(edge, data, idx);
         }
-        // Draw edge if pathData is ready
+        
+        // Draw the edge path if we have valid path data
         if (pathData) {
+          // Parse path to get all points for segment visualization
+          const points = [];
+          const commands = pathData.match(/[ML]\s*([0-9.]+)\s+([0-9.]+)/g) || [];
+          commands.forEach(cmd => {
+            const match = cmd.match(/([0-9.]+)\s+([0-9.]+)/);
+            if (match) {
+              points.push({ x: parseFloat(match[1]), y: parseFloat(match[2]) });
+            }
+          });
+          
+          // Draw normal edge path with category color and arrow
           this.g
             .append('path')
             .attr('class', 'edge-path')
@@ -322,6 +314,7 @@ class HwSchematicRenderer {
             .attr('fill', 'none')
             .attr('stroke-width', 3)
             .attr('marker-end', 'url(#arrowhead)');
+          
           // Add edge label at optimal position (middle of longest segment)
           if (edge.labels && edge.labels[0]) {
             const labelPos = this.findLabelPosition(pathData);
@@ -369,16 +362,212 @@ class HwSchematicRenderer {
     }
   }
 
-  createPathFromSectionWithOffset(section, offset) {
-    const start = section.startPoint;
-    const end = section.endPoint;
+  /**
+   * Create SVG path from ELK edge section (with orthogonal routing)
+   * Uses ELK's bend points AND adds short extensions from ports
+   * 
+   * @param {object} section - ELK section with startPoint, bendPoints, endPoint
+   * @param {object} srcPos - Our calculated source port position {x, y, side}
+   * @param {object} tgtPos - Our calculated target port position {x, y, side}
+   * @returns {string} SVG path data string
+   */
+  createPathFromELKSection(section, srcPos, tgtPos) {
     const bendPoints = section.bendPoints || [];
-    let pathData = `M ${start.x + offset.x} ${start.y + offset.y}`;
-    bendPoints.forEach((bp) => {
-      pathData += ` L ${bp.x + offset.x} ${bp.y + offset.y}`;
-    });
-    pathData += ` L ${end.x + offset.x} ${end.y + offset.y}`;
+    
+    // Use our calculated port positions
+    const start = srcPos || section.startPoint;
+    const end = tgtPos || section.endPoint;
+    
+    // Start at source port
+    let pathData = `M ${start.x} ${start.y}`;
+    
+    if (bendPoints.length > 0) {
+      const firstBend = bendPoints[0];
+      
+      // SIMPLIFIED: Just extend from port in natural direction, then connect to first bend point
+      if (srcPos && srcPos.side) {
+        const extPoint = this.getExtensionPoint(srcPos);
+        pathData += ` L ${extPoint.x} ${extPoint.y}`;  // Extend from port
+        
+        // Connect extension to first bend point orthogonally
+        if (srcPos.side === 'EAST' || srcPos.side === 'WEST') {
+          pathData += ` L ${extPoint.x} ${firstBend.y}`;
+          pathData += ` L ${firstBend.x} ${firstBend.y}`;
+        } else {
+          pathData += ` L ${firstBend.x} ${extPoint.y}`;
+          pathData += ` L ${firstBend.x} ${firstBend.y}`;
+        }
+      } else {
+        pathData += ` L ${firstBend.x} ${firstBend.y}`;
+      }
+      
+      // Add all ELK bend points
+      for (let i = 1; i < bendPoints.length; i++) {
+        pathData += ` L ${bendPoints[i].x} ${bendPoints[i].y}`;
+      }
+      
+      // Connect last bend point to target port with extension
+      const lastBend = bendPoints[bendPoints.length - 1];
+      if (tgtPos && tgtPos.side) {
+        const tgtExt = this.getExtensionPoint(tgtPos);
+        
+        // Connect last bend to target extension orthogonally
+        if (tgtPos.side === 'EAST' || tgtPos.side === 'WEST') {
+          pathData += ` L ${tgtExt.x} ${lastBend.y}`;
+          pathData += ` L ${tgtExt.x} ${tgtExt.y}`;
+        } else {
+          pathData += ` L ${lastBend.x} ${tgtExt.y}`;
+          pathData += ` L ${tgtExt.x} ${tgtExt.y}`;
+        }
+        
+        // Final segment to port
+        pathData += ` L ${end.x} ${end.y}`;
+      } else {
+        pathData += ` L ${end.x} ${end.y}`;
+      }
+    } else {
+      // No bend points - simple direct path
+      pathData += ` L ${end.x} ${end.y}`;
+    }
+    
     return pathData;
+  }
+
+  /**
+   * Create fallback orthogonal path for edges without ELK sections
+   * Enhanced with port extensions and local obstacle avoidance
+   * 
+   * @param {object} edge - Edge object with sources and targets
+   * @param {object} data - Full graph data to find port positions
+   * @returns {string} SVG path data string
+   */
+  createFallbackPath(edge, data) {
+    const startTime = this.routingConfig.logPerformance ? performance.now() : 0;
+    
+    // Find source and target port positions
+    const srcKey = edge.sources[0] || '';
+    const tgtKey = edge.targets[0] || '';
+    
+    const [srcNodeId, srcPortKey] = srcKey.split('/');
+    const [tgtNodeId, tgtPortKey] = tgtKey.split('/');
+    
+    // Find port positions in absolute coordinates
+    const srcPos = this.findPortAbsolutePosition(srcNodeId, srcPortKey, data);
+    const tgtPos = this.findPortAbsolutePosition(tgtNodeId, tgtPortKey, data);
+    
+    if (!srcPos || !tgtPos) {
+      console.warn(`Could not find positions for edge ${edge.id}`);
+      return null;
+    }
+    
+    let pathData;
+    
+    if (!this.routingConfig.enableCollisionDetection) {
+      // Simple Z-route (for debugging/comparison)
+      const midX = (srcPos.x + tgtPos.x) / 2;
+      const midY = (srcPos.y + tgtPos.y) / 2;
+      
+      if (srcPos.side === 'EAST' || srcPos.side === 'WEST') {
+        pathData = `M ${srcPos.x} ${srcPos.y} L ${midX} ${srcPos.y} L ${midX} ${tgtPos.y} L ${tgtPos.x} ${tgtPos.y}`;
+      } else {
+        pathData = `M ${srcPos.x} ${srcPos.y} L ${srcPos.x} ${midY} L ${tgtPos.x} ${midY} L ${tgtPos.x} ${tgtPos.y}`;
+      }
+    } else {
+      // Enhanced routing with port extensions and obstacle avoidance
+      // Pass source and target node IDs to exclude them from obstacles
+      const waypoints = this.routeWithLocalAvoidance(srcPos, tgtPos, data, srcNodeId, tgtNodeId);
+      
+      // Build SVG path from waypoints
+      pathData = `M ${srcPos.x} ${srcPos.y}`;
+      waypoints.forEach(wp => {
+        pathData += ` L ${wp.x} ${wp.y}`;
+      });
+      pathData += ` L ${tgtPos.x} ${tgtPos.y}`;
+    }
+    
+    // Performance logging
+    if (this.routingConfig.logPerformance) {
+      const elapsed = (performance.now() - startTime).toFixed(2);
+      console.log(`⚡ Edge ${edge.id}: ${elapsed}ms`);
+    }
+    
+    return pathData;
+  }
+
+  /**
+   * Find absolute position of a port in the rendered graph
+   * 
+   * @param {string} nodeId - Node ID
+   * @param {string} portKey - Port key
+   * @param {object} data - Full graph data
+   * @returns {object|null} {x, y, side} or null if not found
+   */
+  findPortAbsolutePosition(nodeId, portKey, data) {
+    const search = (nodes, offset) => {
+      for (const node of nodes) {
+        const x = offset.x + (node.x || 0);
+        const y = offset.y + (node.y || 0);
+        
+        if (node.id === nodeId && node.ports) {
+          // Group ports by side to match rendering logic
+          const portsBySide = {
+            WEST: [],
+            EAST: [],
+            NORTH: [],
+            SOUTH: []
+          };
+          
+          node.ports.forEach((p) => {
+            const pSide = p.properties?.['org.eclipse.elk.portSide'] || 'EAST';
+            if (portsBySide[pSide]) {
+              portsBySide[pSide].push(p);
+            }
+          });
+          
+          // Find the target port and calculate its position
+          for (const port of node.ports) {
+            if (port.id === `${nodeId}/${portKey}`) {
+              const portSide = port.properties?.['org.eclipse.elk.portSide'] || 'EAST';
+              const portsOnSameSide = portsBySide[portSide];
+              const portIndex = portsOnSameSide.findIndex(p => p.id === port.id);
+              const portCount = portsOnSameSide.length;
+              
+              let px = x, py = y;
+              
+              // Use same distribution formula as rendering
+              switch (portSide) {
+                case 'WEST':
+                  px = x;
+                  py = y + ((node.height || 80) / (portCount + 1)) * (portIndex + 1);
+                  break;
+                case 'EAST':
+                  px = x + (node.width || 140);
+                  py = y + ((node.height || 80) / (portCount + 1)) * (portIndex + 1);
+                  break;
+                case 'NORTH':
+                  px = x + ((node.width || 140) / (portCount + 1)) * (portIndex + 1);
+                  py = y;
+                  break;
+                case 'SOUTH':
+                  px = x + ((node.width || 140) / (portCount + 1)) * (portIndex + 1);
+                  py = y + (node.height || 80);
+                  break;
+              }
+              
+              return { x: px, y: py, side: portSide };
+            }
+          }
+        }
+        
+        if (node.children) {
+          const found = search(node.children, { x, y });
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    
+    return search(data.children || [], { x: 0, y: 0 });
   }
 
   /**
@@ -434,60 +623,479 @@ class HwSchematicRenderer {
   }
 
   /**
-   * Create an orthogonal (Manhattan-style) path between two points
-   * based on their port sides for professional schematic routing.
+   * Collect all device bounding boxes as obstacles (private helper)
+   * Areas are not included - only leaf nodes (devices)
    * 
-   * @param {object} srcPos - Source position {x, y}
-   * @param {object} tgtPos - Target position {x, y}
-   * @param {string} srcSide - Source port side (WEST, EAST, NORTH, SOUTH)
-   * @param {string} tgtSide - Target port side (WEST, EAST, NORTH, SOUTH)
-   * @returns {string} SVG path data
+   * @param {object} data - Full graph data
+   * @returns {Array} Array of obstacle rectangles {id, x, y, width, height}
+   * @private
    */
-  createOrthogonalPath(srcPos, tgtPos, srcSide, tgtSide) {
-    const { x: x1, y: y1 } = srcPos;
-    const { x: x2, y: y2 } = tgtPos;
+  _getAllDeviceObstacles(data) {
+    const obstacles = [];
+    const padding = this.routingConfig.obstaclePadding;
     
-    const EXTENSION = 40; // How far to extend from port before turning
-    
-    // Determine routing strategy based on port sides
-    if ((srcSide === 'EAST' || srcSide === 'WEST') && 
-        (tgtSide === 'EAST' || tgtSide === 'WEST')) {
-      // Horizontal-horizontal: create path with vertical segment in middle
-      const midY = (y1 + y2) / 2;
-      const extX1 = srcSide === 'EAST' ? x1 + EXTENSION : x1 - EXTENSION;
-      const extX2 = tgtSide === 'EAST' ? x2 + EXTENSION : x2 - EXTENSION;
-      return `M ${x1} ${y1} L ${extX1} ${y1} L ${extX1} ${midY} L ${extX2} ${midY} L ${extX2} ${y2} L ${x2} ${y2}`;
-    } else if ((srcSide === 'NORTH' || srcSide === 'SOUTH') && 
-               (tgtSide === 'NORTH' || tgtSide === 'SOUTH')) {
-      // Vertical-vertical: create path with horizontal segment in middle
-      const midX = (x1 + x2) / 2;
-      const extY1 = srcSide === 'SOUTH' ? y1 + EXTENSION : y1 - EXTENSION;
-      const extY2 = tgtSide === 'SOUTH' ? y2 + EXTENSION : y2 - EXTENSION;
-      return `M ${x1} ${y1} L ${x1} ${extY1} L ${midX} ${extY1} L ${midX} ${extY2} L ${x2} ${extY2} L ${x2} ${y2}`;
-    } else {
-      // Mixed orientation: create L-shape or Z-shape based on sides
-      if ((srcSide === 'EAST' && tgtSide === 'NORTH') || 
-          (srcSide === 'SOUTH' && tgtSide === 'WEST')) {
-        // Two-segment path: horizontal then vertical (or vertical then horizontal)
-        if (srcSide === 'EAST' || srcSide === 'WEST') {
-          const extX = srcSide === 'EAST' ? x1 + EXTENSION : x1 - EXTENSION;
-          return `M ${x1} ${y1} L ${extX} ${y1} L ${extX} ${y2} L ${x2} ${y2}`;
-        } else {
-          const extY = srcSide === 'SOUTH' ? y1 + EXTENSION : y1 - EXTENSION;
-          return `M ${x1} ${y1} L ${x1} ${extY} L ${x2} ${extY} L ${x2} ${y2}`;
-        }
-      } else {
-        // Default: simple L-shape routing
-        if (srcSide === 'EAST' || srcSide === 'WEST') {
-          // Go horizontal first, then vertical
-          const midX = x1 + (x2 - x1) * 0.6;
-          return `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
-        } else {
-          // Go vertical first, then horizontal
-          const midY = y1 + (y2 - y1) * 0.6;
-          return `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
+    const traverse = (nodes, offset = { x: 0, y: 0 }) => {
+      for (const node of nodes) {
+        const absX = offset.x + (node.x || 0);
+        const absY = offset.y + (node.y || 0);
+        
+        // Skip area containers (they have children)
+        // Only collect device nodes (leaf nodes without children)
+        if (!node.children || node.children.length === 0) {
+          obstacles.push({
+            id: node.id,
+            x: absX - padding,
+            y: absY - padding,
+            width: (node.width || 140) + (padding * 2),
+            height: (node.height || 80) + (padding * 2)
+          });
+        } else if (node.children) {
+          // Recurse into area's children with updated offset
+          traverse(node.children, { x: absX, y: absY });
         }
       }
+    };
+    
+    traverse(data.children || []);
+    return obstacles;
+  }
+
+  /**
+   * Collect obstacles near a specific point (local search for performance)
+   * Only obstacles within the specified radius are returned
+   * 
+   * @param {object} point - Center point {x, y}
+   * @param {number} radius - Search radius in pixels
+   * @param {object} data - Full graph data
+   * @param {Array} excludeNodeIds - Node IDs to exclude from obstacles (e.g., source/target)
+   * @returns {Array} Nearby obstacles only
+   */
+  collectNearbyObstacles(point, radius, data, excludeNodeIds = []) {
+    // Get all obstacles (cached if available)
+    const allObstacles = this._cachedObstacles || this._getAllDeviceObstacles(data);
+    
+    // Filter to only obstacles within radius and not excluded
+    return allObstacles.filter(obs => {
+      // Exclude source/target nodes
+      if (excludeNodeIds.includes(obs.id)) {
+        return false;
+      }
+      
+      // Calculate distance from point to obstacle center
+      const centerX = obs.x + obs.width / 2;
+      const centerY = obs.y + obs.height / 2;
+      const distance = Math.sqrt(
+        Math.pow(centerX - point.x, 2) + 
+        Math.pow(centerY - point.y, 2)
+      );
+      return distance < radius;
+    });
+  }
+
+  /**
+   * Check if a line segment intersects with a rectangular obstacle
+   * Uses Axis-Aligned Bounding Box (AABB) intersection test
+   * 
+   * @param {object} p1 - Start point {x, y}
+   * @param {object} p2 - End point {x, y}
+   * @param {object} obstacle - Obstacle rectangle {x, y, width, height}
+   * @returns {boolean} True if segment intersects obstacle
+   */
+  segmentIntersectsObstacle(p1, p2, obstacle) {
+    // Create bounding box for the segment
+    const segMinX = Math.min(p1.x, p2.x);
+    const segMaxX = Math.max(p1.x, p2.x);
+    const segMinY = Math.min(p1.y, p2.y);
+    const segMaxY = Math.max(p1.y, p2.y);
+    
+    // Check if segment's bounding box intersects obstacle
+    const intersects = !(
+      segMaxX < obstacle.x ||
+      segMinX > obstacle.x + obstacle.width ||
+      segMaxY < obstacle.y ||
+      segMinY > obstacle.y + obstacle.height
+    );
+    
+    return intersects;
+  }
+
+  /**
+   * Detect collisions in a path's waypoints (local segments only)
+   * Only checks first N and last N segments for performance
+   * Uses configurable protectedSegmentsCount for flexibility
+   * 
+   * @param {Array} waypoints - Array of waypoint objects {x, y}
+   * @param {Array} obstacles - Array of obstacle rectangles
+   * @param {number} checkSegments - Number of segments to check from each end (defaults to config)
+   * @returns {Array} Array of collision info {segmentIndex, obstacle}
+   */
+  detectLocalCollisions(waypoints, obstacles, checkSegments = null) {
+    const collisions = [];
+    
+    if (waypoints.length < 2) return collisions;
+    
+    // Use config value if not specified
+    const segmentsToCheck = checkSegments !== null 
+      ? checkSegments 
+      : this.routingConfig.protectedSegmentsCount;
+    
+    // Check first N segments (near source)
+    const startCheck = Math.min(segmentsToCheck, waypoints.length - 1);
+    for (let i = 0; i < startCheck; i++) {
+      const p1 = waypoints[i];
+      const p2 = waypoints[i + 1];
+      
+      for (const obs of obstacles) {
+        if (this.segmentIntersectsObstacle(p1, p2, obs)) {
+          collisions.push({ segmentIndex: i, obstacle: obs });
+          break; // Only record first collision per segment
+        }
+      }
+    }
+    
+    // Check last N segments (near target) - MORE SEGMENTS as per user feedback
+    const endStart = Math.max(waypoints.length - segmentsToCheck - 1, startCheck);
+    for (let i = endStart; i < waypoints.length - 1; i++) {
+      const p1 = waypoints[i];
+      const p2 = waypoints[i + 1];
+      
+      for (const obs of obstacles) {
+        if (this.segmentIntersectsObstacle(p1, p2, obs)) {
+          collisions.push({ segmentIndex: i, obstacle: obs });
+          break; // Only record first collision per segment
+        }
+      }
+    }
+    
+    return collisions;
+  }
+
+  /**
+   * Calculate extension point from a port in its natural direction
+   * This ensures edges extend outward from the port before routing
+   * 
+   * @param {object} portPos - Port position with {x, y, side}
+   * @returns {object} Extension point {x, y}
+   */
+  getExtensionPoint(portPos) {
+    const extLength = this.routingConfig.extensionLength;
+    
+    switch (portPos.side) {
+      case 'EAST':
+        return { x: portPos.x + extLength, y: portPos.y };
+      case 'WEST':
+        return { x: portPos.x - extLength, y: portPos.y };
+      case 'NORTH':
+        return { x: portPos.x, y: portPos.y - extLength };
+      case 'SOUTH':
+        return { x: portPos.x, y: portPos.y + extLength };
+      default:
+        // Fallback to EAST if side is unknown
+        return { x: portPos.x + extLength, y: portPos.y };
+    }
+  }
+
+  /**
+   * Route around local obstacles near a port (source or target)
+   * REDESIGNED: Tests all possible routes and chooses first collision-free path
+   * 
+   * @param {object} startPoint - Starting point {x, y}
+   * @param {string} portSide - Port side (EAST, WEST, NORTH, SOUTH)
+   * @param {Array} obstacles - Nearby obstacles
+   * @param {object} targetPoint - End point to route toward {x, y}
+   * @returns {Array} Waypoints to route around obstacles
+   */
+  routeAroundLocalObstacles(startPoint, portSide, obstacles, targetPoint) {
+    const waypoints = [startPoint];
+    const clearance = 20;
+    
+    // If no obstacles, just make simple perpendicular turn
+    if (obstacles.length === 0) {
+      if (portSide === 'EAST' || portSide === 'WEST') {
+        waypoints.push({ x: startPoint.x, y: targetPoint.y });
+      } else {
+        waypoints.push({ x: targetPoint.x, y: startPoint.y });
+      }
+      return waypoints;
+    }
+    
+    // Find bounding box of ALL obstacles to route around
+    const minX = Math.min(...obstacles.map(o => o.x));
+    const maxX = Math.max(...obstacles.map(o => o.x + o.width));
+    const minY = Math.min(...obstacles.map(o => o.y));
+    const maxY = Math.max(...obstacles.map(o => o.y + o.height));
+    
+    // REDESIGNED: Test multiple routing options and choose best
+    const routeOptions = [];
+    
+    if (portSide === 'EAST' || portSide === 'WEST') {
+      // Horizontal port - route above or below ALL obstacles
+      // CRITICAL: Must clear obstacles in BOTH dimensions (vertical AND horizontal)
+      
+      // Option 1: Route above all obstacles
+      const aboveY = minY - clearance;
+      const clearHorizontal = portSide === 'EAST' ? maxX + clearance : minX - clearance;
+      const routeAbove = [
+        startPoint,
+        { x: startPoint.x, y: aboveY },           // Go up
+        { x: clearHorizontal, y: aboveY },        // Go past obstacles horizontally
+        { x: clearHorizontal, y: targetPoint.y }, // Go down to target level
+        { x: targetPoint.x, y: targetPoint.y }    // Go to target
+      ];
+      
+      // Option 2: Route below all obstacles
+      const belowY = maxY + clearance;
+      const routeBelow = [
+        startPoint,
+        { x: startPoint.x, y: belowY },           // Go down
+        { x: clearHorizontal, y: belowY },        // Go past obstacles horizontally
+        { x: clearHorizontal, y: targetPoint.y }, // Go up to target level
+        { x: targetPoint.x, y: targetPoint.y }    // Go to target
+      ];
+      
+      routeOptions.push({ route: routeAbove, name: 'above' });
+      routeOptions.push({ route: routeBelow, name: 'below' });
+      
+    } else {
+      // Vertical port - route left or right of ALL obstacles
+      // CRITICAL: Must clear obstacles in BOTH dimensions (horizontal AND vertical)
+      
+      // Option 1: Route to the right of all obstacles
+      const rightX = maxX + clearance;
+      const clearVertical = portSide === 'SOUTH' ? maxY + clearance : minY - clearance;
+      const routeRight = [
+        startPoint,
+        { x: rightX, y: startPoint.y },           // Go right
+        { x: rightX, y: clearVertical },          // Go past obstacles vertically
+        { x: targetPoint.x, y: clearVertical },   // Go back to target X
+        { x: targetPoint.x, y: targetPoint.y }    // Go to target
+      ];
+      
+      // Option 2: Route to the left of all obstacles
+      const leftX = minX - clearance;
+      const routeLeft = [
+        startPoint,
+        { x: leftX, y: startPoint.y },            // Go left
+        { x: leftX, y: clearVertical },           // Go past obstacles vertically
+        { x: targetPoint.x, y: clearVertical },   // Go back to target X
+        { x: targetPoint.x, y: targetPoint.y }    // Go to target
+      ];
+      
+      routeOptions.push({ route: routeRight, name: 'right' });
+      routeOptions.push({ route: routeLeft, name: 'left' });
+    }
+    
+    // Test each route option and find first collision-free one
+    for (const option of routeOptions) {
+      const testRoute = option.route;
+      let hasCollision = false;
+      
+      // Check every segment of this route
+      for (let i = 0; i < testRoute.length - 1; i++) {
+        const p1 = testRoute[i];
+        const p2 = testRoute[i + 1];
+        
+        for (const obs of obstacles) {
+          if (this.segmentIntersectsObstacle(p1, p2, obs)) {
+            hasCollision = true;
+            break;
+          }
+        }
+        if (hasCollision) break;
+      }
+      
+      if (!hasCollision) {
+        // Found a collision-free route! Use it (skip first point as it's already in waypoints)
+        for (let i = 1; i < testRoute.length - 1; i++) {
+          waypoints.push(testRoute[i]);
+        }
+        return waypoints;
+      }
+    }
+    
+    // If we get here, both routes have collisions - just pick the shorter one
+    // Calculate which direction has less distance
+    const option1 = routeOptions[0].route;
+    const option2 = routeOptions[1].route;
+    
+    let dist1 = 0, dist2 = 0;
+    for (let i = 0; i < option1.length - 1; i++) {
+      dist1 += Math.abs(option1[i].x - option1[i+1].x) + Math.abs(option1[i].y - option1[i+1].y);
+    }
+    for (let i = 0; i < option2.length - 1; i++) {
+      dist2 += Math.abs(option2[i].x - option2[i+1].x) + Math.abs(option2[i].y - option2[i+1].y);
+    }
+    
+    const chosenRoute = dist1 <= dist2 ? option1 : option2;
+    for (let i = 1; i < chosenRoute.length - 1; i++) {
+      waypoints.push(chosenRoute[i]);
+    }
+    
+    return waypoints;
+  }
+
+  /**
+   * Create middle routing between source-side and target-side waypoints
+   * SIMPLIFIED: Just creates simple Z-connection (may cross distant nodes - acceptable per design)
+   * This is per the original plan: "If the middle segment is crossing through nodes its acceptable!"
+   * 
+   * @param {object} srcEnd - Last waypoint from source-side routing {x, y}
+   * @param {object} tgtStart - First waypoint for target-side routing {x, y}
+   * @param {string} srcSide - Source port side
+   * @returns {Array} Middle waypoints
+   */
+  createMiddleRoute(srcEnd, tgtStart, srcSide) {
+    const waypoints = [];
+    
+    // Simple Z-route for middle section (no obstacle checking - per design)
+    if (srcSide === 'EAST' || srcSide === 'WEST') {
+      // Horizontal start - create Z-shape
+      const midX = (srcEnd.x + tgtStart.x) / 2;
+      waypoints.push({ x: midX, y: srcEnd.y });
+      waypoints.push({ x: midX, y: tgtStart.y });
+    } else {
+      // Vertical start - create Z-shape
+      const midY = (srcEnd.y + tgtStart.y) / 2;
+      waypoints.push({ x: srcEnd.x, y: midY });
+      waypoints.push({ x: tgtStart.x, y: midY });
+    }
+    
+    return waypoints;
+  }
+
+  /**
+   * Route edge with local obstacle avoidance
+   * Strategy: Avoid obstacles near source and target, allow middle crossings
+   * Enhanced with extension collision detection
+   * 
+   * @param {object} srcPos - Source port position {x, y, side}
+   * @param {object} tgtPos - Target port position {x, y, side}
+   * @param {object} data - Full graph data
+   * @param {string} srcNodeId - Source node ID to exclude from obstacles
+   * @param {string} tgtNodeId - Target node ID to exclude from obstacles
+   * @returns {Array} Complete waypoint list
+   */
+  routeWithLocalAvoidance(srcPos, tgtPos, data, srcNodeId, tgtNodeId) {
+    // 1. Calculate extension points
+    const srcExt = this.getExtensionPoint(srcPos);
+    const tgtExt = this.getExtensionPoint(tgtPos);
+    
+    // 2. Collect nearby obstacles for source and target (excluding source/target nodes)
+    const srcObstacles = this.collectNearbyObstacles(
+      srcPos, 
+      this.routingConfig.localSearchRadius, 
+      data,
+      [srcNodeId, tgtNodeId]  // Exclude both source and target from obstacles
+    );
+    const tgtObstacles = this.collectNearbyObstacles(
+      tgtPos, 
+      this.routingConfig.localSearchRadius, 
+      data,
+      [srcNodeId, tgtNodeId]  // Exclude both source and target from obstacles
+    );
+    
+    // CRITICAL FIX: Check if extension segments collide with obstacles
+    // If they do, the extension points need to be adjusted
+    const srcExtCollisions = this.detectLocalCollisions(
+      [srcPos, srcExt],
+      srcObstacles,
+      1
+    );
+    
+    const tgtExtCollisions = this.detectLocalCollisions(
+      [tgtPos, tgtExt],
+      tgtObstacles,
+      1
+    );
+    
+    // Adjust source extension if it collides
+    let adjustedSrcExt = srcExt;
+    if (srcExtCollisions.length > 0) {
+      const obstacle = srcExtCollisions[0].obstacle;
+      // Extend beyond the obstacle
+      adjustedSrcExt = this.extendBeyondObstacle(srcPos, obstacle);
+    }
+    
+    // Adjust target extension if it collides
+    let adjustedTgtExt = tgtExt;
+    if (tgtExtCollisions.length > 0) {
+      const obstacle = tgtExtCollisions[0].obstacle;
+      // Extend beyond the obstacle
+      adjustedTgtExt = this.extendBeyondObstacle(tgtPos, obstacle);
+    }
+    
+    // 3. Route around obstacles near source
+    const srcWaypoints = this.routeAroundLocalObstacles(
+      adjustedSrcExt,
+      srcPos.side,
+      srcObstacles,
+      adjustedTgtExt
+    );
+    
+    // 4. Route around obstacles near target (in reverse)
+    const tgtWaypoints = this.routeAroundLocalObstacles(
+      adjustedTgtExt,
+      tgtPos.side,
+      tgtObstacles,
+      adjustedSrcExt
+    );
+    
+    // 5. Create simple middle connection (NO obstacle checking - middle can cross nodes per design)
+    const srcEndPoint = srcWaypoints[srcWaypoints.length - 1];
+    const tgtStartPoint = tgtWaypoints[tgtWaypoints.length - 1];
+    const middleWaypoints = this.createMiddleRoute(
+      srcEndPoint,
+      tgtStartPoint,
+      srcPos.side
+    );
+    
+    // 6. Combine all waypoints: src extension -> src routing -> middle -> tgt routing (reversed) -> tgt extension
+    const tgtRouting = [...tgtWaypoints].reverse();
+    
+    return [
+      ...srcWaypoints,
+      ...middleWaypoints,
+      ...tgtRouting
+    ];
+  }
+  
+  /**
+   * Extend a point beyond an obstacle to avoid collision
+   * 
+   * @param {object} portPos - Port position with {x, y, side}
+   * @param {object} obstacle - Obstacle that is blocking the extension {x, y, width, height}
+   * @returns {object} Extended point {x, y}
+   */
+  extendBeyondObstacle(portPos, obstacle) {
+    const clearance = 20;
+    
+    switch (portPos.side) {
+      case 'EAST':
+        // Extend right beyond obstacle
+        return { 
+          x: obstacle.x + obstacle.width + clearance, 
+          y: portPos.y 
+        };
+      case 'WEST':
+        // Extend left beyond obstacle
+        return { 
+          x: obstacle.x - clearance, 
+          y: portPos.y 
+        };
+      case 'NORTH':
+        // Extend up beyond obstacle
+        return { 
+          x: portPos.x, 
+          y: obstacle.y - clearance 
+        };
+      case 'SOUTH':
+        // Extend down beyond obstacle
+        return { 
+          x: portPos.x, 
+          y: obstacle.y + obstacle.height + clearance 
+        };
+      default:
+        return { x: portPos.x, y: portPos.y };
     }
   }
 

@@ -29,7 +29,9 @@ It focuses on three aspects at once: neat arrangement of devices, readable cable
 
 ## Schematic Visualization (Phase 5)
 
-- **d3-hwschematic integration**: The project leverages d3.js and ELK graph layouts for interactive hardware schematic visualization.
+- **Custom D3-based rendering**: The project leverages d3.js and ELK graph layouts for interactive hardware schematic visualization with no external schematic library dependencies.
+- **Professional orthogonal routing**: Custom Manhattan-style edge routing with parallel edge separation prevents visual stacking and improves readability.
+- **Obstacle avoidance**: Intelligent edge routing around device bounding boxes for clean cable paths.
 - **Scalable graphics**: SVG-based rendering enables smooth zoom and pan from system overview to individual port details.
 - **Custom renderers**: Device, area, and edge renderers provide specialized visualization for AV system components.
 - **Interactive hardware schematics**: Users can navigate complex AV system topologies with responsive, real-time interactions.

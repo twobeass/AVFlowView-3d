@@ -1,12 +1,7 @@
 import { jest } from '@jest/globals';
 
-await jest.unstable_mockModule('d3-hwschematic', () => ({
-  schematic: () => ({
-    data: () => ({
-      render: () => {},
-    }),
-  }),
-}));
+// Note: d3-hwschematic removed November 17, 2025
+// HwSchematicRenderer now uses custom D3-based rendering with OrthogonalRouter
 
 const { default: HwSchematicRenderer } = await import(
   '../HwSchematicRenderer.js'
@@ -49,11 +44,6 @@ describe('HwSchematicRenderer', () => {
       expect(renderer.zoom).toBeDefined();
       expect(typeof renderer.zoom).toBe('function');
     });
-
-    test('should initialize d3-hwschematic instance', () => {
-      const renderer = new HwSchematicRenderer('#test-container');
-      expect(renderer.schematic).toBeDefined();
-    });
   });
 
   describe('Rendering', () => {
@@ -76,12 +66,31 @@ describe('HwSchematicRenderer', () => {
     test('should render with edges', () => {
       const renderer = new HwSchematicRenderer('#test-container');
       const dataWithEdges = {
-        nodes: [
-          { id: 'node1', name: 'Device 1' },
-          { id: 'node2', name: 'Device 2' },
+        children: [
+          { 
+            id: 'node1', 
+            labels: [{ text: 'Device 1' }],
+            width: 100,
+            height: 50,
+            x: 0,
+            y: 0
+          },
+          { 
+            id: 'node2', 
+            labels: [{ text: 'Device 2' }],
+            width: 100,
+            height: 50,
+            x: 200,
+            y: 0
+          },
         ],
         edges: [
-          { id: 'edge1', source: 'node1', target: 'node2', color: '#333' },
+          { 
+            id: 'edge1', 
+            sources: ['node1'], 
+            targets: ['node2'],
+            hwMeta: { category: 'video' }
+          },
         ],
       };
       expect(() => renderer.render(dataWithEdges)).not.toThrow();

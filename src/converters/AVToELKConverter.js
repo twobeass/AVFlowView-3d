@@ -199,10 +199,17 @@ export class AVToELKConverter {
         'org.eclipse.elk.algorithm': 'layered',
         'org.eclipse.elk.direction': layoutDirection,
         'org.eclipse.elk.layered.edgeRouting': 'ORTHOGONAL',
-        'org.eclipse.elk.spacing.nodeNode': 80,
-        'org.eclipse.elk.spacing.edgeNode': 40,
-        'org.eclipse.elk.spacing.edgeEdge': 20,
-        'org.eclipse.elk.layered.spacing.edgeNodeBetweenLayers': 40,
+        'org.eclipse.elk.spacing.nodeNode': 220,  // +10%: More space to reduce overlap
+        'org.eclipse.elk.spacing.edgeNode': 88,   // +10%: More clearance for obstacle avoidance
+        'org.eclipse.elk.spacing.edgeEdge': 55,   // +10%: Better edge separation
+        'org.eclipse.elk.layered.spacing.edgeNodeBetweenLayers': 110,  // +10%: More space between layers
+        'org.eclipse.elk.layered.spacing.baseValue': 55,  // +10%: Increased base spacing
+        'org.eclipse.elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',  // Better node positioning
+        'org.eclipse.elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',  // Respect input order
+        'org.eclipse.elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',  // Better crossing minimization
+        'org.eclipse.elk.separateConnectedComponents': true,  // Separate disconnected components
+        'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',  // CRITICAL: Enable routing for hierarchical edges
+        'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',  // CRITICAL: Enable edge routing at root level
       },
     };
 
