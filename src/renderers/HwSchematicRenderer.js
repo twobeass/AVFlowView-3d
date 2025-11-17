@@ -81,18 +81,18 @@ class HwSchematicRenderer {
       });
     }
     if (data.edges) {
-      data.edges.forEach((edge, idx) => {
+      data.edges.forEach((edge, _idx) => {
         let pathData = null;
         if (edge.sections && edge.sections.length > 0) {
           const section = edge.sections[0];
           const sourceNodeId = edge.sources[0].split('/')[0];
           const targetNodeId = edge.targets[0].split('/')[0];
-          const containerOffset = this.findEdgeContainer(edge, sourceNodeId, targetNodeId, data);
+          const _containerOffset = this.findEdgeContainer(edge, sourceNodeId, targetNodeId, data);
           // eslint-disable-next-line no-console
-          console.log(`🔗 Edge ${edge.id}: container offset (${containerOffset.x}, ${containerOffset.y})`);
+          console.log(`🔗 Edge ${edge.id}: container offset (${_containerOffset.x}, ${_containerOffset.y})`);
           const srcPos = this.findPortAbsolutePosition(edge.sources[0].split('/')[0], edge.sources[0].split('/')[1], data);
           const tgtPos = this.findPortAbsolutePosition(edge.targets[0].split('/')[0], edge.targets[0].split('/')[1], data);
-          pathData = this.createPathFromELKSection(section, srcPos, tgtPos, containerOffset);
+          pathData = this.createPathFromELKSection(section, srcPos, tgtPos);
         } else {
           const sourceNodeId = edge.sources[0].split('/')[0];
           const targetNodeId = edge.targets[0].split('/')[0];
@@ -110,7 +110,7 @@ class HwSchematicRenderer {
             hasStartPoint: !!edge.sections?.[0]?.startPoint,
             hasEndPoint: !!edge.sections?.[0]?.endPoint,
           });
-          pathData = this.createFallbackPath(edge, data, idx);
+          pathData = this.createFallbackPath(edge, data);
         }
         if (pathData) {
           const points = [];
@@ -189,11 +189,13 @@ class HwSchematicRenderer {
     return result;
   }
 
-  findEdgeContainer(edge, sourceNodeId, targetNodeId, data) {
+  findEdgeContainer(_edge, _sourceNodeId, _targetNodeId, _data) {
+    // Placeholder for future hierarchical edge container logic
+    // Currently returns origin as all coordinates are already absolute
     return { x: 0, y: 0 };
   }
 
-  createPathFromELKSection(section, srcPos, tgtPos, containerOffset) {
+  createPathFromELKSection(section, srcPos, tgtPos) {
     let path = `M ${srcPos.x} ${srcPos.y}`;
     if (section.bendPoints && section.bendPoints.length > 0) {
       section.bendPoints.forEach(bp => {
@@ -204,7 +206,7 @@ class HwSchematicRenderer {
     return path;
   }
 
-  createFallbackPath(edge, data, idx) {
+  createFallbackPath(edge, data) {
     const sourceNodeId = edge.sources[0].split('/')[0];
     const targetNodeId = edge.targets[0].split('/')[0];
     const sourcePortKey = edge.sources[0].split('/')[1];
