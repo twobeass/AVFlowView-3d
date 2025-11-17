@@ -1,11 +1,11 @@
 import ELK from 'elkjs';
 
 import { AVToELKConverter } from './converters/index.js';
-import { SchemaValidator } from './validation/index.js';
 import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
 import { ControlsPanel } from './ui/ControlsPanel.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { ExampleLoader } from './utils/ExampleLoader.js';
+import { SchemaValidator } from './validation/index.js';
 
 export class AVFlowView3dApp {
   constructor(container, options = {}) {

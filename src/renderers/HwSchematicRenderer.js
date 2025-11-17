@@ -36,18 +36,7 @@ class HwSchematicRenderer {
     if (this.routingConfig.enableCollisionDetection) {
       this._cachedObstacles = this._getAllDeviceObstacles(data);
     }
-    const findAreaAbsOffset = (areaId) => {
-      function search(nodes, offset) {
-        for (const n of nodes) {
-          const x = offset.x + (n.x || 0);
-          const y = offset.y + (n.y || 0);
-          if (n.id === areaId && n.children) { return { x, y }; }
-          if (n.children) { const found = search(n.children, { x, y }); if (found) { return found; } }
-        }
-        return { x: 0, y: 0 };
-      }
-      return search(data.children || [], { x: 0, y: 0 }) || { x: 0, y: 0 };
-    };
+    
     const renderNodes = (nodes, parentG, parentOffset = { x: 0, y: 0 }) => {
       nodes.forEach((node) => {
         // eslint-disable-next-line no-console
@@ -83,7 +72,9 @@ class HwSchematicRenderer {
       });
     };
     this.g.selectAll('*').remove();
-    if (data.children) { renderNodes(data.children, this.g); }
+    if (data.children) {
+      renderNodes(data.children, this.g);
+    }
     if (this.routingConfig.visualizeObstacles && this._cachedObstacles) {
       this._cachedObstacles.forEach(obs => {
         this.g.append('rect').attr('x', obs.x).attr('y', obs.y).attr('width', obs.width).attr('height', obs.height).attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 2).attr('stroke-dasharray', '5,5').attr('opacity', 0.5).attr('pointer-events', 'none');
@@ -126,10 +117,20 @@ class HwSchematicRenderer {
           const commands = pathData.match(/[ML]\s*([0-9.]+)\s+([0-9.]+)/g) || [];
           commands.forEach(cmd => {
             const match = cmd.match(/([0-9.]+)\s+([0-9.]+)/);
-            if (match) { points.push({ x: parseFloat(match[1]), y: parseFloat(match[2]) }); }
+            if (match) {
+              points.push({ x: parseFloat(match[1]), y: parseFloat(match[2]) });
+            }
           });
           const edgePath = this.g.append('path').attr('class', 'edge-path').attr('data-id', edge.id).attr('d', pathData).attr('stroke', '#333').attr('fill', 'none').attr('stroke-width', 3).attr('marker-end', 'url(#arrowhead)').style('cursor', 'pointer').datum(edge);
-          edgePath.on('mouseenter', function() { d3.select(this).attr('stroke', '#2563eb').attr('stroke-width', 4); }).on('mouseleave', function() { d3.select(this).attr('stroke', '#333').attr('stroke-width', 3); }).on('click', () => { if (window.debugPanel) { window.debugPanel.inspectEdge(edge.id); } });
+          edgePath.on('mouseenter', function() {
+            d3.select(this).attr('stroke', '#2563eb').attr('stroke-width', 4);
+          }).on('mouseleave', function() {
+            d3.select(this).attr('stroke', '#333').attr('stroke-width', 3);
+          }).on('click', () => {
+            if (window.debugPanel) {
+              window.debugPanel.inspectEdge(edge.id);
+            }
+          });
           if (edge.labels && edge.labels[0]) {
             const labelPos = this.findLabelPosition(pathData);
             const labelText = edge.labels[0].text;
@@ -144,6 +145,148 @@ class HwSchematicRenderer {
       });
     }
   }
-  // ... alle weiteren Methoden unverändert, aber alle Klammern ergänzt und nicht genutzte Parameter entfernt.
+
+  // Remaining methods unchanged but with proper formatting
+  getCategoryColor(category) {
+    const colors = {
+      audio: '#FFB74D',
+      video: '#64B5F6',
+      control: '#81C784',
+      network: '#BA68C8',
+      power: '#E57373',
+      default: '#E0E0E0'
+    };
+    return colors[category] || colors.default;
+  }
+
+  findPortAbsolutePosition(nodeId, portKey, data) {
+    let result = { x: 0, y: 0 };
+    const search = (nodes, offset = { x: 0, y: 0 }) => {
+      for (const node of nodes) {
+        const hasChildren = node.children && node.children.length > 0;
+        const nodeX = hasChildren ? (node.x || 0) : offset.x + (node.x || 0);
+        const nodeY = hasChildren ? (node.y || 0) : offset.y + (node.y || 0);
+        if (node.id === nodeId) {
+          if (node.ports && node.ports.length > 0) {
+            const port = node.ports.find(p => p.id === `${nodeId}/${portKey}`);
+            if (port) {
+              result = { x: nodeX + (port.x || 0), y: nodeY + (port.y || 0) };
+              return true;
+            }
+          }
+          result = { x: nodeX + (node.width || 140) / 2, y: nodeY + (node.height || 80) / 2 };
+          return true;
+        }
+        if (node.children && search(node.children, { x: nodeX, y: nodeY })) {
+          return true;
+        }
+      }
+      return false;
+    };
+    if (data.children) {
+      search(data.children);
+    }
+    return result;
+  }
+
+  findEdgeContainer(edge, sourceNodeId, targetNodeId, data) {
+    return { x: 0, y: 0 };
+  }
+
+  createPathFromELKSection(section, srcPos, tgtPos, containerOffset) {
+    let path = `M ${srcPos.x} ${srcPos.y}`;
+    if (section.bendPoints && section.bendPoints.length > 0) {
+      section.bendPoints.forEach(bp => {
+        path += ` L ${bp.x} ${bp.y}`;
+      });
+    }
+    path += ` L ${tgtPos.x} ${tgtPos.y}`;
+    return path;
+  }
+
+  createFallbackPath(edge, data, idx) {
+    const sourceNodeId = edge.sources[0].split('/')[0];
+    const targetNodeId = edge.targets[0].split('/')[0];
+    const sourcePortKey = edge.sources[0].split('/')[1];
+    const targetPortKey = edge.targets[0].split('/')[1];
+    const srcPos = this.findPortAbsolutePosition(sourceNodeId, sourcePortKey, data);
+    const tgtPos = this.findPortAbsolutePosition(targetNodeId, targetPortKey, data);
+    return `M ${srcPos.x} ${srcPos.y} L ${tgtPos.x} ${tgtPos.y}`;
+  }
+
+  findLabelPosition(pathData) {
+    const points = [];
+    const commands = pathData.match(/[ML]\s*([0-9.]+)\s+([0-9.]+)/g) || [];
+    commands.forEach(cmd => {
+      const match = cmd.match(/([0-9.]+)\s+([0-9.]+)/);
+      if (match) {
+        points.push({ x: parseFloat(match[1]), y: parseFloat(match[2]) });
+      }
+    });
+    if (points.length === 0) {
+      return { x: 0, y: 0 };
+    }
+    const midIndex = Math.floor(points.length / 2);
+    return points[midIndex];
+  }
+
+  _getAllDeviceObstacles(data) {
+    const obstacles = [];
+    const traverse = (nodes, offset = { x: 0, y: 0 }) => {
+      nodes.forEach(node => {
+        const hasChildren = node.children && node.children.length > 0;
+        const nodeX = hasChildren ? (node.x || 0) : offset.x + (node.x || 0);
+        const nodeY = hasChildren ? (node.y || 0) : offset.y + (node.y || 0);
+        if (!hasChildren) {
+          obstacles.push({
+            x: nodeX,
+            y: nodeY,
+            width: node.width || 140,
+            height: node.height || 80
+          });
+        }
+        if (node.children) {
+          traverse(node.children, { x: nodeX, y: nodeY });
+        }
+      });
+    };
+    if (data.children) {
+      traverse(data.children);
+    }
+    return obstacles;
+  }
+
+  fitToView() {
+    const bounds = this.g.node().getBBox();
+    const parent = this.svg.node().parentElement;
+    const fullWidth = parent.clientWidth;
+    const fullHeight = parent.clientHeight;
+    const width = bounds.width;
+    const height = bounds.height;
+    const midX = bounds.x + width / 2;
+    const midY = bounds.y + height / 2;
+    if (width === 0 || height === 0) {
+      return;
+    }
+    const scale = 0.9 / Math.max(width / fullWidth, height / fullHeight);
+    const translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
+    this.svg.transition().duration(750).call(
+      this.zoom.transform,
+      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+    );
+  }
+
+  zoomIn() {
+    this.svg.transition().call(this.zoom.scaleBy, 1.3);
+  }
+
+  zoomOut() {
+    this.svg.transition().call(this.zoom.scaleBy, 0.7);
+  }
+
+  resetZoom() {
+    this.fitToView();
+  }
 }
+
 export default HwSchematicRenderer;

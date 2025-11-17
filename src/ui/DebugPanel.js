@@ -307,7 +307,7 @@ export class DebugPanel {
    * Highlight edges by routing method (ELK = green, Fallback = red)
    * Hides arrows and labels for cleaner path visualization
    */
-  highlightRoutingMethods(group) {
+  highlightRoutingMethods(_group) {
     if (!this.currentData || !this.currentData.edges) {
       return;
     }
@@ -458,7 +458,7 @@ export class DebugPanel {
   /**
    * Highlight parallel edges (same source/target)
    */
-  highlightParallelEdges(group) {
+  highlightParallelEdges(_group) {
     if (!this.currentData || !this.currentData.edges) {
       return;
     }
@@ -478,7 +478,7 @@ export class DebugPanel {
     const colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
     let colorIndex = 0;
     
-    parallelGroups.forEach((edges, key) => {
+    parallelGroups.forEach((edges, _key) => {
       if (edges.length > 1) {
         const color = colors[colorIndex % colors.length];
         colorIndex++;
