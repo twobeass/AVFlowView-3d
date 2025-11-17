@@ -1,19 +1,100 @@
 {
-  "layout": { "direction": "LR" },
+  "layout": {
+    "direction": "LR",
+    "portBinding": "auto",
+    "areaFirst": true,
+    "areaPadding": 24
+  },
   "areas": [
-    { "id": "rackA", "label": "Rack A" },
-    { "id": "roomB", "label": "Room B" }
+    {
+      "id": "studio",
+      "label": "Studio Room"
+    }
   ],
   "nodes": [
-    { "id": "n1", "manufacturer": "Yamaha", "model": "Mixer1", "category": "Audio", "status": "Regular", "areaId": "rackA", "ports": { "inL": { "alignment": "In", "label": "L In", "type": "XLR", "gender": "F" }, "inR": { "alignment": "In", "label": "R In", "type": "XLR", "gender": "F" }, "outL": { "alignment": "Out", "label": "L Out", "type": "XLR", "gender": "M" }, "outR": { "alignment": "Out", "label": "R Out", "type": "XLR", "gender": "M" } } },
-    { "id": "n2", "manufacturer": "Sony", "model": "AMP", "category": "Audio", "status": "Regular", "areaId": "rackA", "ports": { "in1": { "alignment": "In", "label": "Amp In", "type": "XLR", "gender": "F" }, "out": { "alignment": "Out", "label": "Amp Out", "type": "XLR", "gender": "M" } } },
-    { "id": "n3", "manufacturer": "Panasonic", "model": "Camera", "category": "Video", "status": "Existing", "areaId": "roomB", "ports": { "out": { "alignment": "Out", "label": "Video Out", "type": "SDI", "gender": "M" } } },
-    { "id": "n4", "manufacturer": "Barco", "model": "Projector", "category": "Video", "status": "Regular", "areaId": "roomB", "ports": { "in": { "alignment": "In", "label": "Video In", "type": "HDMI", "gender": "F" } } }
+    {
+      "id": "switcher",
+      "manufacturer": "Blackmagic",
+      "model": "ATEM 2 M/E",
+      "category": "video",
+      "status": "Regular",
+      "areaId": "studio",
+      "ports": {
+        "sdi_out_1": {
+          "alignment": "Out",
+          "label": "SDI Out 1",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "sdi_out_2": {
+          "alignment": "Out",
+          "label": "SDI Out 2",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "monitor1",
+      "manufacturer": "Sony",
+      "model": "BVM-HX310",
+      "category": "video",
+      "status": "Regular",
+      "areaId": "studio",
+      "ports": {
+        "sdi_in": {
+          "alignment": "In",
+          "label": "SDI In",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "monitor2",
+      "manufacturer": "Sony",
+      "model": "BVM-HX310",
+      "category": "video",
+      "status": "Regular",
+      "areaId": "studio",
+      "ports": {
+        "sdi_in": {
+          "alignment": "In",
+          "label": "SDI In",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    }
   ],
   "edges": [
-    { "id": "e1", "source": "n1", "sourcePortKey": "outL", "target": "n2", "targetPortKey": "in1", "category": "Audio", "cableType": "XLR", "label": "Mix L" },
-    { "id": "e2", "source": "n2", "sourcePortKey": "out", "target": "n1", "targetPortKey": "inL", "category": "Audio", "cableType": "XLR", "label": "Amp to Mixer" },
-    { "id": "e3", "source": "n3", "sourcePortKey": "out", "target": "n4", "targetPortKey": "in", "category": "Video", "cableType": "SDI", "label": "Cam to Proj" },
-    { "id": "e4", "source": "n1", "sourcePortKey": "outR", "target": "n2", "targetPortKey": "in1", "category": "Audio", "cableType": "XLR", "label": "Mix R" }
-  ]
+    {
+      "id": "cable1",
+      "wireId": "SDI-001",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Switcher to Monitor 1",
+      "source": "switcher",
+      "sourcePortKey": "sdi_out_1",
+      "target": "monitor1",
+      "targetPortKey": "sdi_in",
+      "binding": "exact"
+    },
+    {
+      "id": "cable2",
+      "wireId": "SDI-002",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Switcher to Monitor 2",
+      "source": "switcher",
+      "sourcePortKey": "sdi_out_2",
+      "target": "monitor2",
+      "targetPortKey": "sdi_in",
+      "binding": "exact"
+    }
+  ],
+  "metadata": {
+    "project": "Medium Example",
+    "description": "One source with two outputs to two targets in one area"
+  }
 }
