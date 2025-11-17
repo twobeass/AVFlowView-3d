@@ -6,7 +6,8 @@
 - **SchemaValidator:** Checks and flags errors; if fail, error object returned.
 - **Transformer:** Valid AV JSON is converted to ELK JSON.
 - **Styler:** ELK nodes/edges are decorated with category, status, and class assignments.
-- **Renderer:** ELK JSON fed to d3-hwschematic for SVG rendering.
+- **ELK Layout:** ELK.js computes positions with automatic orthogonal routing.
+- **Renderer:** Custom D3-based HwSchematicRenderer renders SVG with OrthogonalRouter for edge paths.
 - **Interaction Layer:** Listeners/hooks are attached for select, focus, search.
 
 ## 2. User Interaction/Update Flow
@@ -31,15 +32,24 @@ AVToELKConverter.convert()
   ↓
 CategoryStyler/PortDirectionResolver
   ↓
-d3-hwschematic.render()
+ELK.js layout() - computes positions
+  ↓
+HwSchematicRenderer.render()
+  ├─ Device/Area rendering (D3.js)
+  ├─ OrthogonalRouter.calculateOrthogonalPath()
+  │   ├─ groupEdgesByEndpoints() - detect parallel edges
+  │   ├─ calculateEdgeOffset() - compute separation
+  │   ├─ collectObstacles() - get device bounding boxes
+  │   └─ Generate orthogonal SVG path data
+  └─ Edge rendering with parallel separation
   ↓
 UI event handler registration
   ↓
-User interaction
+User interaction (zoom/pan/layout toggle)
   ↓
-FocusManager/SearchManager
+FocusManager/SearchManager (Phase 6)
   ↓
-d3-hwschematic re-render
+HwSchematicRenderer re-render with updated state
 ```
 
 ## 5. File/Data Boundaries

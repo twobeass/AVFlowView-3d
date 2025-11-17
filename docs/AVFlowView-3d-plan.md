@@ -1,13 +1,13 @@
 # AVFlowView-3d Autonomous Implementation Plan
 
-This document is the detailed roadmap for an autonomous coding agent to implement **AVFlowView-3d**, a D3.js + d3-hwschematic based viewer for A/V wiring graphs driven by the `av-wiring-graph` JSON schema.
+This document is the detailed roadmap for an autonomous coding agent to implement **AVFlowView-3d**, a D3.js-based viewer for A/V wiring graphs driven by the `av-wiring-graph` JSON schema with custom orthogonal edge routing.
 
 ---
 
 ## 1. Project Overview
 
-AVFlowView-3d turns structured JSON descriptions of areas, devices, ports, and cables into an interactive, auto-layouted wiring diagram using d3-hwschematic and ELK.js.
-The agent must consume JSON conforming to `av-wiring-graph.schema.json`, validate it, convert it into ELK JSON, and render a clear left-to-right or top-to-bottom signal-flow diagram with areas, port directions, category colors, and focus/context highlighting.
+AVFlowView-3d turns structured JSON descriptions of areas, devices, ports, and cables into an interactive, auto-layouted wiring diagram using D3.js and ELK.js with custom professional orthogonal (Manhattan-style) edge routing.
+The agent must consume JSON conforming to `av-wiring-graph.schema.json`, validate it, convert it into ELK JSON, and render a clear left-to-right or top-to-bottom signal-flow diagram with areas, port directions, category colors, parallel edge separation, and focus/context highlighting.
 
 ---
 
@@ -15,7 +15,7 @@ The agent must consume JSON conforming to `av-wiring-graph.schema.json`, validat
 
 The implementation is split into phases; phases run sequentially, tasks inside a phase may run in parallel when dependencies allow.
 
-### Phase 1: Project Setup & Architecture
+### Phase 1: Project Setup & Architecture ✅ COMPLETED
 
 **Goals:** Repository structure, tooling, and basic docs.
 
@@ -32,7 +32,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 
 ---
 
-### Phase 2: Schema Validation Layer
+### Phase 2: Schema Validation Layer ✅ COMPLETED
 
 **Goals:** Reliable validation of input data against the AV wiring schema.
 
@@ -48,7 +48,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 
 ---
 
-### Phase 3: Data Transformation (AV → ELK)
+### Phase 3: Data Transformation (AV → ELK) ✅ COMPLETED
 
 **Goals:** Convert AV graph JSON into ELK JSON compatible with d3-hwschematic.
 
@@ -89,7 +89,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 
 ---
 
-### Phase 4: Styling & Semantics
+### Phase 4: Styling & Semantics ✅ COMPLETED
 
 **Goals:** Encapsulate category/status-based visuals and bidirectional port semantics.
 
@@ -113,48 +113,110 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 
 ---
 
-### Phase 5: Visualization via d3-hwschematic ✅ COMPLETED
+### Phase 5: Visualization & UI Controls ✅ COMPLETED
 
-**Goals:** Implement custom renderers for devices, areas, and cables, and integrate zoom/pan.
+**Goals:** Implement custom renderers for devices, areas, and cables; integrate zoom/pan; create interactive UI controls panel.
 
-**Status:** Phase 5 completed on 2025-11-16. Added HwSchematicRenderer for interactive hardware schematic visualization with custom device, area, and edge renderers. Integrated zoom, pan and comprehensive testing including Jest ES module support.
+**Status:** Phase 5 completed on 2025-11-16. Implemented full visualization pipeline with interactive controls, automatic layout, and example loading.
 
 **Completed Tasks:**
+
 1. **HwSchematic initialization**
    - ✅ Instantiated HwSchematic with container SVG
-   - ✅ Configured zoom and pan behavior
+   - ✅ Configured zoom and pan behavior with d3-zoom
    - ✅ Handled d3-hwschematic module exports correctly
+   - ✅ Added fallback rendering when d3-hwschematic unavailable
 
-2. **Device renderer**
-   - ✅ Implemented DeviceRenderer as a method
-   - ✅ Draws rectangular box with device metadata
-   - ✅ Renders device name and category information
+2. **Custom Renderers**
+   - ✅ **DeviceRenderer** - Draws rectangular boxes with device metadata, category colors, and port information
+   - ✅ **AreaRenderer** - Draws container rectangles for grouping devices with area labels
+   - ✅ **EdgeRenderer** - Renders cables with category colors and type patterns
 
-3. **Area renderer**
-   - ✅ Implemented AreaRenderer as a method
-   - ✅ Draws container rectangles for areas
-   - ✅ Shows area labels
+3. **Zoom & Pan Controls**
+   - ✅ Implemented `zoomIn()` - Increase scale by 30% with smooth animation
+   - ✅ Implemented `zoomOut()` - Decrease scale by 30% with smooth animation
+   - ✅ Implemented `resetZoom()` - Return to identity transform
+   - ✅ Implemented `fitToView()` - Auto-fit content with 50px padding
+   - ✅ Configured zoom scale bounds (0.1x to 10x)
+   - ✅ Added smooth 300ms transitions for all zoom operations
 
-4. **Cable edges**
-   - ✅ Implemented EdgeRenderer as a method
-   - ✅ Renders edges with category colors
-   - ✅ Supports cable type patterns
+4. **UI Controls Panel**
+   - ✅ Created `ControlsPanel` component with dark engineering aesthetic
+   - ✅ Implemented zoom controls (in, out, reset buttons)
+   - ✅ Implemented layout direction toggle (LR ↔ TB)
+   - ✅ Implemented example selector dropdown
+   - ✅ Applied fixed-position styling (top-right corner)
+   - ✅ Added accessible ARIA labels to all controls
+   - ✅ Wired all controls to AVFlowView3dApp callbacks
 
-5. **Zoom & pan**
-   - ✅ Implemented d3-zoom on SVG container
-   - ✅ Configured scale extents (0.1 to 10)
+5. **Example Loading**
+   - ✅ Created `ExampleLoader` utility class
+   - ✅ Implemented `listExamples()` method
+   - ✅ Implemented `loadExample(name)` method
+   - ✅ Listed actual available examples (simple, medium, complex)
+   - ✅ Added graceful error handling for missing files
 
-6. **Testing**
+6. **Application Integration**
+   - ✅ Enhanced `AVFlowView3dApp` with full pipeline:
+     - Validation (SchemaValidator)
+     - Conversion (AVToELKConverter)
+     - Layout (ELK.js)
+     - Rendering (HwSchematicRenderer)
+   - ✅ Integrated ControlsPanel with callbacks
+   - ✅ Integrated ExampleLoader for graph management
+   - ✅ Implemented `load(graphJson)` method
+   - ✅ Implemented `loadExample(name)` method
+   - ✅ Implemented `changeLayout(direction)` method
+   - ✅ Implemented zoom control methods
+
+7. **Main Entry Point**
+   - ✅ Updated `src/main.js` with complete bootstrap
+   - ✅ Auto-loads default example (simple.json) on startup
+   - ✅ Imports controls.css for styling
+   - ✅ Handles initialization errors gracefully
+
+8. **Testing**
    - ✅ Resolved Jest ESM module import issues
    - ✅ Implemented async mocking with jest.unstable_mockModule
    - ✅ Fixed JSDOM compatibility (SVGGElement testing)
-   - ✅ All renderer tests passing (79 total tests)
+   - ✅ All 79 unit tests passing
+   - ✅ Manual testing of all controls verified
 
-**Exit criteria met:** Example graph renders with devices, areas, ports, and cables; zoom/pan works smoothly; all tests pass.
+9. **Documentation**
+   - ✅ Created comprehensive `docs/PHASE5_COMPLETION.md`
+   - ✅ Documented all features and architecture
+   - ✅ Added testing checklist and verification steps
+
+10. **Custom Orthogonal Edge Routing (2025-11-17)**
+   - ✅ Created `src/utils/OrthogonalRouter.js` (398 lines)
+   - ✅ Implemented `calculateOrthogonalPath()` - Manhattan-style routing with L-shape, Z-shape, and complex strategies
+   - ✅ Implemented `calculateEdgeOffset()` - 10px parallel edge separation to prevent visual stacking
+   - ✅ Implemented `collectObstacles()` - Recursive device bounding box collection with 20px padding
+   - ✅ Implemented `groupEdgesByEndpoints()` - Parallel edge detection
+   - ✅ Integrated OrthogonalRouter into HwSchematicRenderer
+   - ✅ Removed d3-hwschematic dependency completely (security vulnerability resolved)
+   - ✅ Updated package.json and ran `npm uninstall d3-hwschematic`
+   - ✅ Tested with all examples (simple, medium, complex)
+   - ✅ Created comprehensive documentation (`docs/ORTHOGONAL_ROUTING_IMPLEMENTATION.md`)
+   - ✅ Updated 7 documentation files (README.md, AGENT_README.md, TECHNICAL_SPECS.md, CONTEXT.md, CHECKLIST.md, AVFlowView-3d-plan.md, new ORTHOGONAL_ROUTING_IMPLEMENTATION.md)
+
+**Exit criteria met:** Example graph renders with devices, areas, ports, and cables; zoom/pan works smoothly; all controls functional; layout toggle works; example selector loads graphs; all tests pass; edges use 100% orthogonal routing with parallel edge separation.
+
+**Key Achievements:**
+- Complete validation → conversion → layout → render pipeline operational
+- Professional UI controls with engineering aesthetic
+- Smooth interactive zoom/pan with d3-zoom
+- Dynamic layout switching (LR/TB)
+- Example graph loading system
+- **Custom orthogonal edge routing with parallel edge separation**
+- **Removed external dependency and security vulnerability**
+- **Professional Manhattan-style cable paths with obstacle avoidance**
+- 79 unit tests passing
+- Ready for Phase 6 advanced interactions
 
 ---
 
-### Phase 6: Interaction & Focus/Context
+### Phase 6: Interaction & Focus/Context ⏳ NEXT PHASE
 
 **Goals:** Implement selection, neighbor highlighting, search, and filters.
 
@@ -185,16 +247,21 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 
 **Main class:** `AVFlowView3dApp`.
 
-**Tasks:**
-- Initialize:
-  - Accept DOM container and optional config.
-  - Wire up SchemaValidator → AVToELKConverter → CategoryStyler → d3-hwschematic.
-- Public methods:
-  - `load(graphJson)` – validate, transform, render.
-  - `update(graphJson)` – re-render (with future incremental diffing).
-  - `setFocus(nodeIdOrEdgeId, distance)` – programmatic focus.
-  - `export(type: 'svg' | 'png')` – export diagram.
-- Hook up basic controls panel around the canvas.
+**Current Status:** Partially complete (60%)
+- ✅ Basic initialization and configuration
+- ✅ `load(graphJson)` method implemented
+- ✅ `loadExample(name)` method implemented
+- ✅ `changeLayout(direction)` method implemented
+- ✅ Zoom control methods implemented
+- ✅ Controls panel integrated
+
+**Remaining Tasks:**
+- `update(graphJson)` – re-render with incremental diffing
+- `setFocus(nodeIdOrEdgeId, distance)` – programmatic focus
+- `export(type: 'svg' | 'png')` – export diagram
+- Focus distance slider UI
+- Search input UI
+- Category filters UI
 
 **Exit criteria:** A minimal HTML page can instantiate `AVFlowView3dApp` and show a working diagram from a sample JSON.
 
@@ -204,15 +271,44 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 
 **Goals:** Make the project robust, documented, and ready for others (or other agents) to extend.
 
-**Tasks:**
-- Unit tests for:
-  - SchemaValidator, AVToELKConverter, CategoryStyler, PortDirectionResolver, FocusManager.
-- Integration tests with Playwright or similar:
-  - Load example graphs, click nodes, adjust focus, run search.
-- Documentation:
-  - Expand `README.md` with quick start and screenshots.
-  - `docs/CONTEXT.md` (high-level narrative) and `docs/ARCHITECTURE.md` (components & data flow).
-  - `src/notes/requirements.md` (see that file) for non-negotiable constraints.
-- Performance tuning for medium/large graphs.
+**Current Status:** Partially complete (40%)
+- ✅ Unit tests for validation, conversion, styling, port resolution
+- ✅ Renderer initialization tests
+- ✅ ESLint and Prettier configured
+- ✅ Basic README and documentation
+
+**Remaining Tasks:**
+- Integration tests with Playwright
+  - Load example graphs, click nodes, adjust focus, run search
+- Complete documentation:
+  - Expand `README.md` with quick start and screenshots
+  - `docs/ARCHITECTURE.md` (components & data flow)
+  - API documentation with examples
+- Performance tuning for medium/large graphs
+- Browser compatibility testing
+- Accessibility improvements (keyboard navigation, screen reader support)
+- CI/CD pipeline setup
 
 **Exit criteria:** CI passes, examples work in major browsers, and docs are sufficient for another agent or human to continue development.
+
+---
+
+## 3. Current Status Summary
+
+**Completed Phases:**
+- ✅ Phase 1: Project Setup & Architecture (100%)
+- ✅ Phase 2: Schema Validation Layer (100%)
+- ✅ Phase 3: Data Transformation (100%)
+- ✅ Phase 4: Styling & Semantics (100%)
+- ✅ Phase 5: Visualization & UI Controls (100%)
+
+**In Progress:**
+- ⏳ Phase 6: Interaction & Focus/Context (0% - Next)
+- ⏳ Phase 7: Application Shell & API (60%)
+- ⏳ Phase 8: Testing, Docs & Polish (40%)
+
+**Overall Progress: ~62% Complete**
+
+**Branch:** `feature/phase5-ui-controls-panel`  
+**Last Updated:** 2025-11-16  
+**Next Milestone:** Begin Phase 6 - Interactive selection and focus/context features

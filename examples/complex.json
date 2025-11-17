@@ -1,24 +1,241 @@
 {
-  "layout": { "direction": "TB" },
+  "layout": {
+    "direction": "LR",
+    "portBinding": "auto",
+    "areaFirst": true,
+    "areaPadding": 24
+  },
   "areas": [
-    { "id": "core", "label": "Central AV Core" },
-    { "id": "hallA", "label": "Hall A" },
-    { "id": "hallB", "label": "Hall B" },
-    { "id": "control", "label": "Control Room" },
-    { "id": "rackNorth", "label": "Rack North", "parentId": "core" }
+    {
+      "id": "control-room",
+      "label": "Control Room"
+    },
+    {
+      "id": "equipment-rack",
+      "label": "Equipment Rack",
+      "parentId": "control-room"
+    },
+    {
+      "id": "studio-floor",
+      "label": "Studio Floor"
+    }
   ],
   "nodes": [
-    { "id": "mix1", "manufacturer": "Yamaha", "model": "PrimeMix", "category": "Audio", "status": "Regular", "areaId": "core", "ports": { "outA": { "alignment": "Out", "label": "Stereo Out A", "type": "XLR", "gender": "M" }, "outB": { "alignment": "Out", "label": "Stereo Out B", "type": "XLR", "gender": "M" }, "in": { "alignment": "In", "label": "Main In", "type": "XLR", "gender": "F" } } },
-    { "id": "ctrl1", "manufacturer": "Crestron", "model": "CP3", "category": "Control", "status": "Existing", "areaId": "control", "ports": { "eth": { "alignment": "Bidirectional", "label": "LAN", "type": "RJ45", "gender": "N/A" }, "serial": { "alignment": "Bidirectional", "label": "RS232", "type": "DB9", "gender": "N/A" } } },
-    { "id": "prjA", "manufacturer": "Barco", "model": "LaserPro", "category": "Video", "status": "Regular", "areaId": "hallA", "ports": { "inH": { "alignment": "In", "label": "HDMI In", "type": "HDMI", "gender": "F" }, "ctrl": { "alignment": "In", "label": "Control", "type": "RJ45", "gender": "N/A" } } },
-    { "id": "camA", "manufacturer": "Panasonic", "model": "AutoCam", "category": "Video", "status": "Existing", "areaId": "hallA", "ports": { "outS": { "alignment": "Out", "label": "SDI Out", "type": "SDI", "gender": "M" }, "ptz": { "alignment": "Bidirectional", "label": "PTZ Ctrl", "type": "RJ45", "gender": "N/A" } } }
-    // ... 46 more nodes with various areas, categories, and ports
+    {
+      "id": "camera1",
+      "manufacturer": "Sony",
+      "model": "PXW-Z450",
+      "category": "video",
+      "status": "Regular",
+      "areaId": "studio-floor",
+      "ports": {
+        "sdi_out": {
+          "alignment": "Out",
+          "label": "SDI Out",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "power_in": {
+          "alignment": "In",
+          "label": "Power",
+          "type": "PowerCON",
+          "gender": "M"
+        }
+      }
+    },
+    {
+      "id": "camera2",
+      "manufacturer": "Sony",
+      "model": "PXW-Z450",
+      "category": "video",
+      "status": "Existing",
+      "areaId": "studio-floor",
+      "ports": {
+        "sdi_out": {
+          "alignment": "Out",
+          "label": "SDI Out",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "power_in": {
+          "alignment": "In",
+          "label": "Power",
+          "type": "PowerCON",
+          "gender": "M"
+        }
+      }
+    },
+    {
+      "id": "switcher",
+      "manufacturer": "Blackmagic",
+      "model": "ATEM 2 M/E",
+      "category": "video",
+      "status": "Regular",
+      "areaId": "equipment-rack",
+      "ports": {
+        "sdi_in_1": {
+          "alignment": "In",
+          "label": "SDI In 1",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "sdi_in_2": {
+          "alignment": "In",
+          "label": "SDI In 2",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "sdi_out_pgm": {
+          "alignment": "Out",
+          "label": "PGM Out",
+          "type": "SDI",
+          "gender": "F"
+        },
+        "ethernet": {
+          "alignment": "Bidirectional",
+          "label": "Ethernet",
+          "type": "RJ45",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "monitor",
+      "manufacturer": "Sony",
+      "model": "BVM-HX310",
+      "category": "video",
+      "status": "Regular",
+      "areaId": "control-room",
+      "ports": {
+        "sdi_in": {
+          "alignment": "In",
+          "label": "SDI In",
+          "type": "SDI",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "network-switch",
+      "manufacturer": "Cisco",
+      "model": "Catalyst 2960",
+      "category": "network",
+      "status": "Regular",
+      "areaId": "equipment-rack",
+      "ports": {
+        "eth1": {
+          "alignment": "Bidirectional",
+          "label": "Port 1",
+          "type": "RJ45",
+          "gender": "F"
+        },
+        "eth2": {
+          "alignment": "Bidirectional",
+          "label": "Port 2",
+          "type": "RJ45",
+          "gender": "F"
+        }
+      }
+    },
+    {
+      "id": "pdu",
+      "manufacturer": "APC",
+      "model": "AP7900",
+      "category": "power",
+      "status": "Regular",
+      "areaId": "equipment-rack",
+      "ports": {
+        "outlet1": {
+          "alignment": "Out",
+          "label": "Outlet 1",
+          "type": "PowerCON",
+          "gender": "F"
+        },
+        "outlet2": {
+          "alignment": "Out",
+          "label": "Outlet 2",
+          "type": "PowerCON",
+          "gender": "F"
+        }
+      }
+    }
   ],
   "edges": [
-    { "id": "e1", "source": "mix1", "sourcePortKey": "outA", "target": "core.amp", "targetPortKey": "ampIn", "category": "Audio", "cableType": "XLR", "label": "Mix-A to Amp" },
-    { "id": "e2", "source": "ctrl1", "sourcePortKey": "eth", "target": "prjA", "targetPortKey": "ctrl", "category": "Control", "cableType": "CAT7", "label": "Net Ctrl" },
-    { "id": "e3", "source": "camA", "sourcePortKey": "outS", "target": "prjA", "targetPortKey": "inH", "category": "Video", "cableType": "SDI", "label": "Camera A Feed" },
-    { "id": "e4", "source": "ctrl1", "sourcePortKey": "serial", "target": "core.encoder", "targetPortKey": "serIn", "category": "Control", "cableType": "DB9", "label": "Serial Bridge" }
-    // ... 76 more edges forming a complex, multi-area, multi-category graph
-  ]
+    {
+      "id": "cam1-to-switcher",
+      "wireId": "SDI-001",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Camera 1 Feed",
+      "source": "camera1",
+      "sourcePortKey": "sdi_out",
+      "target": "switcher",
+      "targetPortKey": "sdi_in_1",
+      "binding": "exact"
+    },
+    {
+      "id": "cam2-to-switcher",
+      "wireId": "SDI-002",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Camera 2 Feed",
+      "source": "camera2",
+      "sourcePortKey": "sdi_out",
+      "target": "switcher",
+      "targetPortKey": "sdi_in_2",
+      "binding": "exact"
+    },
+    {
+      "id": "switcher-to-monitor",
+      "wireId": "SDI-003",
+      "category": "video",
+      "cableType": "SDI",
+      "label": "Program Output",
+      "source": "switcher",
+      "sourcePortKey": "sdi_out_pgm",
+      "target": "monitor",
+      "targetPortKey": "sdi_in",
+      "binding": "exact"
+    },
+    {
+      "id": "switcher-network",
+      "wireId": "CAT6-001",
+      "category": "network",
+      "cableType": "CAT6",
+      "label": "Control Network",
+      "source": "switcher",
+      "sourcePortKey": "ethernet",
+      "target": "network-switch",
+      "targetPortKey": "eth1",
+      "binding": "exact"
+    },
+    {
+      "id": "pdu-to-cam1",
+      "wireId": "PWR-001",
+      "category": "power",
+      "cableType": "PowerCON",
+      "label": "Power to Camera 1",
+      "source": "pdu",
+      "sourcePortKey": "outlet1",
+      "target": "camera1",
+      "targetPortKey": "power_in",
+      "binding": "exact"
+    },
+    {
+      "id": "pdu-to-cam2",
+      "wireId": "PWR-002",
+      "category": "power",
+      "cableType": "PowerCON",
+      "label": "Power to Camera 2",
+      "source": "pdu",
+      "sourcePortKey": "outlet2",
+      "target": "camera2",
+      "targetPortKey": "power_in",
+      "binding": "exact"
+    }
+  ],
+  "metadata": {
+    "project": "Complex Example",
+    "description": "Multiple nodes in multiple areas with video, network, and power connections"
+  }
 }

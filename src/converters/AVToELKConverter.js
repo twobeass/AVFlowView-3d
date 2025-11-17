@@ -44,10 +44,14 @@ function createAreaNodes(graph, elkGraph) {
     const elkArea = {
       id: area.id,
       labels: area.label ? [{ text: area.label }] : [],
+      width: 400,  // Default area width
+      height: 300, // Default area height
       children: [],
       ports: [],
       properties: {
         'hwMeta.type': 'area',
+        // Removed padding to test if it's causing coordinate issues
+        // 'elk.padding': '[top=40,left=20,bottom=20,right=20]',
       },
     };
 
@@ -90,6 +94,8 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     const elkNode = {
       id: node.id,
       labels: [{ text: label }],
+      width: 140,  // Default device width
+      height: 80,  // Default device height
       children: [],
       ports: [],
       properties: {
@@ -103,22 +109,67 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     const ports =
       node.ports && typeof node.ports === 'object' ? node.ports : {};
 
-    Object.entries(ports).forEach(([portKey, port]) => {
-      if (!port) {
-        return;
-      }
-
+    // Group ports by side first (critical for correct distribution)
+    const portEntries = Object.entries(ports);
+    const portsBySide = {
+      WEST: [],
+      EAST: [],
+      NORTH: [],
+      SOUTH: []
+    };
+    
+    // First pass: group ports by their side
+    portEntries.forEach(([portKey, port]) => {
+      if (!port) return;
       const side = computePortSide(port.alignment, layoutDirection);
+      portsBySide[side].push({ portKey, port });
+    });
+    
+    // Second pass: create ELK ports with correct distribution per side
+    let globalIndex = 0;
+    Object.entries(portsBySide).forEach(([side, portsOnSide]) => {
+      const portCountOnSide = portsOnSide.length;
+      
+      portsOnSide.forEach(({ portKey, port }, sideIndex) => {
+        const nodeWidth = elkNode.width || 140;
+        const nodeHeight = elkNode.height || 80;
+        let anchorX = 0;
+        let anchorY = 0;
+        
+        // Calculate position based on ports ON THIS SIDE only
+        switch (side) {
+          case 'WEST':
+            anchorX = 0;
+            anchorY = (nodeHeight / (portCountOnSide + 1)) * (sideIndex + 1);
+            break;
+          case 'EAST':
+            anchorX = nodeWidth;
+            anchorY = (nodeHeight / (portCountOnSide + 1)) * (sideIndex + 1);
+            break;
+          case 'NORTH':
+            anchorX = (nodeWidth / (portCountOnSide + 1)) * (sideIndex + 1);
+            anchorY = 0;
+            break;
+          case 'SOUTH':
+            anchorX = (nodeWidth / (portCountOnSide + 1)) * (sideIndex + 1);
+            anchorY = nodeHeight;
+            break;
+        }
 
-      elkNode.ports.push({
-        id: `${node.id}/${portKey}`,
-        labels: port.label ? [{ text: port.label }] : [],
-        properties: {
-          'org.eclipse.elk.portSide': side,
-          'hwMeta.portKey': portKey,
-          'hwMeta.type': port.type,
-          'hwMeta.gender': port.gender,
-        },
+        elkNode.ports.push({
+          id: `${node.id}/${portKey}`,
+          labels: port.label ? [{ text: port.label }] : [],
+          // Let ELK position ports - no explicit x/y
+          properties: {
+            'org.eclipse.elk.portSide': side,
+            'org.eclipse.elk.port.index': globalIndex,
+            'hwMeta.portKey': portKey,
+            'hwMeta.type': port.type,
+            'hwMeta.gender': port.gender,
+          },
+        });
+        
+        globalIndex++;
       });
     });
 
@@ -191,9 +242,47 @@ export class AVToELKConverter {
       children: [],
       edges: [],
       layoutOptions: {
+        // ========== CORE ALGORITHM ==========
         'org.eclipse.elk.algorithm': 'layered',
         'org.eclipse.elk.direction': layoutDirection,
+        
+        // ========== EDGE ROUTING ==========
         'org.eclipse.elk.layered.edgeRouting': 'ORTHOGONAL',
+        'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',  // CRITICAL: Root-level edge routing
+        
+        // ========== HIERARCHY & PORT HANDLING ==========
+        'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',  // Back to INCLUDE_CHILDREN, testing without padding
+        'org.eclipse.elk.portConstraints': 'FIXED_SIDE',  // Ports stay on assigned sides, ELK positions them
+        
+        // ========== SPACING (Optimized for AV diagrams) ==========
+        'org.eclipse.elk.spacing.nodeNode': 220,
+        'org.eclipse.elk.spacing.edgeNode': 88,
+        'org.eclipse.elk.spacing.edgeEdge': 55,
+        'org.eclipse.elk.layered.spacing.edgeNodeBetweenLayers': 110,
+        'org.eclipse.elk.layered.spacing.edgeEdgeBetweenLayers': 15,  // NEW: Better parallel edge separation
+        'org.eclipse.elk.layered.spacing.baseValue': 55,
+        
+        // ========== NODE PLACEMENT ==========
+        'org.eclipse.elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+        'org.eclipse.elk.layered.nodePlacement.bk.edgeStraightening': 'IMPROVE_STRAIGHTNESS',  // NEW: Straighter edges
+        'org.eclipse.elk.layered.nodePlacement.favorStraightEdges': true,  // NEW: Prefer straight edges
+        
+        // ========== CROSSING & ORDERING ==========
+        'org.eclipse.elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
+        'org.eclipse.elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
+        
+        // ========== EDGE PRIORITIES ==========
+        'org.eclipse.elk.layered.priority.shortness': 10,  // NEW: Prioritize shorter edges
+        'org.eclipse.elk.layered.priority.straightness': 5,  // NEW: Secondary: straight edges
+        'org.eclipse.elk.layered.priority.direction': 0,  // Tertiary: flow direction
+        
+        // ========== COMPACTION ==========
+        'org.eclipse.elk.layered.compaction.connectedComponents': true,  // NEW: Reduce whitespace
+        'org.eclipse.elk.layered.compaction.postCompaction.strategy': 'EDGE_LENGTH',  // NEW: Better edge separation
+        'org.eclipse.elk.layered.compaction.postCompaction.constraints': 'SCANLINE',  // NEW: Constraint handling
+        
+        // ========== COMPONENT SEPARATION ==========
+        'org.eclipse.elk.separateConnectedComponents': true,
       },
     };
 
