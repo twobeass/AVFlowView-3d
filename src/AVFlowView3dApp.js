@@ -8,26 +8,19 @@ import { ExampleLoader } from './utils/ExampleLoader.js';
 import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
 
 export class AVFlowView3dApp {
-  /**
-   * @param {HTMLElement | string} container - DOM element or selector.
-   * @param {object} [options] - Configuration options.
-   */
   constructor(container, options = {}) {
     this.container =
       typeof container === 'string'
         ? document.querySelector(container)
         : container;
-
     if (!this.container) {
       throw new Error('AVFlowView3dApp: container not found');
     }
-
     this.options = {
       debug: false,
       enableDebugPanel: true, // NEW: Enable debug panel by default (can be disabled for production)
       ...options,
     };
-
     this.schemaValidator = new SchemaValidator();
     this.converter = new AVToELKConverter();
     this.exampleLoader = new ExampleLoader('/examples/');
@@ -35,17 +28,11 @@ export class AVFlowView3dApp {
     this.currentGraph = null;
     this.currentLayoutDirection = 'LR';
     this.layoutTime = 0; // Track layout time for debug panel
-
     this._initializeUI();
     this._initializeRenderer();
     this._initializeDebugPanel();
     this._initializeControls();
   }
-
-  /**
-   * Initialize the container structure
-   * @private
-   */
   _initializeUI() {
     this.container.innerHTML = '';
     this.container.style.width = '100%';
@@ -53,41 +40,22 @@ export class AVFlowView3dApp {
     this.container.style.position = 'relative';
     this.container.style.overflow = 'hidden';
   }
-
-  /**
-   * Initialize the HwSchematicRenderer
-   * @private
-   */
   _initializeRenderer() {
     const renderContainer = document.createElement('div');
     renderContainer.id = 'render-container';
     renderContainer.style.width = '100%';
     renderContainer.style.height = '100%';
     this.container.appendChild(renderContainer);
-
     this.renderer = new HwSchematicRenderer('#render-container');
   }
-
-  /**
-   * Initialize the debug panel for ELK routing diagnostics
-   * @private
-   */
   _initializeDebugPanel() {
-    if (!this.options.enableDebugPanel) {
-      return;
-    }
-
+    if (!this.options.enableDebugPanel) { return; }
     this.debugPanel = new DebugPanel(this.renderer);
     window.debugPanel = this.debugPanel;
     if (!this.options.debug && !this.options.enableDebugPanel) {
       this.debugPanel.hide();
     }
   }
-
-  /**
-   * Initialize the controls panel with callbacks
-   * @private
-   */
   async _initializeControls() {
     this.controlsPanel = new ControlsPanel(this.container, {
       onZoomIn: () => this.zoomIn(),
@@ -104,7 +72,6 @@ export class AVFlowView3dApp {
       console.error('Failed to list examples:', error);
     }
   }
-
   async load(graphJson) {
     const validation = this.schemaValidator.validateGraph(graphJson);
     if (!validation.success) {
@@ -125,7 +92,6 @@ export class AVFlowView3dApp {
         console.log('Layout complete', laidOutGraph);
         // eslint-disable-next-line no-console
         console.log(`⚡ Layout time: ${this.layoutTime.toFixed(2)}ms`);
-        // DEBUG: Log port positions from ELK
         // eslint-disable-next-line no-console
         console.log('🔍 ELK Port Positions:', this.extractPortInfo(laidOutGraph));
       }
@@ -150,7 +116,6 @@ export class AVFlowView3dApp {
       };
     }
   }
-
   async loadExample(exampleName) {
     try {
       const graphData = await this.exampleLoader.loadExample(exampleName);
@@ -173,73 +138,45 @@ export class AVFlowView3dApp {
       };
     }
   }
-
   async changeLayout(direction) {
-    if (!this.currentGraph) return;
+    if (!this.currentGraph) { return; }
     this.currentLayoutDirection = direction;
     this.currentGraph.layout.direction = direction;
     await this.load(this.currentGraph);
   }
-
   zoomIn() {
-    if (this.renderer && this.renderer.zoomIn) {
-      this.renderer.zoomIn();
-    }
+    if (this.renderer && this.renderer.zoomIn) { this.renderer.zoomIn(); }
   }
-
   zoomOut() {
-    if (this.renderer && this.renderer.zoomOut) {
-      this.renderer.zoomOut();
-    }
+    if (this.renderer && this.renderer.zoomOut) { this.renderer.zoomOut(); }
   }
-
   resetView() {
-    if (this.renderer && this.renderer.resetZoom) {
-      this.renderer.resetZoom();
-    }
+    if (this.renderer && this.renderer.resetZoom) { this.renderer.resetZoom(); }
   }
-
   extractPortInfo(data) {
     const portInfo = [];
     const traverse = (nodes) => {
       nodes.forEach(node => {
         if (node.ports && node.ports.length > 0) {
           node.ports.forEach(port => {
-            portInfo.push({
-              nodeId: node.id,
-              portId: port.id,
-              x: port.x,
-              y: port.y,
-              side: port.properties?.['org.eclipse.elk.portSide']
-            });
+            portInfo.push({ nodeId: node.id, portId: port.id, x: port.x, y: port.y, side: port.properties?.['org.eclipse.elk.portSide'] });
           });
         }
-        if (node.children) traverse(node.children);
+        if (node.children) { traverse(node.children); }
       });
     };
-    if (data.children) traverse(data.children);
+    if (data.children) { traverse(data.children); }
     return portInfo;
   }
-
   toggleDebugPanel() {
     if (this.debugPanel) {
-      if (this.debugPanel.isVisible) {
-        this.debugPanel.hide();
-      } else {
-        this.debugPanel.show();
-      }
+      if (this.debugPanel.isVisible) { this.debugPanel.hide(); }
+      else { this.debugPanel.show(); }
     }
   }
-
   destroy() {
-    if (this.controlsPanel) {
-      this.controlsPanel.destroy();
-    }
-    if (this.debugPanel) {
-      this.debugPanel.hide();
-    }
-    if (this.container) {
-      this.container.innerHTML = '';
-    }
+    if (this.controlsPanel) { this.controlsPanel.destroy(); }
+    if (this.debugPanel) { this.debugPanel.hide(); }
+    if (this.container) { this.container.innerHTML = ''; }
   }
 }
