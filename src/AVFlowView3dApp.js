@@ -2,10 +2,10 @@ import ELK from 'elkjs';
 
 import { AVToELKConverter } from './converters/index.js';
 import { SchemaValidator } from './validation/index.js';
+import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
 import { ControlsPanel } from './ui/ControlsPanel.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { ExampleLoader } from './utils/ExampleLoader.js';
-import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
 
 export class AVFlowView3dApp {
   constructor(container, options = {}) {
@@ -49,7 +49,9 @@ export class AVFlowView3dApp {
     this.renderer = new HwSchematicRenderer('#render-container');
   }
   _initializeDebugPanel() {
-    if (!this.options.enableDebugPanel) { return; }
+    if (!this.options.enableDebugPanel) {
+      return;
+    }
     this.debugPanel = new DebugPanel(this.renderer);
     window.debugPanel = this.debugPanel;
     if (!this.options.debug && !this.options.enableDebugPanel) {
@@ -139,19 +141,27 @@ export class AVFlowView3dApp {
     }
   }
   async changeLayout(direction) {
-    if (!this.currentGraph) { return; }
+    if (!this.currentGraph) {
+      return;
+    }
     this.currentLayoutDirection = direction;
     this.currentGraph.layout.direction = direction;
     await this.load(this.currentGraph);
   }
   zoomIn() {
-    if (this.renderer && this.renderer.zoomIn) { this.renderer.zoomIn(); }
+    if (this.renderer && this.renderer.zoomIn) {
+      this.renderer.zoomIn();
+    }
   }
   zoomOut() {
-    if (this.renderer && this.renderer.zoomOut) { this.renderer.zoomOut(); }
+    if (this.renderer && this.renderer.zoomOut) {
+      this.renderer.zoomOut();
+    }
   }
   resetView() {
-    if (this.renderer && this.renderer.resetZoom) { this.renderer.resetZoom(); }
+    if (this.renderer && this.renderer.resetZoom) {
+      this.renderer.resetZoom();
+    }
   }
   extractPortInfo(data) {
     const portInfo = [];
@@ -162,21 +172,34 @@ export class AVFlowView3dApp {
             portInfo.push({ nodeId: node.id, portId: port.id, x: port.x, y: port.y, side: port.properties?.['org.eclipse.elk.portSide'] });
           });
         }
-        if (node.children) { traverse(node.children); }
+        if (node.children) {
+          traverse(node.children);
+        }
       });
     };
-    if (data.children) { traverse(data.children); }
+    if (data.children) {
+      traverse(data.children);
+    }
     return portInfo;
   }
   toggleDebugPanel() {
     if (this.debugPanel) {
-      if (this.debugPanel.isVisible) { this.debugPanel.hide(); }
-      else { this.debugPanel.show(); }
+      if (this.debugPanel.isVisible) {
+        this.debugPanel.hide();
+      } else {
+        this.debugPanel.show();
+      }
     }
   }
   destroy() {
-    if (this.controlsPanel) { this.controlsPanel.destroy(); }
-    if (this.debugPanel) { this.debugPanel.hide(); }
-    if (this.container) { this.container.innerHTML = ''; }
+    if (this.controlsPanel) {
+      this.controlsPanel.destroy();
+    }
+    if (this.debugPanel) {
+      this.debugPanel.hide();
+    }
+    if (this.container) {
+      this.container.innerHTML = '';
+    }
   }
 }

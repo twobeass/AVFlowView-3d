@@ -37,7 +37,9 @@ function createAreaNodes(graph, elkGraph) {
 
   // First pass: create ELK nodes for all areas.
   areas.forEach((area) => {
-    if (!area || !area.id) { return; }
+    if (!area || !area.id) {
+      return;
+    }
     const elkArea = {
       id: area.id,
       labels: area.label ? [{ text: area.label }] : [],
@@ -53,7 +55,9 @@ function createAreaNodes(graph, elkGraph) {
   });
   // Second pass: attach areas to their parent or to the root graph.
   areas.forEach((area) => {
-    if (!area || !area.id) { return; }
+    if (!area || !area.id) {
+      return;
+    }
     const elkArea = areaNodeMap.get(area.id);
     if (area.parentId && areaNodeMap.has(area.parentId)) {
       const parentElk = areaNodeMap.get(area.parentId);
@@ -69,7 +73,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
   const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
   const nodeMap = new Map();
   nodes.forEach((node) => {
-    if (!node || !node.id) { return; }
+    if (!node || !node.id) {
+      return;
+    }
     const label = node.label || `${node.manufacturer ?? ''} ${node.model ?? ''}`.trim() || node.id;
     const elkNode = {
       id: node.id,
@@ -91,7 +97,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     const portsBySide = { WEST: [], EAST: [], NORTH: [], SOUTH: [] };
     // First pass: group ports by their side
     portEntries.forEach(([portKey, port]) => {
-      if (!port) { return; }
+      if (!port) {
+        return;
+      }
       const side = computePortSide(port.alignment, layoutDirection);
       portsBySide[side].push({ portKey, port });
     });
@@ -100,9 +108,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     Object.entries(portsBySide).forEach(([side, portsOnSide]) => {
       const portCountOnSide = portsOnSide.length;
       portsOnSide.forEach(({ portKey, port }, sideIndex) => {
-        const nodeWidth = elkNode.width || 140;
         const nodeHeight = elkNode.height || 80;
-        // anchorX wird nicht mehr benötigt
+        // anchorY is calculated but not used - ELK handles port positioning automatically
+        // when using portSide and port.index properties
         let anchorY = 0;
         switch (side) {
           case 'WEST':
@@ -116,6 +124,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
           case 'SOUTH':
             break;
         }
+        // Suppress unused var warning - anchorY kept for future manual port positioning
+        void anchorY;
+        
         elkNode.ports.push({
           id: `${node.id}/${portKey}`,
           labels: port.label ? [{ text: port.label }] : [],
@@ -144,7 +155,9 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
 function createEdges(graph, elkGraph) {
   const edges = Array.isArray(graph.edges) ? graph.edges : [];
   edges.forEach((edge) => {
-    if (!edge || !edge.id || !edge.source || !edge.target) { return; }
+    if (!edge || !edge.id || !edge.source || !edge.target) {
+      return;
+    }
     const sourcePortId =
       edge.sourcePortKey !== null && edge.sourcePortKey !== undefined
         ? `${edge.source}/${edge.sourcePortKey}`
