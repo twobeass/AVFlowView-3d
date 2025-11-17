@@ -37,10 +37,7 @@ function createAreaNodes(graph, elkGraph) {
 
   // First pass: create ELK nodes for all areas.
   areas.forEach((area) => {
-    if (!area || !area.id) {
-      return;
-    }
-
+    if (!area || !area.id) { return; }
     const elkArea = {
       id: area.id,
       labels: area.label ? [{ text: area.label }] : [],
@@ -50,22 +47,14 @@ function createAreaNodes(graph, elkGraph) {
       ports: [],
       properties: {
         'hwMeta.type': 'area',
-        // Removed padding to test if it's causing coordinate issues
-        // 'elk.padding': '[top=40,left=20,bottom=20,right=20]',
       },
     };
-
     areaNodeMap.set(area.id, elkArea);
   });
-
   // Second pass: attach areas to their parent or to the root graph.
   areas.forEach((area) => {
-    if (!area || !area.id) {
-      return;
-    }
-
+    if (!area || !area.id) { return; }
     const elkArea = areaNodeMap.get(area.id);
-
     if (area.parentId && areaNodeMap.has(area.parentId)) {
       const parentElk = areaNodeMap.get(area.parentId);
       parentElk.children.push(elkArea);
@@ -73,29 +62,20 @@ function createAreaNodes(graph, elkGraph) {
       elkGraph.children.push(elkArea);
     }
   });
-
   return areaNodeMap;
 }
 
 function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
   const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
   const nodeMap = new Map();
-
   nodes.forEach((node) => {
-    if (!node || !node.id) {
-      return;
-    }
-
-    const label =
-      node.label ||
-      `${node.manufacturer ?? ''} ${node.model ?? ''}`.trim() ||
-      node.id;
-
+    if (!node || !node.id) { return; }
+    const label = node.label || `${node.manufacturer ?? ''} ${node.model ?? ''}`.trim() || node.id;
     const elkNode = {
       id: node.id,
       labels: [{ text: label }],
-      width: 140,  // Default device width
-      height: 80,  // Default device height
+      width: 140,
+      height: 80,
       children: [],
       ports: [],
       properties: {
@@ -104,62 +84,41 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
         'hwMeta.status': node.status,
       },
     };
-
     // Ports
-    const ports =
-      node.ports && typeof node.ports === 'object' ? node.ports : {};
-
+    const ports = node.ports && typeof node.ports === 'object' ? node.ports : {};
     // Group ports by side first (critical for correct distribution)
     const portEntries = Object.entries(ports);
-    const portsBySide = {
-      WEST: [],
-      EAST: [],
-      NORTH: [],
-      SOUTH: []
-    };
-    
+    const portsBySide = { WEST: [], EAST: [], NORTH: [], SOUTH: [] };
     // First pass: group ports by their side
     portEntries.forEach(([portKey, port]) => {
-      if (!port) return;
+      if (!port) { return; }
       const side = computePortSide(port.alignment, layoutDirection);
       portsBySide[side].push({ portKey, port });
     });
-    
     // Second pass: create ELK ports with correct distribution per side
     let globalIndex = 0;
     Object.entries(portsBySide).forEach(([side, portsOnSide]) => {
       const portCountOnSide = portsOnSide.length;
-      
       portsOnSide.forEach(({ portKey, port }, sideIndex) => {
         const nodeWidth = elkNode.width || 140;
         const nodeHeight = elkNode.height || 80;
-        let anchorX = 0;
+        // anchorX wird nicht mehr benötigt
         let anchorY = 0;
-        
-        // Calculate position based on ports ON THIS SIDE only
         switch (side) {
           case 'WEST':
-            anchorX = 0;
             anchorY = (nodeHeight / (portCountOnSide + 1)) * (sideIndex + 1);
             break;
           case 'EAST':
-            anchorX = nodeWidth;
             anchorY = (nodeHeight / (portCountOnSide + 1)) * (sideIndex + 1);
             break;
           case 'NORTH':
-            anchorX = (nodeWidth / (portCountOnSide + 1)) * (sideIndex + 1);
-            anchorY = 0;
             break;
           case 'SOUTH':
-            anchorX = (nodeWidth / (portCountOnSide + 1)) * (sideIndex + 1);
-            anchorY = nodeHeight;
             break;
         }
-
         elkNode.ports.push({
           id: `${node.id}/${portKey}`,
           labels: port.label ? [{ text: port.label }] : [],
-          // Let ELK position ports - no explicit x/y
           properties: {
             'org.eclipse.elk.portSide': side,
             'org.eclipse.elk.port.index': globalIndex,
@@ -168,13 +127,10 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
             'hwMeta.gender': port.gender,
           },
         });
-        
         globalIndex++;
       });
     });
-
     nodeMap.set(node.id, elkNode);
-
     if (node.areaId && areaNodeMap.has(node.areaId)) {
       const areaContainer = areaNodeMap.get(node.areaId);
       areaContainer.children.push(elkNode);
@@ -182,18 +138,13 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
       elkGraph.children.push(elkNode);
     }
   });
-
   return nodeMap;
 }
 
 function createEdges(graph, elkGraph) {
   const edges = Array.isArray(graph.edges) ? graph.edges : [];
-
   edges.forEach((edge) => {
-    if (!edge || !edge.id || !edge.source || !edge.target) {
-      return;
-    }
-
+    if (!edge || !edge.id || !edge.source || !edge.target) { return; }
     const sourcePortId =
       edge.sourcePortKey !== null && edge.sourcePortKey !== undefined
         ? `${edge.source}/${edge.sourcePortKey}`
@@ -202,7 +153,6 @@ function createEdges(graph, elkGraph) {
       edge.targetPortKey !== null && edge.targetPortKey !== undefined
         ? `${edge.target}/${edge.targetPortKey}`
         : undefined;
-
     const elkEdge = {
       id: edge.id,
       sources: [sourcePortId || edge.source],
@@ -214,84 +164,51 @@ function createEdges(graph, elkGraph) {
         'hwMeta.wireId': edge.wireId,
       },
     };
-
     elkGraph.edges.push(elkEdge);
   });
 }
 
 export class AVToELKConverter {
-  /**
-   * Convert a validated AV wiring graph JSON object into an ELK JSON graph
-   * suitable for ELK's layered algorithm and d3-hwschematic.
-   *
-   * @param {unknown} json
-   * @returns {object} ELK graph JSON
-   */
-  // eslint-disable-next-line class-methods-use-this
   convert(json) {
     if (!json || typeof json !== 'object' || Array.isArray(json)) {
       throw new Error('AVToELKConverter.convert expects a non-null object');
     }
-
     const graph = json;
-
     const layoutDirection = computeLayoutDirection(graph.layout || {});
-
     const elkGraph = {
       id: 'root',
       children: [],
       edges: [],
       layoutOptions: {
-        // ========== CORE ALGORITHM ==========
         'org.eclipse.elk.algorithm': 'layered',
         'org.eclipse.elk.direction': layoutDirection,
-        
-        // ========== EDGE ROUTING ==========
         'org.eclipse.elk.layered.edgeRouting': 'ORTHOGONAL',
-        'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',  // CRITICAL: Root-level edge routing
-        
-        // ========== HIERARCHY & PORT HANDLING ==========
-        'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',  // Back to INCLUDE_CHILDREN, testing without padding
-        'org.eclipse.elk.portConstraints': 'FIXED_SIDE',  // Ports stay on assigned sides, ELK positions them
-        
-        // ========== SPACING (Optimized for AV diagrams) ==========
+        'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',
+        'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+        'org.eclipse.elk.portConstraints': 'FIXED_SIDE',
         'org.eclipse.elk.spacing.nodeNode': 220,
         'org.eclipse.elk.spacing.edgeNode': 88,
         'org.eclipse.elk.spacing.edgeEdge': 55,
         'org.eclipse.elk.layered.spacing.edgeNodeBetweenLayers': 110,
-        'org.eclipse.elk.layered.spacing.edgeEdgeBetweenLayers': 15,  // NEW: Better parallel edge separation
+        'org.eclipse.elk.layered.spacing.edgeEdgeBetweenLayers': 15,
         'org.eclipse.elk.layered.spacing.baseValue': 55,
-        
-        // ========== NODE PLACEMENT ==========
         'org.eclipse.elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
-        'org.eclipse.elk.layered.nodePlacement.bk.edgeStraightening': 'IMPROVE_STRAIGHTNESS',  // NEW: Straighter edges
-        'org.eclipse.elk.layered.nodePlacement.favorStraightEdges': true,  // NEW: Prefer straight edges
-        
-        // ========== CROSSING & ORDERING ==========
+        'org.eclipse.elk.layered.nodePlacement.bk.edgeStraightening': 'IMPROVE_STRAIGHTNESS',
+        'org.eclipse.elk.layered.nodePlacement.favorStraightEdges': true,
         'org.eclipse.elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
         'org.eclipse.elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
-        
-        // ========== EDGE PRIORITIES ==========
-        'org.eclipse.elk.layered.priority.shortness': 10,  // NEW: Prioritize shorter edges
-        'org.eclipse.elk.layered.priority.straightness': 5,  // NEW: Secondary: straight edges
-        'org.eclipse.elk.layered.priority.direction': 0,  // Tertiary: flow direction
-        
-        // ========== COMPACTION ==========
-        'org.eclipse.elk.layered.compaction.connectedComponents': true,  // NEW: Reduce whitespace
-        'org.eclipse.elk.layered.compaction.postCompaction.strategy': 'EDGE_LENGTH',  // NEW: Better edge separation
-        'org.eclipse.elk.layered.compaction.postCompaction.constraints': 'SCANLINE',  // NEW: Constraint handling
-        
-        // ========== COMPONENT SEPARATION ==========
+        'org.eclipse.elk.layered.priority.shortness': 10,
+        'org.eclipse.elk.layered.priority.straightness': 5,
+        'org.eclipse.elk.layered.priority.direction': 0,
+        'org.eclipse.elk.layered.compaction.connectedComponents': true,
+        'org.eclipse.elk.layered.compaction.postCompaction.strategy': 'EDGE_LENGTH',
+        'org.eclipse.elk.layered.compaction.postCompaction.constraints': 'SCANLINE',
         'org.eclipse.elk.separateConnectedComponents': true,
       },
     };
-
     const areaNodeMap = createAreaNodes(graph, elkGraph);
-
     createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection);
-
     createEdges(graph, elkGraph);
-
     return elkGraph;
   }
 }
