@@ -4,9 +4,16 @@ export default defineConfig({
   root: '.',
   build: {
     outDir: 'dist',
+    sourcemap: true,
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true,
+    },
+  },
+  server: {
+    sourcemapIgnoreList: false,
+    fs: {
+      strict: false,
     },
   },
   optimizeDeps: {
@@ -19,14 +26,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // Polyfill web-worker for browser context
       'web-worker': 'elkjs/lib/elk-api.js',
-    },
-  },
-  server: {
-    fs: {
-      // Allow serving files from node_modules
-      strict: false,
     },
   },
 });
