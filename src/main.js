@@ -1,6 +1,7 @@
 import { AVFlowView3dApp } from './AVFlowView3dApp.js';
 import { ExampleLoader } from './utils/ExampleLoader.js';
 import './styles/controls.css';
+import './styles/debug.css';
 
 async function bootstrap() {
   const container = document.getElementById('app');

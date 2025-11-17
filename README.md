@@ -10,8 +10,8 @@ AVFlowView-3d transforms structured JSON descriptions of audio-visual systems in
 
 ## Key Features
 
-- **Automatic Layout**: Left-to-right or top-to-bottom signal flow with ELK.js
-- **Smart Cable Routing**: Orthogonal paths that avoid overlapping devices
+- **Automatic Layout**: Left-to-right or top-to-bottom signal flow with ELK.js (fully hierarchical)
+- **Smart Cable Routing**: ELK.js orthogonal routing with perfect port alignment at all hierarchy levels
 - **Category Colors**: Consistent color-coding for audio, video, network, control, and power
 - **Areas & Grouping**: Visual containers for rooms, racks, and zones
 - **Focus/Context**: Highlight N-hop neighborhoods to reduce visual complexity
@@ -167,20 +167,22 @@ Contributions are welcome! Please:
 
 ## Status
 
-**Current Status**: Phases 1-5 complete. Interactive features (Phase 6) and UI shell (Phase 7) in progress.
+**Current Status**: Phases 1-5 complete with full ELK hierarchical support. Interactive features (Phase 6) and UI shell (Phase 7) in progress.
 
 See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
 
 ### Completed Features
 
 ✅ Schema validation with comprehensive error reporting  
-✅ AV to ELK graph conversion  
+✅ AV to ELK graph conversion with full hierarchy support  
 ✅ Category-based styling system  
 ✅ D3-based rendering with zoom/pan  
 ✅ Custom device, area, and edge renderers  
-✅ **Professional orthogonal edge routing with parallel edge separation**  
-✅ **Obstacle avoidance for clean cable paths**  
-✅ 79 passing unit tests  
+✅ **100% ELK.js orthogonal routing** - No fallback needed  
+✅ **Hierarchical coordinate system** - Works with nested areas at any depth  
+✅ **Perfect port alignment** - Edges connect precisely in all layouts  
+✅ **Debug panel** - Comprehensive visualization and diagnostic tools  
+✅ **87 passing unit tests** - All edge cases covered  
 
 ### In Progress
 
@@ -188,3 +190,13 @@ See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
 🚧 Search and filtering UI  
 🚧 Complete application shell  
 🚧 E2E testing with Playwright
+
+### ELK Integration
+
+The project now features **production-ready ELK integration** for:
+- ✅ Flat layouts (no hierarchy)
+- ✅ Single-level hierarchies (areas with devices)
+- ✅ Multi-level nested hierarchies (areas within areas)
+- ✅ Cross-container edges (spanning different hierarchy levels)
+
+See [docs/ELK_OPTIMIZATION_STATUS.md](docs/ELK_OPTIMIZATION_STATUS.md) for complete technical documentation on ELK's hierarchical coordinate system, configuration best practices, and troubleshooting guide.

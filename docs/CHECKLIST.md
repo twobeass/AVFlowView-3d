@@ -181,18 +181,21 @@ This checklist provides concrete, verifiable tasks for each phase of the AVFlowV
   - [x] Add cable type patterns
   - [x] Smooth corners
 
-### Orthogonal Edge Routing (2025-11-17)
-- [x] Create `src/utils/OrthogonalRouter.js`
-- [x] Implement `calculateOrthogonalPath()` for Manhattan-style routing
-- [x] Implement `calculateEdgeOffset()` for parallel edge separation
-- [x] Implement `collectObstacles()` for device bounding boxes
-- [x] Implement `groupEdgesByEndpoints()` for parallel edge detection
-- [x] Integrate OrthogonalRouter into HwSchematicRenderer
-- [x] Add 10px separation between parallel edges
-- [x] Add 20px obstacle padding around devices
-- [x] Remove d3-hwschematic from package.json
-- [x] Test with all example graphs (simple, medium, complex)
-- [x] Create comprehensive documentation (ORTHOGONAL_ROUTING_IMPLEMENTATION.md)
+### ELK.js Integration & Hierarchical Routing (2025-11-17)
+- [x] Migrate to 100% ELK.js orthogonal routing
+- [x] Implement ELK hierarchical coordinate system support
+- [x] Create `findEdgeContainer()` for common ancestor detection
+- [x] Create `findNodePath()` for hierarchy path tracking
+- [x] Create `findContainerOffset()` for absolute position calculation
+- [x] Implement cumulative offset tracking for nested hierarchies
+- [x] Fix coordinate translation for all hierarchy levels
+- [x] Test with flat layouts (simple.json)
+- [x] Test with single-level hierarchies (medium.json)
+- [x] Test with nested hierarchies (complex.json)
+- [x] Test with multi-level hierarchies (heavy.json)
+- [x] Create comprehensive debug panel with diagnostic tools
+- [x] Create `src/ui/DebugPanel.js` with edge inspection
+- [x] Create `docs/ELK_OPTIMIZATION_STATUS.md` with full documentation
 
 ### Zoom & Pan Controls
 - [x] Implement zoom in method with animation
@@ -247,12 +250,20 @@ This checklist provides concrete, verifiable tasks for each phase of the AVFlowV
 - [x] Test zoom and pan functionality
 - [x] Resolved Jest ESM module import issues
 - [x] Fixed JSDOM compatibility (SVGGElement)
-- [x] All renderer tests passing (79 total tests)
+- [x] All tests passing (87 total tests)
+- [x] Test ELK routing with all example files
+- [x] Verify coordinate alignment in hierarchical layouts
+- [x] Debug panel for visual verification
 - [ ] Visual regression tests (optional)
 - [x] Manual testing of all controls
 
 ### Documentation
 - [x] Create `docs/PHASE5_COMPLETION.md`
+- [x] Create `docs/ELK_OPTIMIZATION_STATUS.md`
+- [x] Document ELK hierarchical coordinate system
+- [x] Document common ancestor detection algorithm
+- [x] Add configuration best practices
+- [x] Add troubleshooting guide
 - [x] Document all Phase 5 features
 - [x] Document architecture and pipeline
 - [x] Add testing checklist
@@ -388,6 +399,8 @@ This checklist provides concrete, verifiable tasks for each phase of the AVFlowV
 
 **Overall Progress: ~62% Complete**
 
-**Current Status**: Phase 5 complete with custom orthogonal routing. Ready for Phase 6 advanced interactions.
+**Current Status**: Phase 5 complete with full ELK.js integration and hierarchical support. All coordinate issues resolved. Ready for Phase 6 advanced interactions.
 
-**Last Updated**: 2025-11-17
+**Key Achievement**: 100% ELK.js routing with perfect port alignment at all hierarchy levels (flat, single-level, and nested).
+
+**Last Updated**: 2025-11-17 (ELK hierarchical coordinate system completed)

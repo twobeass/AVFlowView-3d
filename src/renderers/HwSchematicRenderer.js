@@ -118,8 +118,15 @@ class HwSchematicRenderer {
     // Helper to recursively render children
     const renderNodes = (nodes, parentG, parentOffset = { x: 0, y: 0 }) => {
       nodes.forEach((node) => {
+        // DEBUG: Log what ELK is providing
+        console.log(`🔍 Node ${node.id}: ELK x=${node.x}, y=${node.y}, hasChildren=${!!(node.children && node.children.length)}, parentOffset=(${parentOffset.x}, ${parentOffset.y})`);
+        
+        // ELK provides coordinates relative to parent container
+        // Add parent offset to get absolute SVG coordinates
         const absoluteX = parentOffset.x + (node.x || 0);
         const absoluteY = parentOffset.y + (node.y || 0);
+        
+        console.log(`   → Calculated absolute: (${absoluteX}, ${absoluteY})`);
 
         if (node.children && node.children.length) {
           // This is an area/container
@@ -148,7 +155,7 @@ class HwSchematicRenderer {
             .attr('fill', '#666')
             .text(node.labels?.[0]?.text || node.id || 'Area');
 
-          // Recurse into children with updated offset
+          // Recurse into children with cumulative offset
           renderNodes(node.children, parentG, {
             x: absoluteX,
             y: absoluteY,
@@ -192,59 +199,24 @@ class HwSchematicRenderer {
             .attr('fill', '#000')
             .text(node.labels?.[0]?.text || node.id || 'Device');
 
-          // Draw ports as small circles with improved distribution
+          // Draw ports at ELK's calculated positions
           if (node.ports && node.ports.length > 0) {
-            // Group ports by side for even distribution
-            const portsBySide = {
-              WEST: [],
-              EAST: [],
-              NORTH: [],
-              SOUTH: []
-            };
-            
             node.ports.forEach((port) => {
-              const portSide = port.properties?.['org.eclipse.elk.portSide'] || 'EAST';
-              if (portsBySide[portSide]) {
-                portsBySide[portSide].push(port);
-              }
-            });
+              // Use ELK's port position directly
+              const px = absoluteX + (port.x !== undefined ? port.x : 0);
+              const py = absoluteY + (port.y !== undefined ? port.y : 0);
+              
+              // DEBUG: Log port rendering positions
+              console.log(`📍 Rendering port ${port.id} at (${px.toFixed(1)}, ${py.toFixed(1)}) - ELK port: (${port.x}, ${port.y}), node at (${absoluteX}, ${absoluteY})`);
 
-            // Render each port with even distribution within its side
-            Object.entries(portsBySide).forEach(([side, ports]) => {
-              ports.forEach((port, portIndex) => {
-                let px = absoluteX;
-                let py = absoluteY;
-                const portCount = ports.length;
-
-                // Calculate even distribution
-                switch (side) {
-                  case 'WEST':
-                    px = absoluteX;
-                    py = absoluteY + ((node.height || 80) / (portCount + 1)) * (portIndex + 1);
-                    break;
-                  case 'EAST':
-                    px = absoluteX + (node.width || 140);
-                    py = absoluteY + ((node.height || 80) / (portCount + 1)) * (portIndex + 1);
-                    break;
-                  case 'NORTH':
-                    px = absoluteX + ((node.width || 140) / (portCount + 1)) * (portIndex + 1);
-                    py = absoluteY;
-                    break;
-                  case 'SOUTH':
-                    px = absoluteX + ((node.width || 140) / (portCount + 1)) * (portIndex + 1);
-                    py = absoluteY + (node.height || 80);
-                    break;
-                }
-
-                nodeG
-                  .append('circle')
-                  .attr('cx', px)
-                  .attr('cy', py)
-                  .attr('r', 5)
-                  .attr('fill', '#fff')
-                  .attr('stroke', '#333')
-                  .attr('stroke-width', 2);
-              });
+              nodeG
+                .append('circle')
+                .attr('cx', px)
+                .attr('cy', py)
+                .attr('r', 5)
+                .attr('fill', '#fff')
+                .attr('stroke', '#333')
+                .attr('stroke-width', 2);
             });
           }
         }
@@ -282,12 +254,44 @@ class HwSchematicRenderer {
         let pathData = null;
         
         // TRY ELK ROUTING FIRST - it already does obstacle avoidance!
-        if (edge.sections && edge.sections.length > 0 && edge.sections[0].bendPoints) {
+        if (edge.sections && edge.sections.length > 0) {
           const section = edge.sections[0];
+          
+          // CRITICAL: Find which container this edge belongs to
+          // ELK places edges in the common ancestor container of source/target
+          const sourceNodeId = edge.sources[0].split('/')[0];
+          const targetNodeId = edge.targets[0].split('/')[0];
+          const containerOffset = this.findEdgeContainer(edge, sourceNodeId, targetNodeId, data);
+          
+          console.log(`🔗 Edge ${edge.id}: container offset (${containerOffset.x}, ${containerOffset.y})`);
+          
+          // ELK provides sections with startPoint/endPoint
+          // bendPoints may be omitted for straight edges (valid ELK output)
           const srcPos = this.findPortAbsolutePosition(edge.sources[0].split('/')[0], edge.sources[0].split('/')[1], data);
           const tgtPos = this.findPortAbsolutePosition(edge.targets[0].split('/')[0], edge.targets[0].split('/')[1], data);
-          pathData = this.createPathFromELKSection(section, srcPos, tgtPos);
+          pathData = this.createPathFromELKSection(section, srcPos, tgtPos, containerOffset);
         } else {
+          // ENHANCED LOGGING: Identify why ELK routing failed
+          const sourceNodeId = edge.sources[0].split('/')[0];
+          const targetNodeId = edge.targets[0].split('/')[0];
+          const sourcePortKey = edge.sources[0].split('/')[1];
+          const targetPortKey = edge.targets[0].split('/')[1];
+          
+          console.warn('⚠️ FALLBACK ROUTING ACTIVATED:', {
+            edgeId: edge.id,
+            source: `${sourceNodeId}/${sourcePortKey}`,
+            target: `${targetNodeId}/${targetPortKey}`,
+            reason: !edge.sections ? 'No sections array' : 
+                    edge.sections.length === 0 ? 'Empty sections array' : 
+                    !edge.sections[0].bendPoints ? 'No bendPoints in section[0]' :
+                    'Unknown',
+            hasSections: !!edge.sections,
+            sectionsCount: edge.sections?.length || 0,
+            bendPointsCount: edge.sections?.[0]?.bendPoints?.length || 0,
+            hasStartPoint: !!edge.sections?.[0]?.startPoint,
+            hasEndPoint: !!edge.sections?.[0]?.endPoint,
+          });
+          
           // Fallback only when ELK doesn't provide routing
           pathData = this.createFallbackPath(edge, data, idx);
         }
@@ -304,16 +308,37 @@ class HwSchematicRenderer {
             }
           });
           
-          // Draw normal edge path with category color and arrow
-          this.g
+          // Draw edge path (neutral color by default, can be highlighted by debug panel)
+          const edgePath = this.g
             .append('path')
             .attr('class', 'edge-path')
             .attr('data-id', edge.id)
             .attr('d', pathData)
-            .attr('stroke', this.getCategoryColor(edge.properties?.['hwMeta.category']) || '#333')
+            .attr('stroke', '#333')  // Neutral color
             .attr('fill', 'none')
             .attr('stroke-width', 3)
-            .attr('marker-end', 'url(#arrowhead)');
+            .attr('marker-end', 'url(#arrowhead)')
+            .style('cursor', 'pointer')
+            .datum(edge);  // Bind edge data for debug panel
+          
+          // Add hover effect
+          edgePath
+            .on('mouseenter', function() {
+              d3.select(this)
+                .attr('stroke', '#2563eb')
+                .attr('stroke-width', 4);
+            })
+            .on('mouseleave', function() {
+              d3.select(this)
+                .attr('stroke', '#333')
+                .attr('stroke-width', 3);
+            })
+            .on('click', () => {
+              // Notify debug panel of edge click
+              if (window.debugPanel) {
+                window.debugPanel.inspectEdge(edge.id);
+              }
+            });
           
           // Add edge label at optimal position (middle of longest segment)
           if (edge.labels && edge.labels[0]) {
@@ -364,73 +389,133 @@ class HwSchematicRenderer {
 
   /**
    * Create SVG path from ELK edge section (with orthogonal routing)
-   * Uses ELK's bend points AND adds short extensions from ports
+   * CRITICAL: ELK's edge routing is in the container's local space!
    * 
    * @param {object} section - ELK section with startPoint, bendPoints, endPoint
    * @param {object} srcPos - Our calculated source port position {x, y, side}
    * @param {object} tgtPos - Our calculated target port position {x, y, side}
+   * @param {object} containerOffset - Container offset to add to ELK coordinates
    * @returns {string} SVG path data string
    */
-  createPathFromELKSection(section, srcPos, tgtPos) {
+  createPathFromELKSection(section, srcPos, tgtPos, containerOffset) {
     const bendPoints = section.bendPoints || [];
+    const elkStart = section.startPoint;
+    const elkEnd = section.endPoint;
     
-    // Use our calculated port positions
-    const start = srcPos || section.startPoint;
-    const end = tgtPos || section.endPoint;
+    // Add container offset to convert from local to absolute coordinates
+    const offsetX = containerOffset.x;
+    const offsetY = containerOffset.y;
     
-    // Start at source port
-    let pathData = `M ${start.x} ${start.y}`;
+    let pathData = `M ${elkStart.x + offsetX} ${elkStart.y + offsetY}`;
     
-    if (bendPoints.length > 0) {
-      const firstBend = bendPoints[0];
-      
-      // SIMPLIFIED: Just extend from port in natural direction, then connect to first bend point
-      if (srcPos && srcPos.side) {
-        const extPoint = this.getExtensionPoint(srcPos);
-        pathData += ` L ${extPoint.x} ${extPoint.y}`;  // Extend from port
-        
-        // Connect extension to first bend point orthogonally
-        if (srcPos.side === 'EAST' || srcPos.side === 'WEST') {
-          pathData += ` L ${extPoint.x} ${firstBend.y}`;
-          pathData += ` L ${firstBend.x} ${firstBend.y}`;
-        } else {
-          pathData += ` L ${firstBend.x} ${extPoint.y}`;
-          pathData += ` L ${firstBend.x} ${firstBend.y}`;
-        }
-      } else {
-        pathData += ` L ${firstBend.x} ${firstBend.y}`;
-      }
-      
-      // Add all ELK bend points
-      for (let i = 1; i < bendPoints.length; i++) {
-        pathData += ` L ${bendPoints[i].x} ${bendPoints[i].y}`;
-      }
-      
-      // Connect last bend point to target port with extension
-      const lastBend = bendPoints[bendPoints.length - 1];
-      if (tgtPos && tgtPos.side) {
-        const tgtExt = this.getExtensionPoint(tgtPos);
-        
-        // Connect last bend to target extension orthogonally
-        if (tgtPos.side === 'EAST' || tgtPos.side === 'WEST') {
-          pathData += ` L ${tgtExt.x} ${lastBend.y}`;
-          pathData += ` L ${tgtExt.x} ${tgtExt.y}`;
-        } else {
-          pathData += ` L ${lastBend.x} ${tgtExt.y}`;
-          pathData += ` L ${tgtExt.x} ${tgtExt.y}`;
-        }
-        
-        // Final segment to port
-        pathData += ` L ${end.x} ${end.y}`;
-      } else {
-        pathData += ` L ${end.x} ${end.y}`;
-      }
-    } else {
-      // No bend points - simple direct path
-      pathData += ` L ${end.x} ${end.y}`;
-    }
+    // Add all ELK bend points (with offset)
+    bendPoints.forEach(bend => {
+      pathData += ` L ${bend.x + offsetX} ${bend.y + offsetY}`;
+    });
+    
+    // End at ELK's end point (with offset)
+    pathData += ` L ${elkEnd.x + offsetX} ${elkEnd.y + offsetY}`;
     
     return pathData;
+  }
+
+  /**
+   * Find which container an edge belongs to
+   * ELK places edges in the common ancestor container of source and target
+   * Also checks edge.container property if available
+   * 
+   * @param {object} edge - Edge object
+   * @param {string} sourceNodeId - Source node ID
+   * @param {string} targetNodeId - Target node ID
+   * @param {object} data - Full graph data
+   * @returns {object} Container offset {x, y}
+   */
+  findEdgeContainer(edge, sourceNodeId, targetNodeId, data) {
+    // Check if edge has explicit container property
+    if (edge.container) {
+      return this.findContainerOffset(edge.container, data);
+    }
+    
+    // Find common ancestor container of source and target nodes
+    const srcPath = this.findNodePath(sourceNodeId, data);
+    const tgtPath = this.findNodePath(targetNodeId, data);
+    
+    if (!srcPath || !tgtPath) {
+      return { x: 0, y: 0 };
+    }
+    
+    // Find common ancestor by comparing paths
+    let commonAncestor = null;
+    for (let i = 0; i < Math.min(srcPath.length, tgtPath.length); i++) {
+      if (srcPath[i].id === tgtPath[i].id) {
+        commonAncestor = srcPath[i];
+      } else {
+        break;
+      }
+    }
+    
+    // Return the absolute offset of the common ancestor
+    if (commonAncestor) {
+      return this.findContainerOffset(commonAncestor.id, data);
+    }
+    
+    return { x: 0, y: 0 };
+  }
+  
+  /**
+   * Find the path from root to a node (list of containers)
+   * 
+   * @param {string} nodeId - Node ID
+   * @param {object} data - Full graph data
+   * @returns {Array|null} Path of container nodes from root to target
+   */
+  findNodePath(nodeId, data) {
+    const search = (nodes, path) => {
+      for (const node of nodes) {
+        const newPath = [...path, node];
+        
+        if (node.id === nodeId) {
+          return newPath;
+        }
+        
+        if (node.children) {
+          const found = search(node.children, newPath);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    
+    return search(data.children || [], []);
+  }
+  
+  /**
+   * Find the absolute offset of a container by ID
+   * 
+   * @param {string} containerId - Container ID
+   * @param {object} data - Full graph data
+   * @returns {object} Absolute offset {x, y}
+   */
+  findContainerOffset(containerId, data) {
+    const search = (nodes, offset) => {
+      for (const node of nodes) {
+        const absX = offset.x + (node.x || 0);
+        const absY = offset.y + (node.y || 0);
+        
+        if (node.id === containerId) {
+          return { x: absX, y: absY };
+        }
+        
+        if (node.children) {
+          const found = search(node.children, { x: absX, y: absY });
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    
+    const result = search(data.children || [], { x: 0, y: 0 });
+    return result || { x: 0, y: 0 };
   }
 
   /**
@@ -503,56 +588,21 @@ class HwSchematicRenderer {
    * @returns {object|null} {x, y, side} or null if not found
    */
   findPortAbsolutePosition(nodeId, portKey, data) {
-    const search = (nodes, offset) => {
+    const search = (nodes, offset, isArea) => {
       for (const node of nodes) {
+        // Add parent offset to node position
         const x = offset.x + (node.x || 0);
         const y = offset.y + (node.y || 0);
         
         if (node.id === nodeId && node.ports) {
-          // Group ports by side to match rendering logic
-          const portsBySide = {
-            WEST: [],
-            EAST: [],
-            NORTH: [],
-            SOUTH: []
-          };
-          
-          node.ports.forEach((p) => {
-            const pSide = p.properties?.['org.eclipse.elk.portSide'] || 'EAST';
-            if (portsBySide[pSide]) {
-              portsBySide[pSide].push(p);
-            }
-          });
-          
-          // Find the target port and calculate its position
+          // Found the node - calculate port position
           for (const port of node.ports) {
             if (port.id === `${nodeId}/${portKey}`) {
+              const px = x + (port.x || 0);
+              const py = y + (port.y || 0);
               const portSide = port.properties?.['org.eclipse.elk.portSide'] || 'EAST';
-              const portsOnSameSide = portsBySide[portSide];
-              const portIndex = portsOnSameSide.findIndex(p => p.id === port.id);
-              const portCount = portsOnSameSide.length;
               
-              let px = x, py = y;
-              
-              // Use same distribution formula as rendering
-              switch (portSide) {
-                case 'WEST':
-                  px = x;
-                  py = y + ((node.height || 80) / (portCount + 1)) * (portIndex + 1);
-                  break;
-                case 'EAST':
-                  px = x + (node.width || 140);
-                  py = y + ((node.height || 80) / (portCount + 1)) * (portIndex + 1);
-                  break;
-                case 'NORTH':
-                  px = x + ((node.width || 140) / (portCount + 1)) * (portIndex + 1);
-                  py = y;
-                  break;
-                case 'SOUTH':
-                  px = x + ((node.width || 140) / (portCount + 1)) * (portIndex + 1);
-                  py = y + (node.height || 80);
-                  break;
-              }
+              console.log(`🎯 Port ${port.id}: offset=(${offset.x}, ${offset.y}), node=(${node.x}, ${node.y}), port=(${port.x}, ${port.y}) → absolute=(${px}, ${py})`);
               
               return { x: px, y: py, side: portSide };
             }
@@ -560,14 +610,15 @@ class HwSchematicRenderer {
         }
         
         if (node.children) {
-          const found = search(node.children, { x, y });
+          // Recurse with cumulative offset
+          const found = search(node.children, { x, y }, true);
           if (found) return found;
         }
       }
       return null;
     };
     
-    return search(data.children || [], { x: 0, y: 0 });
+    return search(data.children || [], { x: 0, y: 0 }, false);
   }
 
   /**
@@ -636,6 +687,7 @@ class HwSchematicRenderer {
     
     const traverse = (nodes, offset = { x: 0, y: 0 }) => {
       for (const node of nodes) {
+        // Add parent offset to get absolute position
         const absX = offset.x + (node.x || 0);
         const absY = offset.y + (node.y || 0);
         
@@ -650,7 +702,7 @@ class HwSchematicRenderer {
             height: (node.height || 80) + (padding * 2)
           });
         } else if (node.children) {
-          // Recurse into area's children with updated offset
+          // Recurse with cumulative offset
           traverse(node.children, { x: absX, y: absY });
         }
       }

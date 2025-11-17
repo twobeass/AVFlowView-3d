@@ -11,6 +11,7 @@
 import { AVToELKConverter } from './converters/index.js';
 import { SchemaValidator } from './validation/index.js';
 import { ControlsPanel } from './ui/ControlsPanel.js';
+import { DebugPanel } from './ui/DebugPanel.js';
 import { ExampleLoader } from './utils/ExampleLoader.js';
 import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
 import ELK from 'elkjs';
@@ -32,6 +33,7 @@ export class AVFlowView3dApp {
 
     this.options = {
       debug: false,
+      enableDebugPanel: true, // NEW: Enable debug panel by default (can be disabled for production)
       ...options,
     };
 
@@ -41,9 +43,11 @@ export class AVFlowView3dApp {
     this.elk = new ELK();
     this.currentGraph = null;
     this.currentLayoutDirection = 'LR';
+    this.layoutTime = 0; // Track layout time for debug panel
 
     this._initializeUI();
     this._initializeRenderer();
+    this._initializeDebugPanel();
     this._initializeControls();
   }
 
@@ -71,6 +75,26 @@ export class AVFlowView3dApp {
     this.container.appendChild(renderContainer);
 
     this.renderer = new HwSchematicRenderer('#render-container');
+  }
+
+  /**
+   * Initialize the debug panel for ELK routing diagnostics
+   * @private
+   */
+  _initializeDebugPanel() {
+    if (!this.options.enableDebugPanel) {
+      return;
+    }
+
+    this.debugPanel = new DebugPanel(this.renderer);
+    
+    // Make debug panel globally accessible for edge click handlers
+    window.debugPanel = this.debugPanel;
+    
+    // Hide in production if debug is false
+    if (!this.options.debug && !this.options.enableDebugPanel) {
+      this.debugPanel.hide();
+    }
   }
 
   /**
@@ -117,14 +141,28 @@ export class AVFlowView3dApp {
     const elkGraph = this.converter.convert(graphJson);
 
     try {
+      // Measure layout time for debug panel
+      const layoutStart = performance.now();
       const laidOutGraph = await this.elk.layout(elkGraph);
+      this.layoutTime = performance.now() - layoutStart;
 
       if (this.options.debug) {
         // eslint-disable-next-line no-console
         console.log('Layout complete', laidOutGraph);
+        // eslint-disable-next-line no-console
+        console.log(`⚡ Layout time: ${this.layoutTime.toFixed(2)}ms`);
+        
+        // DEBUG: Log port positions from ELK
+        // eslint-disable-next-line no-console
+        console.log('🔍 ELK Port Positions:', this.extractPortInfo(laidOutGraph));
       }
 
       this.renderer.render(laidOutGraph);
+
+      // Update debug panel with layout results
+      if (this.debugPanel) {
+        this.debugPanel.update(laidOutGraph, this.layoutTime);
+      }
 
       return {
         success: true,
@@ -215,11 +253,53 @@ export class AVFlowView3dApp {
   }
 
   /**
+   * Extract port information for debugging
+   * @private
+   */
+  extractPortInfo(data) {
+    const portInfo = [];
+    const traverse = (nodes) => {
+      nodes.forEach(node => {
+        if (node.ports && node.ports.length > 0) {
+          node.ports.forEach(port => {
+            portInfo.push({
+              nodeId: node.id,
+              portId: port.id,
+              x: port.x,
+              y: port.y,
+              side: port.properties?.['org.eclipse.elk.portSide']
+            });
+          });
+        }
+        if (node.children) traverse(node.children);
+      });
+    };
+    if (data.children) traverse(data.children);
+    return portInfo;
+  }
+
+  /**
+   * Toggle debug panel visibility
+   */
+  toggleDebugPanel() {
+    if (this.debugPanel) {
+      if (this.debugPanel.isVisible) {
+        this.debugPanel.hide();
+      } else {
+        this.debugPanel.show();
+      }
+    }
+  }
+
+  /**
    * Clean up resources and event listeners
    */
   destroy() {
     if (this.controlsPanel) {
       this.controlsPanel.destroy();
+    }
+    if (this.debugPanel) {
+      this.debugPanel.hide();
     }
     if (this.container) {
       this.container.innerHTML = '';

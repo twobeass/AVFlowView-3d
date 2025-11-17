@@ -9,7 +9,8 @@ export class ExampleLoader {
     try {
       // List of available example files in the repository
       // These correspond to actual files in the /examples/ directory
-      return ['simple.json', 'medium.json', 'complex.json'];
+      // NOTE: To add new examples, simply add the filename to this array
+      return ['simple.json', 'medium.json', 'complex.json', 'heavy.json'];
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to list examples:', error);

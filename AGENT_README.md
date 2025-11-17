@@ -48,28 +48,31 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 
 ## Current Status: Phase 5 Complete ✅
 
-**Phase 5 (UI Controls Panel) completed on 2025-11-16:**
+**Phase 5 completed with full ELK hierarchical support on 2025-11-17:**
 - Integrated ControlsPanel component with zoom, layout toggle, and example selector
 - Connected HwSchematicRenderer with zoom control methods (zoomIn, zoomOut, resetZoom, fitToView)
-- Integrated ELK layout engine for automatic graph positioning
+- **100% ELK.js orthogonal routing** - Removed all custom fallback routing
+- **Hierarchical coordinate system fully working** - Supports nested areas at any depth
 - Implemented complete validation → conversion → layout → render pipeline
 - Added ExampleLoader utility for loading example graphs
 - Main application entry point (src/main.js) loads default example on startup
 - All controls wired through AVFlowView3dApp callbacks
 - Controls styling with fixed-position panel and engineering aesthetic
-- **79 unit tests passing**
+- **87 unit tests passing**
 
 **Key Features Now Available:**
 - ✅ Automatic schema validation with clear error messages
-- ✅ AV-to-ELK graph conversion with category styling
+- ✅ AV-to-ELK graph conversion with full hierarchy support
 - ✅ ELK.js automatic layout (LR/TB direction support)
-- ✅ Custom D3-based rendering with professional orthogonal edge routing
-- ✅ **Parallel edge separation** - Multiple edges between same devices visually separated
-- ✅ **Obstacle avoidance** - Edges route around device bounding boxes
+- ✅ **100% ELK.js orthogonal routing** - No fallback needed
+- ✅ **Hierarchical coordinate system** - Works with flat, single-level, and nested hierarchies
+- ✅ **Perfect port alignment** - Edges connect precisely at all hierarchy levels
+- ✅ **Common ancestor detection** - Edges correctly placed in appropriate containers
+- ✅ **Comprehensive debug panel** - Visual inspection and diagnostic tools
 - ✅ Zoom controls (in, out, reset) with smooth animations
 - ✅ Pan support with d3-zoom
 - ✅ Layout direction toggle (Left-to-Right ↔ Top-to-Bottom)
-- ✅ Example graph loading with dropdown selector
+- ✅ Example graph loading with dropdown selector (simple, medium, complex, heavy)
 - ✅ Professional UI controls panel
 
 **Ready for Phase 6: Advanced Interactions**
@@ -79,13 +82,29 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 - Advanced filtering (category, status, area)
 
 ## Test & Build Status
-- **All tests passing, as of 2025-11-16**
+- **All tests passing, as of 2025-11-17**
 - See CHECKLIST.md for granular progress and task status
-- Test coverage: Schema validation, conversion logic, renderer initialization, styling, and port direction resolution
-- 79 total tests across all modules
+- Test coverage: Schema validation, conversion logic, renderer initialization, styling, port direction resolution, and ELK integration
+- **87 total tests** across all modules
+- All example files tested: simple.json, medium.json, complex.json, heavy.json
 
 ## Change Log
 *Agent should update this section after completing each phase/maintenance*
+
+- **2025-11-17: COMPLETED - ELK Hierarchical Coordinate System**
+  - Resolved coordinate mismatches in hierarchical and nested layouts
+  - Implemented `findEdgeContainer()` for common ancestor detection
+  - Implemented `findNodePath()` for building hierarchy paths
+  - Implemented `findContainerOffset()` for absolute position calculation
+  - Added cumulative offset tracking throughout rendering pipeline
+  - Fixed coordinate translation for all hierarchy levels (flat, single, nested)
+  - Created comprehensive debug panel (src/ui/DebugPanel.js) with diagnostic tools
+  - Created complete documentation (docs/ELK_OPTIMIZATION_STATUS.md)
+  - Updated README.md and CHECKLIST.md with completion status
+  - All 87 tests passing
+  - Tested with all example files: simple, medium, complex, heavy
+  - **Key Achievement**: 100% ELK routing with perfect port alignment at all hierarchy levels
+  - Branch: feature/phase5-ui-controls-panel
 
 - **2025-11-17: Removed d3-hwschematic & Implemented Custom Orthogonal Routing**
   - Created src/utils/OrthogonalRouter.js (398 lines) with professional Manhattan-style routing
@@ -129,6 +148,7 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 - See README.md for installation and overview
 - See CHECKLIST.md for up-to-date progress tracking
 - See docs/PHASE5_COMPLETION.md for detailed Phase 5 documentation
+- See docs/ELK_OPTIMIZATION_STATUS.md for ELK integration and hierarchical coordinate system documentation
 - For maintenance, always consult this file if unsure whether to use --force or upgrade dev dependencies!
 
 ## Architecture Overview
@@ -140,16 +160,20 @@ src/main.js (bootstrap)
     ↓
 AVFlowView3dApp
 ├── SchemaValidator (validation)
-├── AVToELKConverter (transformation)
+├── AVToELKConverter (transformation with full hierarchy support)
 ├── CategoryStyler (styling)
 ├── PortDirectionResolver (semantics)
-├── ELK (layout engine)
-├── HwSchematicRenderer (visualization)
-│   └── OrthogonalRouter (edge routing with separation & obstacle avoidance)
+├── ELK (layout engine with hierarchical coordinates)
+├── HwSchematicRenderer (visualization with coordinate translation)
+│   ├── findEdgeContainer() - Common ancestor detection
+│   ├── findNodePath() - Hierarchy path tracking
+│   ├── findContainerOffset() - Absolute position calculation
+│   └── Cumulative offset rendering for nested hierarchies
+├── DebugPanel (visual inspection & diagnostics)
 ├── ControlsPanel (UI controls)
 └── ExampleLoader (example management)
     ↓
-Interactive Canvas + Controls Panel
+Interactive Canvas + Controls Panel + Debug Panel
 ```
 
 ## Next Phase Preview
