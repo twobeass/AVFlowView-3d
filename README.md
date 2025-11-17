@@ -11,7 +11,7 @@ AVFlowView-3d transforms structured JSON descriptions of audio-visual systems in
 ## Key Features
 
 - **Automatic Layout**: Left-to-right or top-to-bottom signal flow with ELK.js (fully hierarchical)
-- **Smart Cable Routing**: ELK.js orthogonal routing with perfect port alignment at all hierarchy levels
+- **Smart Cable Routing**: Native ELK.js orthogonal routing with perfect port alignment at all hierarchy levels
 - **Category Colors**: Consistent color-coding for audio, video, network, control, and power
 - **Areas & Grouping**: Visual containers for rooms, racks, and zones
 - **Focus/Context**: Highlight N-hop neighborhoods to reduce visual complexity
@@ -106,10 +106,10 @@ AVFlowView-3d/
 │   └── invalid-examples/        # Examples of validation errors
 ├── src/
 │   ├── converters/              # AV to ELK graph conversion
-│   ├── renderers/               # D3-based custom rendering with orthogonal routing
+│   ├── renderers/               # D3-based rendering with native ELK routing
 │   ├── styling/                 # Category colors and styles
 │   ├── validation/              # JSON schema validation
-│   └── utils/                   # Utility functions (including OrthogonalRouter)
+│   └── utils/                   # Utility functions
 └── tests/
     ├── converters/              # Converter unit tests
     ├── validation/              # Validator unit tests
@@ -119,8 +119,7 @@ AVFlowView-3d/
 ## Technology Stack
 
 - **[D3.js](https://d3js.org/)** - Visualization and DOM manipulation
-- **[ELK.js](https://eclipse.dev/elk/)** - Graph layout engine
-- **Custom Orthogonal Router** - Professional Manhattan-style edge routing with obstacle avoidance
+- **[ELK.js](https://eclipse.dev/elk/)** - Graph layout engine with native orthogonal routing
 - **[ajv](https://ajv.js.org/)** - JSON Schema validation
 - **[Vite](https://vitejs.dev/)** - Build tool and dev server
 - **[Jest](https://jestjs.io/)** - Unit testing framework
@@ -178,7 +177,7 @@ See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
 ✅ Category-based styling system  
 ✅ D3-based rendering with zoom/pan  
 ✅ Custom device, area, and edge renderers  
-✅ **100% ELK.js orthogonal routing** - No fallback needed  
+✅ **100% native ELK.js orthogonal routing** - Integrated in layout phase  
 ✅ **Hierarchical coordinate system** - Works with nested areas at any depth  
 ✅ **Perfect port alignment** - Edges connect precisely in all layouts  
 ✅ **Debug panel** - Comprehensive visualization and diagnostic tools  
