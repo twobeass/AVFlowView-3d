@@ -44,10 +44,13 @@ function createAreaNodes(graph, elkGraph) {
     const elkArea = {
       id: area.id,
       labels: area.label ? [{ text: area.label }] : [],
+      width: 400,  // Default area width
+      height: 300, // Default area height
       children: [],
       ports: [],
       properties: {
         'hwMeta.type': 'area',
+        'elk.padding': '[top=40,left=20,bottom=20,right=20]',
       },
     };
 
@@ -90,6 +93,8 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     const elkNode = {
       id: node.id,
       labels: [{ text: label }],
+      width: 140,  // Default device width
+      height: 80,  // Default device height
       children: [],
       ports: [],
       properties: {
@@ -194,6 +199,10 @@ export class AVToELKConverter {
         'org.eclipse.elk.algorithm': 'layered',
         'org.eclipse.elk.direction': layoutDirection,
         'org.eclipse.elk.layered.edgeRouting': 'ORTHOGONAL',
+        'org.eclipse.elk.spacing.nodeNode': 80,
+        'org.eclipse.elk.spacing.edgeNode': 40,
+        'org.eclipse.elk.spacing.edgeEdge': 20,
+        'org.eclipse.elk.layered.spacing.edgeNodeBetweenLayers': 40,
       },
     };
 
