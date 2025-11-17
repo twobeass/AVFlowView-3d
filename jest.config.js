@@ -2,7 +2,7 @@ export default {
   testEnvironment: 'jsdom',
   transform: {},
   moduleNameMapper: {
-    '^(.?/.*)\.js$': '$1',
+    '^(./?.*).js$': '$1',
   },
   testMatch: [
     '**/tests/**/*.test.js',
