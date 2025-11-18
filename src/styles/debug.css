@@ -19,4 +19,346 @@
   overflow-y: auto;
 }
 
-/* ... rest unchanged ... */
+.debug-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 6px 6px 0 0;
+  cursor: move;
+}
+
+.debug-panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.debug-toggle-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.2s;
+}
+
+.debug-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.debug-panel-content {
+  padding: 16px;
+}
+
+.debug-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.debug-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.debug-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Statistics */
+.debug-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+.stat-label {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #111827;
+  font-size: 14px;
+}
+
+.elk-stat .stat-value {
+  color: #22c55e;
+}
+
+.fallback-stat .stat-value {
+  color: #ef4444;
+}
+
+/* Controls */
+.debug-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.debug-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.debug-checkbox:hover {
+  background: #f9fafb;
+}
+
+.debug-checkbox input[type="checkbox"] {
+  margin: 0 10px 0 0;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.checkbox-label {
+  font-size: 13px;
+  color: #374151;
+  user-select: none;
+}
+
+/* Indicators */
+.elk-indicator {
+  color: #22c55e;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.fallback-indicator {
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Inspector */
+.debug-inspector {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 12px;
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.inspector-hint {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
+.inspector-content {
+  font-size: 12px;
+}
+
+.inspector-content h5 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 6px;
+}
+
+.inspector-field {
+  margin-bottom: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.inspector-field strong {
+  color: #6b7280;
+  min-width: 100px;
+}
+
+.routing-badge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.routing-badge.elk {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.routing-badge.fallback {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.bend-list {
+  margin: 4px 0 0 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.bend-list li {
+  padding: 2px 0;
+  color: #6b7280;
+  font-family: 'Courier New', monospace;
+}
+
+/* Diagnostic Data Panel */
+.debug-diagnostic {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 12px;
+  min-height: 150px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+.diagnostic-hint {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
+.diagnostic-pre {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #374151;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Buttons */
+.debug-btn {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.debug-btn:last-child {
+  margin-bottom: 0;
+}
+
+.debug-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.debug-btn:active {
+  background: #d1d5db;
+}
+
+/* Debug visualizations in SVG */
+.debug-overlay {
+  pointer-events: none;
+}
+
+.debug-bend-point {
+  pointer-events: all;
+  transition: r 0.2s;
+}
+
+.debug-bend-point:hover {
+  r: 6;
+}
+
+.debug-port-extension {
+  opacity: 0.7;
+}
+
+.debug-edge-label {
+  font-family: 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .debug-panel {
+    width: calc(100% - 40px);
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+}
+
+/* Scrollbar styling */
+.debug-panel::-webkit-scrollbar,
+.debug-inspector::-webkit-scrollbar {
+  width: 8px;
+}
+
+.debug-panel::-webkit-scrollbar-track,
+.debug-inspector::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.debug-panel::-webkit-scrollbar-thumb,
+.debug-inspector::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.debug-panel::-webkit-scrollbar-thumb:hover,
+.debug-inspector::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Production mode - hidden by default */
+.debug-panel.debug-hidden {
+  display: none;
+}
+
+/* Animation for panel appearance */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.debug-panel {
+  animation: slideIn 0.3s ease-out;
+}

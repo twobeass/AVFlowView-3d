@@ -166,9 +166,9 @@ export class AVFlowView3dApp {
   extractPortInfo(data) {
     const portInfo = [];
     const traverse = (nodes) => {
-      nodes.forEach((node) => {
+      nodes.forEach(node => {
         if (node.ports && node.ports.length > 0) {
-          node.ports.forEach((port) => {
+          node.ports.forEach(port => {
             portInfo.push({ nodeId: node.id, portId: port.id, x: port.x, y: port.y, side: port.properties?.['org.eclipse.elk.portSide'] });
           });
         }
