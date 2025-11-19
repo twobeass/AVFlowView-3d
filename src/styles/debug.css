@@ -5,26 +5,27 @@
 
 .debug-panel {
   position: fixed;
-  top: 80px; /* Changed from 20px to account for topbar */
+  top: 80px; /* Below topbar */
   right: 20px;
   width: 350px;
   background: #ffffff;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 9000; /* Below topbar (10000) */
+  z-index: 9000;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, sans-serif;
   font-size: 13px;
   max-height: calc(90vh - 100px);
   overflow-y: auto;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-/* Hidden state for toggle */
 .debug-panel.hidden {
   transform: translateX(calc(100% + 40px));
+  opacity: 0;
+  pointer-events: none;
 }
 
 .debug-panel-header {
@@ -321,7 +322,7 @@
 @media (max-width: 768px) {
   .debug-panel {
     width: calc(100% - 40px);
-    top: 70px; /* Adjusted for mobile topbar height */
+    top: 10px;
     right: 10px;
     left: 10px;
   }
