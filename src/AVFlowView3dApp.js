@@ -2,7 +2,7 @@ import ELK from 'elkjs';
 
 import { AVToELKConverter } from './converters/index.js';
 import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
-import { ControlsPanel } from './ui/ControlsPanel.js';
+import { TopBar } from './ui/TopBar.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { ExampleLoader } from './utils/ExampleLoader.js';
 import { SchemaValidator } from './validation/index.js';
@@ -24,7 +24,7 @@ export class AVFlowView3dApp {
 
     this.options = {
       debug: false,
-      enableDebugPanel: true, // NEW: Enable debug panel by default (can be disabled for production)
+      enableDebugPanel: true,
       ...options,
     };
 
@@ -34,12 +34,13 @@ export class AVFlowView3dApp {
     this.elk = new ELK();
     this.currentGraph = null;
     this.currentLayoutDirection = 'LR';
-    this.layoutTime = 0; // Track layout time for debug panel
+    this.layoutTime = 0;
+    this.debugPanelVisible = false;
 
     this._initializeUI();
     this._initializeRenderer();
+    this._initializeTopBar();
     this._initializeDebugPanel();
-    this._initializeControls();
   }
 
   /**
@@ -69,6 +70,35 @@ export class AVFlowView3dApp {
   }
 
   /**
+   * Initialize the TopBar with all controls
+   * @private
+   */
+  async _initializeTopBar() {
+    this.topBar = new TopBar(document.body, {
+      onZoomIn: () => this.zoomIn(),
+      onZoomOut: () => this.zoomOut(),
+      onReset: () => this.resetView(),
+      onLayoutChange: (direction) => this.changeLayout(direction),
+      onExampleLoad: (exampleName) => this.loadExample(exampleName),
+      onDebugStateChange: (state) => this.handleDebugStateChange(state),
+      onExportELK: () => this.exportELKGraph(),
+      onExportStats: () => this.exportStatistics(),
+      onToggleDebugPanel: () => this.toggleDebugPanel(),
+    });
+
+    // Load available examples
+    try {
+      const examples = await this.exampleLoader.listExamples();
+      this.topBar.setAvailableExamples(examples);
+    } catch (error) {
+      if (this.options.debug) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to list examples:', error);
+      }
+    }
+  }
+
+  /**
    * Initialize the debug panel for ELK routing diagnostics
    * @private
    */
@@ -77,31 +107,44 @@ export class AVFlowView3dApp {
       return;
     }
 
-    this.debugPanel = new DebugPanel(this.renderer);
+    // Create debug panel container
+    const debugContainer = document.createElement('div');
+    debugContainer.id = 'debug-panel-container';
+    document.body.appendChild(debugContainer);
+
+    this.debugPanel = new DebugPanel(this.renderer, '#debug-panel-container');
     window.debugPanel = this.debugPanel;
-    if (!this.options.debug && !this.options.enableDebugPanel) {
-      this.debugPanel.hide();
+    
+    // Start hidden
+    this.debugPanel.hide();
+  }
+
+  /**
+   * Handle debug state changes from TopBar
+   * @private
+   */
+  handleDebugStateChange(state) {
+    if (this.debugPanel) {
+      this.debugPanel.debugState = state;
+      this.debugPanel.updateVisualization();
     }
   }
 
   /**
-   * Initialize the controls panel with callbacks
-   * @private
+   * Export ELK graph JSON
    */
-  async _initializeControls() {
-    this.controlsPanel = new ControlsPanel(this.container, {
-      onZoomIn: () => this.zoomIn(),
-      onZoomOut: () => this.zoomOut(),
-      onReset: () => this.resetView(),
-      onLayoutChange: (direction) => this.changeLayout(direction),
-      onExampleLoad: (exampleName) => this.loadExample(exampleName),
-    });
-    try {
-      const examples = await this.exampleLoader.listExamples();
-      this.controlsPanel.setAvailableExamples(examples);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to list examples:', error);
+  exportELKGraph() {
+    if (this.debugPanel) {
+      this.debugPanel.exportELKGraph();
+    }
+  }
+
+  /**
+   * Export statistics CSV
+   */
+  exportStatistics() {
+    if (this.debugPanel) {
+      this.debugPanel.exportStatistics();
     }
   }
 
@@ -114,8 +157,10 @@ export class AVFlowView3dApp {
       }
       return validation;
     }
+
     this.currentGraph = graphJson;
     const elkGraph = this.converter.convert(graphJson);
+
     // PERFORMANCE PATCH: Overwrite ELK options if node count is high
     const nodeCount = (function countNodes(node) {
       let count = 0;
@@ -128,7 +173,9 @@ export class AVFlowView3dApp {
       traverse(node);
       return count;
     })(elkGraph);
+
     if (nodeCount > 100) {
+      // eslint-disable-next-line no-console
       console.warn(
         `⚠️ Large graph detected (${nodeCount} nodes) - applying fast ELK layout options.`
       );
@@ -140,26 +187,42 @@ export class AVFlowView3dApp {
       elkGraph.layoutOptions['org.eclipse.elk.spacing.nodeNode'] = 150;
       elkGraph.layoutOptions['org.eclipse.elk.spacing.edgeNode'] = 60;
     }
+
     try {
       const layoutStart = performance.now();
       const laidOutGraph = await this.elk.layout(elkGraph);
       this.layoutTime = performance.now() - layoutStart;
+
       if (this.options.debug) {
         // eslint-disable-next-line no-console
         console.log('Layout complete', laidOutGraph);
         // eslint-disable-next-line no-console
         console.log(`⚡ Layout time: ${this.layoutTime.toFixed(2)}ms`);
-        // DEBUG: Log port positions from ELK
         // eslint-disable-next-line no-console
         console.log(
           '🔍 ELK Port Positions:',
           this.extractPortInfo(laidOutGraph)
         );
       }
+
+      // Render the graph
       this.renderer.render(laidOutGraph);
+
+      // Update debug panel and stats
       if (this.debugPanel) {
         this.debugPanel.update(laidOutGraph, this.layoutTime);
+        
+        // Update TopBar stats
+        if (this.topBar) {
+          this.topBar.updateStats({
+            totalEdges: this.debugPanel.stats.totalEdges,
+            elkEdges: this.debugPanel.stats.elkEdges,
+            fallbackEdges: this.debugPanel.stats.fallbackEdges,
+            layoutTime: this.layoutTime,
+          });
+        }
       }
+
       return {
         success: true,
         elkGraph: laidOutGraph,
@@ -255,22 +318,26 @@ export class AVFlowView3dApp {
   }
 
   toggleDebugPanel() {
-    if (this.debugPanel) {
-      this.debugPanel.isVisible = !this.debugPanel.isVisible;
-      if (this.debugPanel.isVisible) {
-        this.debugPanel.show();
+    const panel = document.querySelector('.debug-panel');
+    if (panel) {
+      this.debugPanelVisible = !this.debugPanelVisible;
+      if (this.debugPanelVisible) {
+        panel.classList.remove('hidden');
       } else {
-        this.debugPanel.hide();
+        panel.classList.add('hidden');
       }
     }
   }
 
   destroy() {
-    if (this.controlsPanel) {
-      this.controlsPanel.destroy();
+    if (this.topBar) {
+      this.topBar.destroy();
     }
     if (this.debugPanel) {
-      this.debugPanel.hide();
+      const debugContainer = document.getElementById('debug-panel-container');
+      if (debugContainer) {
+        debugContainer.remove();
+      }
     }
     if (this.container) {
       this.container.innerHTML = '';
