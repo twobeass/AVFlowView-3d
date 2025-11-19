@@ -102,14 +102,24 @@ export class ControlsPanel {
   }
 
   destroy() {
-    this._zoomInBtn.removeEventListener('click', this._zoomInHandler);
-    this._zoomOutBtn.removeEventListener('click', this._zoomOutHandler);
-    this._zoomResetBtn.removeEventListener('click', this._zoomResetHandler);
-    this._layoutSelect.removeEventListener('change', this._layoutChangeHandler);
-    this._exampleSelector.removeEventListener(
-      'change',
-      this._exampleChangeHandler
-    );
+    if (this._zoomInBtn) {
+      this._zoomInBtn.removeEventListener('click', this._zoomInHandler);
+    }
+    if (this._zoomOutBtn) {
+      this._zoomOutBtn.removeEventListener('click', this._zoomOutHandler);
+    }
+    if (this._zoomResetBtn) {
+      this._zoomResetBtn.removeEventListener('click', this._zoomResetHandler);
+    }
+    if (this._layoutSelect) {
+      this._layoutSelect.removeEventListener('change', this._layoutChangeHandler);
+    }
+    if (this._exampleSelector) {
+      this._exampleSelector.removeEventListener(
+        'change',
+        this._exampleChangeHandler
+      );
+    }
     if (this.panel && this.container.contains(this.panel)) {
       this.container.removeChild(this.panel);
     }

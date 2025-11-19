@@ -15,88 +15,134 @@ describe('PortDirectionResolver', () => {
     it('should create instance', () => {
       expect(resolver).toBeInstanceOf(PortDirectionResolver);
     });
-  });
 
-  describe('resolveDirection', () => {
-    it('should resolve input port direction', () => {
-      const direction = resolver.resolveDirection('input');
-      expect(direction).toBeDefined();
-      expect(typeof direction).toBe('string');
-    });
-
-    it('should resolve output port direction', () => {
-      const direction = resolver.resolveDirection('output');
-      expect(direction).toBeDefined();
-      expect(typeof direction).toBe('string');
-    });
-
-    it('should resolve bidirectional port direction', () => {
-      const direction = resolver.resolveDirection('bidirectional');
-      expect(direction).toBeDefined();
-      expect(typeof direction).toBe('string');
-    });
-
-    it('should handle null alignment', () => {
-      const direction = resolver.resolveDirection(null);
-      expect(direction).toBeDefined();
-    });
-
-    it('should handle undefined alignment', () => {
-      const direction = resolver.resolveDirection(undefined);
-      expect(direction).toBeDefined();
-    });
-
-    it('should handle unknown alignment', () => {
-      const direction = resolver.resolveDirection('unknown');
-      expect(direction).toBeDefined();
-    });
-
-    it('should return consistent results for same input', () => {
-      const dir1 = resolver.resolveDirection('input');
-      const dir2 = resolver.resolveDirection('input');
-      expect(dir1).toBe(dir2);
+    it('should initialize bidirectional set', () => {
+      expect(resolver.bidirectional).toBeDefined();
+      expect(resolver.bidirectional instanceof Set).toBe(true);
     });
   });
 
-  describe('resolveDirectionForLayout', () => {
-    it('should resolve direction for LR layout with input', () => {
-      const direction = resolver.resolveDirectionForLayout('input', 'LR');
-      expect(direction).toBeDefined();
+  describe('analyzeBidirectionalPorts', () => {
+    it('should analyze ports with no edges', () => {
+      const ports = [
+        { id: 'port1', direction: 'input' },
+        { id: 'port2', direction: 'output' },
+      ];
+      const edges = [];
+      const result = resolver.analyzeBidirectionalPorts(ports, edges);
+      expect(result).toBeDefined();
+      expect(result.length).toBe(2);
     });
 
-    it('should resolve direction for LR layout with output', () => {
-      const direction = resolver.resolveDirectionForLayout('output', 'LR');
-      expect(direction).toBeDefined();
+    it('should infer bidirectional port as output when more outgoing edges', () => {
+      const ports = [{ id: 'port1', direction: 'bidirectional' }];
+      const edges = [
+        { source: 'port1', target: 'port2' },
+        { source: 'port1', target: 'port3' },
+      ];
+      const result = resolver.analyzeBidirectionalPorts(ports, edges);
+      expect(result[0].inferredDirection).toBe('out');
     });
 
-    it('should resolve direction for TB layout with input', () => {
-      const direction = resolver.resolveDirectionForLayout('input', 'TB');
-      expect(direction).toBeDefined();
+    it('should infer bidirectional port as input when more incoming edges', () => {
+      const ports = [{ id: 'port1', direction: 'bidirectional' }];
+      const edges = [
+        { source: 'port2', target: 'port1' },
+        { source: 'port3', target: 'port1' },
+      ];
+      const result = resolver.analyzeBidirectionalPorts(ports, edges);
+      expect(result[0].inferredDirection).toBe('in');
     });
 
-    it('should resolve direction for TB layout with output', () => {
-      const direction = resolver.resolveDirectionForLayout('output', 'TB');
-      expect(direction).toBeDefined();
+    it('should keep bidirectional when equal incoming and outgoing', () => {
+      const ports = [{ id: 'port1', direction: 'bidirectional' }];
+      const edges = [
+        { source: 'port1', target: 'port2' },
+        { source: 'port3', target: 'port1' },
+      ];
+      const result = resolver.analyzeBidirectionalPorts(ports, edges);
+      expect(result[0].inferredDirection).toBe('bidirectional');
     });
 
-    it('should handle null layout', () => {
-      const direction = resolver.resolveDirectionForLayout('input', null);
-      expect(direction).toBeDefined();
+    it('should handle empty port list', () => {
+      const ports = [];
+      const edges = [];
+      const result = resolver.analyzeBidirectionalPorts(ports, edges);
+      expect(result).toBeDefined();
+      expect(result.length).toBe(0);
+    });
+  });
+
+  describe('assignPortSides', () => {
+    it('should assign left side for input ports', () => {
+      const ports = [{ id: 'port1', inferredDirection: 'in' }];
+      const result = resolver.assignPortSides(ports);
+      expect(result[0].side).toBe('left');
     });
 
-    it('should handle undefined layout', () => {
-      const direction = resolver.resolveDirectionForLayout('input', undefined);
-      expect(direction).toBeDefined();
+    it('should assign right side for output ports', () => {
+      const ports = [{ id: 'port1', inferredDirection: 'out' }];
+      const result = resolver.assignPortSides(ports);
+      expect(result[0].side).toBe('right');
     });
 
-    it('should handle bidirectional ports in LR layout', () => {
-      const direction = resolver.resolveDirectionForLayout('bidirectional', 'LR');
-      expect(direction).toBeDefined();
+    it('should assign top side for bidirectional ports', () => {
+      const ports = [{ id: 'port1', inferredDirection: 'bidirectional' }];
+      const result = resolver.assignPortSides(ports);
+      expect(result[0].side).toBe('top');
     });
 
-    it('should handle bidirectional ports in TB layout', () => {
-      const direction = resolver.resolveDirectionForLayout('bidirectional', 'TB');
-      expect(direction).toBeDefined();
+    it('should handle multiple ports', () => {
+      const ports = [
+        { id: 'port1', inferredDirection: 'in' },
+        { id: 'port2', inferredDirection: 'out' },
+        { id: 'port3', inferredDirection: 'bidirectional' },
+      ];
+      const result = resolver.assignPortSides(ports);
+      expect(result[0].side).toBe('left');
+      expect(result[1].side).toBe('right');
+      expect(result[2].side).toBe('top');
+    });
+
+    it('should handle missing inferredDirection', () => {
+      const ports = [{ id: 'port1' }];
+      const result = resolver.assignPortSides(ports);
+      expect(result[0].side).toBe('top');
+    });
+  });
+
+  describe('resolve', () => {
+    it('should analyze and assign sides to bidirectional ports', () => {
+      const ports = [{ id: 'port1', direction: 'bidirectional' }];
+      const edges = [{ source: 'port1', target: 'port2' }];
+      const result = resolver.resolve(ports, edges);
+      expect(result).toBeDefined();
+      expect(result[0].inferredDirection).toBe('out');
+      expect(result[0].side).toBe('right');
+    });
+
+    it('should handle mixed port types', () => {
+      const ports = [
+        { id: 'port1', direction: 'input' },
+        { id: 'port2', direction: 'bidirectional' },
+      ];
+      const edges = [{ source: 'port2', target: 'port3' }];
+      const result = resolver.resolve(ports, edges);
+      expect(result.length).toBe(2);
+      expect(result[0]).toBeDefined();
+      expect(result[1].side).toBe('right');
+    });
+
+    it('should handle empty input', () => {
+      const result = resolver.resolve([], []);
+      expect(result).toBeDefined();
+      expect(result.length).toBe(0);
+    });
+
+    it('should handle null ports', () => {
+      expect(() => {
+        resolver.resolve(null, []);
+      }).toThrow();
     });
   });
 });

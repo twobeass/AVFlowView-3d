@@ -1,6 +1,8 @@
 export default {
   testEnvironment: 'jsdom',
   transform: {},
+  injectGlobals: true,
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '^(.*/.*)\\.js$': '$1',
   },
