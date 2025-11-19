@@ -178,7 +178,9 @@ export class AVFlowView3dApp {
   }
 
   async changeLayout(direction) {
-    if (!this.currentGraph) {return;}
+    if (!this.currentGraph) {
+      return;
+    }
     this.currentLayoutDirection = direction;
     this.currentGraph.layout.direction = direction;
     await this.load(this.currentGraph);
@@ -217,10 +219,14 @@ export class AVFlowView3dApp {
             });
           });
         }
-        if (node.children) {traverse(node.children);}
+        if (node.children) {
+          traverse(node.children);
+        }
       });
     };
-    if (data.children) {traverse(data.children);}
+    if (data.children) {
+      traverse(data.children);
+    }
     return portInfo;
   }
 

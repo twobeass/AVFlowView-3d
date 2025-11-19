@@ -493,7 +493,9 @@ class HwSchematicRenderer {
 
         if (node.children) {
           const found = search(node.children, newPath);
-          if (found) {return found;}
+          if (found) {
+            return found;
+          }
         }
       }
       return null;
@@ -521,7 +523,9 @@ class HwSchematicRenderer {
 
         if (node.children) {
           const found = search(node.children, { x: absX, y: absY });
-          if (found) {return found;}
+          if (found) {
+            return found;
+          }
         }
       }
       return null;
@@ -636,7 +640,9 @@ class HwSchematicRenderer {
         if (node.children) {
           // Recurse with cumulative offset
           const found = search(node.children, { x, y }, true);
-          if (found) {return found;}
+          if (found) {
+            return found;
+          }
         }
       }
       return null;
@@ -808,7 +814,9 @@ class HwSchematicRenderer {
   detectLocalCollisions(waypoints, obstacles, checkSegments = null) {
     const collisions = [];
 
-    if (waypoints.length < 2) {return collisions;}
+    if (waypoints.length < 2) {
+      return collisions;
+    }
 
     // Use config value if not specified
     const segmentsToCheck =
@@ -982,7 +990,9 @@ class HwSchematicRenderer {
             break;
           }
         }
-        if (hasCollision) {break;}
+        if (hasCollision) {
+          break;
+        }
       }
 
       if (!hasCollision) {

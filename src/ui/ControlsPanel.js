@@ -47,17 +47,24 @@ export class ControlsPanel {
     this._exampleSelector = this.panel.querySelector('#example-selector');
 
     this._zoomInHandler = () => {
-      if (this.callbacks.onZoomIn) {this.callbacks.onZoomIn();}
+      if (this.callbacks.onZoomIn) {
+        this.callbacks.onZoomIn();
+      }
     };
     this._zoomOutHandler = () => {
-      if (this.callbacks.onZoomOut) {this.callbacks.onZoomOut();}
+      if (this.callbacks.onZoomOut) {
+        this.callbacks.onZoomOut();
+      }
     };
     this._zoomResetHandler = () => {
-      if (this.callbacks.onReset) {this.callbacks.onReset();}
+      if (this.callbacks.onReset) {
+        this.callbacks.onReset();
+      }
     };
     this._layoutChangeHandler = (e) => {
-      if (this.callbacks.onLayoutChange)
-        {this.callbacks.onLayoutChange(e.target.value);}
+      if (this.callbacks.onLayoutChange) {
+        this.callbacks.onLayoutChange(e.target.value);
+      }
     };
     this._exampleChangeHandler = (e) => {
       if (this.callbacks.onExampleLoad) {
@@ -80,7 +87,9 @@ export class ControlsPanel {
 
   setAvailableExamples(examples) {
     this.examples = examples;
-    if (!this._exampleSelector) {return;}
+    if (!this._exampleSelector) {
+      return;
+    }
     // Clear current options except placeholder
     this._exampleSelector.innerHTML =
       '<option value="">Select example...</option>';
