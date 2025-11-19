@@ -115,7 +115,6 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
       const side = computePortSide(port.alignment, layoutDirection);
       portsBySide[side].push({ portKey, port });
     });
-
     // Second pass: create ELK ports with correct distribution per side
     let globalIndex = 0;
     Object.entries(portsBySide).forEach(([side, portsOnSide]) => {
@@ -249,7 +248,7 @@ export class AVToELKConverter {
       elkGraph.layoutOptions['org.eclipse.elk.spacing.nodeNode'] = 150;
       elkGraph.layoutOptions['org.eclipse.elk.spacing.edgeNode'] = 60;
     }
-    createAreaNodes(graph, elkGraph);
+    const areaNodeMap = createAreaNodes(graph, elkGraph);
     createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection);
     createEdges(graph, elkGraph);
     return elkGraph;
