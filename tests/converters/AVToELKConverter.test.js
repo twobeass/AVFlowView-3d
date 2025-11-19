@@ -18,7 +18,12 @@ describe('AVToELKConverter', () => {
             category: 'Video',
             status: 'Regular',
             ports: {
-              out1: { alignment: 'Out', label: 'SDI Out', type: 'SDI', gender: 'M' },
+              out1: {
+                alignment: 'Out',
+                label: 'SDI Out',
+                type: 'SDI',
+                gender: 'M',
+              },
             },
           },
           {
@@ -28,7 +33,12 @@ describe('AVToELKConverter', () => {
             category: 'Video',
             status: 'Regular',
             ports: {
-              in1: { alignment: 'In', label: 'SDI In', type: 'SDI', gender: 'F' },
+              in1: {
+                alignment: 'In',
+                label: 'SDI In',
+                type: 'SDI',
+                gender: 'F',
+              },
             },
           },
         ],
@@ -51,7 +61,9 @@ describe('AVToELKConverter', () => {
       expect(result.children).toHaveLength(2);
       expect(result.edges).toHaveLength(1);
       expect(result.layoutOptions['org.eclipse.elk.algorithm']).toBe('layered');
-      expect(result.layoutOptions['org.eclipse.elk.layered.edgeRouting']).toBe('ORTHOGONAL');
+      expect(result.layoutOptions['org.eclipse.elk.layered.edgeRouting']).toBe(
+        'ORTHOGONAL'
+      );
     });
 
     test('should create ELK nodes with correct structure', () => {
@@ -131,8 +143,18 @@ describe('AVToELKConverter', () => {
             category: 'Network',
             status: 'Regular',
             ports: {
-              port1: { alignment: 'In', label: 'Port 1', type: 'RJ45', gender: 'F' },
-              port2: { alignment: 'Out', label: 'Port 2', type: 'RJ45', gender: 'M' },
+              port1: {
+                alignment: 'In',
+                label: 'Port 1',
+                type: 'RJ45',
+                gender: 'F',
+              },
+              port2: {
+                alignment: 'Out',
+                label: 'Port 2',
+                type: 'RJ45',
+                gender: 'M',
+              },
             },
           },
         ],
@@ -166,7 +188,12 @@ describe('AVToELKConverter', () => {
             category: 'Network',
             status: 'Regular',
             ports: {
-              p1: { alignment: 'Bidirectional', label: 'Port 1', type: 'RJ45', gender: 'N/A' },
+              p1: {
+                alignment: 'Bidirectional',
+                label: 'Port 1',
+                type: 'RJ45',
+                gender: 'N/A',
+              },
             },
           },
         ],
@@ -203,7 +230,16 @@ describe('AVToELKConverter', () => {
   describe('Layout direction', () => {
     test('should default to LEFT-to-RIGHT (RIGHT) layout', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -214,7 +250,16 @@ describe('AVToELKConverter', () => {
     test('should use LR layout when specified', () => {
       const graph = {
         layout: { direction: 'LR' },
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -225,7 +270,16 @@ describe('AVToELKConverter', () => {
     test('should use TB layout when specified', () => {
       const graph = {
         layout: { direction: 'TB' },
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -244,7 +298,12 @@ describe('AVToELKConverter', () => {
             category: 'A',
             status: 'Regular',
             ports: {
-              in1: { alignment: 'In', label: 'Input', type: 'USB', gender: 'F' },
+              in1: {
+                alignment: 'In',
+                label: 'Input',
+                type: 'USB',
+                gender: 'F',
+              },
             },
           },
         ],
@@ -267,7 +326,12 @@ describe('AVToELKConverter', () => {
             category: 'A',
             status: 'Regular',
             ports: {
-              out1: { alignment: 'Out', label: 'Output', type: 'USB', gender: 'M' },
+              out1: {
+                alignment: 'Out',
+                label: 'Output',
+                type: 'USB',
+                gender: 'M',
+              },
             },
           },
         ],
@@ -290,7 +354,12 @@ describe('AVToELKConverter', () => {
             category: 'A',
             status: 'Regular',
             ports: {
-              p1: { alignment: 'Bidirectional', label: 'Port 1', type: 'RJ45', gender: 'N/A' },
+              p1: {
+                alignment: 'Bidirectional',
+                label: 'Port 1',
+                type: 'RJ45',
+                gender: 'N/A',
+              },
             },
           },
         ],
@@ -307,8 +376,22 @@ describe('AVToELKConverter', () => {
     test('should create edges with port-specific connections', () => {
       const graph = {
         nodes: [
-          { id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} },
-          { id: 'n2', manufacturer: 'M', model: 'Y', category: 'A', status: 'Regular', ports: {} },
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+          {
+            id: 'n2',
+            manufacturer: 'M',
+            model: 'Y',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
         ],
         edges: [
           {
@@ -332,8 +415,22 @@ describe('AVToELKConverter', () => {
     test('should create edges without port keys (node-level connections)', () => {
       const graph = {
         nodes: [
-          { id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} },
-          { id: 'n2', manufacturer: 'M', model: 'Y', category: 'A', status: 'Regular', ports: {} },
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+          {
+            id: 'n2',
+            manufacturer: 'M',
+            model: 'Y',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
         ],
         edges: [
           {
@@ -353,7 +450,16 @@ describe('AVToELKConverter', () => {
 
     test('should preserve edge metadata', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [
           {
             id: 'e1',
@@ -378,7 +484,16 @@ describe('AVToELKConverter', () => {
 
     test('should skip edges with missing required fields', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [
           { id: 'e1' }, // missing source and target
           { id: 'e2', source: 'n1' }, // missing target
@@ -398,7 +513,16 @@ describe('AVToELKConverter', () => {
           { id: 'room1', label: 'Room 1' },
           { id: 'room2', label: 'Room 2' },
         ],
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -461,7 +585,16 @@ describe('AVToELKConverter', () => {
           { id: 'floor1', label: 'Floor 1', parentId: 'building' },
           { id: 'room1', label: 'Room A', parentId: 'floor1' },
         ],
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -483,7 +616,16 @@ describe('AVToELKConverter', () => {
     test('should handle areas with invalid parentId', () => {
       const graph = {
         areas: [{ id: 'room1', label: 'Room 1', parentId: 'nonexistent' }],
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -512,7 +654,12 @@ describe('AVToELKConverter', () => {
             status: 'Existing',
             areaId: 'studio',
             ports: {
-              sdi1: { alignment: 'Out', label: 'SDI 1', type: 'SDI', gender: 'M' },
+              sdi1: {
+                alignment: 'Out',
+                label: 'SDI 1',
+                type: 'SDI',
+                gender: 'M',
+              },
             },
           },
           {
@@ -523,7 +670,12 @@ describe('AVToELKConverter', () => {
             status: 'Regular',
             areaId: 'control',
             ports: {
-              sdi_in: { alignment: 'In', label: 'SDI In', type: 'SDI', gender: 'F' },
+              sdi_in: {
+                alignment: 'In',
+                label: 'SDI In',
+                type: 'SDI',
+                gender: 'F',
+              },
             },
           },
           {
@@ -534,7 +686,12 @@ describe('AVToELKConverter', () => {
             status: 'Regular',
             areaId: 'control',
             ports: {
-              p1: { alignment: 'Bidirectional', label: 'Port 1', type: 'RJ45', gender: 'N/A' },
+              p1: {
+                alignment: 'Bidirectional',
+                label: 'Port 1',
+                type: 'RJ45',
+                gender: 'N/A',
+              },
             },
           },
         ],
@@ -567,7 +724,9 @@ describe('AVToELKConverter', () => {
 
   describe('Error handling', () => {
     test('should throw error for null input', () => {
-      expect(() => converter.convert(null)).toThrow('AVToELKConverter.convert expects a non-null object');
+      expect(() => converter.convert(null)).toThrow(
+        'AVToELKConverter.convert expects a non-null object'
+      );
     });
 
     test('should throw error for non-object input', () => {
@@ -589,7 +748,14 @@ describe('AVToELKConverter', () => {
         nodes: [
           null,
           undefined,
-          { id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} },
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
         ],
         edges: [],
       };
@@ -609,7 +775,12 @@ describe('AVToELKConverter', () => {
             category: 'A',
             status: 'Regular',
             ports: {
-              valid: { alignment: 'In', label: 'Valid', type: 'USB', gender: 'F' },
+              valid: {
+                alignment: 'In',
+                label: 'Valid',
+                type: 'USB',
+                gender: 'F',
+              },
               invalid: null,
             },
           },

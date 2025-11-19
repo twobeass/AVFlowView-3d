@@ -18,40 +18,44 @@ The following ELK options must be used for graph layout:
   'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX'
 }
 ```
+
 - Set `elk.direction` to 'RIGHT' for Left-to-Right (LR) layouts, 'DOWN' for Top-to-Bottom (TB).
 - Always set `edgeRouting` to 'ORTHOGONAL'.
 - Tune spacing for node/edge collision avoidance as above.
 
 ## Port Side Mapping Table
 
-| Layout | Alignment      | Port Side   |
-|--------|---------------|-------------|
-| LR     | In            | WEST        |
-| LR     | Out           | EAST        |
-| LR     | Bidirectional | auto*       |
-| TB     | In            | NORTH       |
-| TB     | Out           | SOUTH       |
-| TB     | Bidirectional | auto*       |
+| Layout | Alignment     | Port Side |
+| ------ | ------------- | --------- |
+| LR     | In            | WEST      |
+| LR     | Out           | EAST      |
+| LR     | Bidirectional | auto\*    |
+| TB     | In            | NORTH     |
+| TB     | Out           | SOUTH     |
+| TB     | Bidirectional | auto\*    |
 
-*For Bidirectional: Use PortDirectionResolver to assign side by majority edge direction. If even, default to In-side for predictability.
+\*For Bidirectional: Use PortDirectionResolver to assign side by majority edge direction. If even, default to In-side for predictability.
 
 ## Custom D3 Renderer with Orthogonal Edge Routing - Phase 5 Complete
 
 ### Visualization Architecture
 
 **Core Rendering:**
+
 - Custom D3-based renderer with no external schematic library dependencies
 - Integrated with d3.js ^7.8.5 for SVG manipulation and interactions
 - Uses ELK.js ^0.9.0 for automatic graph layout computation
 - Professional Manhattan-style edge routing with obstacle avoidance
 
 **Renderer Components:**
+
 - `HwSchematicRenderer` - Main renderer class managing SVG container, zoom/pan, and rendering pipeline
 - `OrthogonalRouter` - Custom edge routing utility with parallel edge separation
 - Device, area, and edge rendering with category-based styling
 - Port-side aware routing (WEST/EAST/NORTH/SOUTH)
 
 **Custom Renderers (in `src/renderers/`):**
+
 - Shape SVG as `<g class='device-node'>...</g>` with `<rect>`, category colors, labels, and ports
 - SVG IDs must be stable and computed as `nodeId` or `areaId` for proper focus
 - Event handling via `d3.select` and attached listeners
@@ -84,43 +88,49 @@ The following ELK options must be used for graph layout:
 
 **Routing Strategies:**
 
-| Port Sides | Strategy | Segments | Description |
-|------------|----------|----------|-------------|
-| EAST-WEST (horizontal) | Z-shape | 5 | Horizontal extension → vertical middle → horizontal to target |
-| NORTH-SOUTH (vertical) | Z-shape | 5 | Vertical extension → horizontal middle → vertical to target |
-| Mixed orientation | L-shape | 4 | Extension from source → turn → extension to target |
-| Direct (aligned) | Straight | 1 | Direct connection when ports align |
+| Port Sides             | Strategy | Segments | Description                                                   |
+| ---------------------- | -------- | -------- | ------------------------------------------------------------- |
+| EAST-WEST (horizontal) | Z-shape  | 5        | Horizontal extension → vertical middle → horizontal to target |
+| NORTH-SOUTH (vertical) | Z-shape  | 5        | Vertical extension → horizontal middle → vertical to target   |
+| Mixed orientation      | L-shape  | 4        | Extension from source → turn → extension to target            |
+| Direct (aligned)       | Straight | 1        | Direct connection when ports align                            |
 
 **Configuration Parameters:**
+
 - **Edge Separation:** 10px (default) - Distance between parallel edges
 - **Port Extension:** 40px - Distance to extend from port before first turn
 - **Obstacle Padding:** 20px - Clearance around device bounding boxes
 
 **Coordinate System:**
+
 - All routing in global SVG coordinates
 - Port positions calculated with absolute offsets from nested containers
 - ELK-provided bend points preserved when available
 - Offset applied perpendicular to routing direction (Y for horizontal, X for vertical)
 
 **Obstacle Avoidance:**
+
 - Basic detection with 40px extension from ports
 - Checks for line-rectangle intersections
 - Relies on port extensions to route around most obstacles
-- Future enhancement: A* pathfinding for complex scenarios
+- Future enhancement: A\* pathfinding for complex scenarios
 
 **Performance:**
+
 - Routing time: <1ms per edge (negligible)
 - Obstacle collection: O(n) where n = number of devices
 - Edge grouping: O(e) where e = number of edges
 - Tested with 100+ edges without performance issues
 
 **Test Harness with Jest:**
+
 - Jest ^29.7.0 configured for ES module support (`node --experimental-vm-modules`)
 - `jest-environment-jsdom` for DOM/SVG testing environment
 - All 79 tests passing with comprehensive renderer coverage
 - Unit tests needed for OrthogonalRouter utility (TODO)
 
 **Performance Considerations:**
+
 - SVG-based rendering enables smooth zoom from 0.1x to 10x scale
 - d3-zoom integrated for responsive pan and zoom interactions
 - Custom renderers optimized for large schematic visualization
@@ -129,6 +139,7 @@ The following ELK options must be used for graph layout:
 ## UI Controls Specifications (Phase 5)
 
 **ControlsPanel Component:**
+
 - Fixed position: top-right corner (20px from edges)
 - Dark engineering aesthetic:
   - Background: #1e1e1e
@@ -143,6 +154,7 @@ The following ELK options must be used for graph layout:
   3. Example selector (select dropdown)
 
 **Button Styling:**
+
 - Background: #282828
 - Border: #555 (1px solid)
 - Padding: 6px 10px
@@ -154,35 +166,41 @@ The following ELK options must be used for graph layout:
 - Transition: 0.2s ease
 
 **Accessibility:**
+
 - All buttons have `aria-label` attributes
 - All select elements have `aria-label` attributes
 - Keyboard navigable (tab order)
 - Clear visual focus indicators
 
 **Responsive Design:**
+
 - Mobile (<480px): 90% width, centered (5% margins)
 - Maintains functionality on all screen sizes
 
 ## Zoom Control Specifications
 
 **Zoom Methods:**
+
 - `zoomIn()`: Multiply scale by 1.3 (30% increase)
 - `zoomOut()`: Divide scale by 1.3 (30% decrease)
 - `resetZoom()`: Return to identity transform (1.0 scale, 0,0 translation)
 - `fitToView()`: Auto-scale to fit content with 50px padding
 
 **Zoom Constraints:**
+
 - Minimum scale: 0.1x (10% of original)
 - Maximum scale: 10x (1000% of original)
 - Default scale: 1.0x (100%)
 
 **Animation:**
+
 - Duration: 300ms for zoom in/out
 - Duration: 500ms for reset/fit-to-view
 - Easing: d3 default (cubic)
 - Center-based zooming maintains focal point
 
 **Pan Behavior:**
+
 - Free pan with mouse drag
 - Constrained by zoom scale
 - No boundaries (infinite canvas)
@@ -190,10 +208,12 @@ The following ELK options must be used for graph layout:
 ## Layout Direction Specifications
 
 **Supported Directions:**
+
 - LR (Left-to-Right): Signal flow from left to right
 - TB (Top-to-Bottom): Signal flow from top to bottom
 
 **Switching Behavior:**
+
 - User selects direction from dropdown
 - App triggers `changeLayout(direction)` callback
 - Graph is re-converted with new direction
@@ -202,12 +222,14 @@ The following ELK options must be used for graph layout:
 - Auto-fit to view after layout
 
 **ELK Direction Mapping:**
+
 - LR → `elk.direction = 'RIGHT'`
 - TB → `elk.direction = 'DOWN'`
 
 ## Example Loading Specifications
 
 **ExampleLoader Class:**
+
 ```js
 class ExampleLoader {
   constructor(basePath = '/examples/')
@@ -217,11 +239,13 @@ class ExampleLoader {
 ```
 
 **Available Examples:**
+
 - `simple.json` - 5 devices, basic topology
 - `medium.json` - ~10-15 devices, moderate complexity
 - `complex.json` - 20+ devices, realistic AV system
 
 **Loading Behavior:**
+
 - Fetch from server using Fetch API
 - Parse JSON
 - Return graph object
@@ -229,6 +253,7 @@ class ExampleLoader {
 - Errors logged to console
 
 **Error Handling:**
+
 - Missing files: Clear error message with filename and status
 - Invalid JSON: Parse error reported
 - Validation errors: SchemaValidator error messages displayed
@@ -237,6 +262,7 @@ class ExampleLoader {
 ## Application Pipeline (Phase 5)
 
 **Data Flow:**
+
 ```
 1. User action (load example, toggle layout)
    ↓
@@ -260,6 +286,7 @@ class ExampleLoader {
 ```
 
 **Timing Targets:**
+
 - Validation: <50ms for typical graph
 - Conversion: <100ms for typical graph
 - ELK layout: <500ms for typical graph
@@ -269,6 +296,7 @@ class ExampleLoader {
 ## Main Entry Point (src/main.js)
 
 **Bootstrap Sequence:**
+
 ```js
 1. Wait for DOMContentLoaded
 2. Get #app container
@@ -280,6 +308,7 @@ class ExampleLoader {
 ```
 
 **Error Recovery:**
+
 - Missing container: Log error, exit gracefully
 - Failed example load: Log error, show empty canvas with controls
 - Validation failure: Log error details, show empty canvas
@@ -288,6 +317,7 @@ class ExampleLoader {
 ## Testing Requirements
 
 **Unit Test Coverage:**
+
 - SchemaValidator: 100% (36 tests)
 - AVToELKConverter: 100% (25 tests)
 - CategoryStyler: 100% (8 tests)
@@ -296,6 +326,7 @@ class ExampleLoader {
 - Total: 79 tests passing
 
 **Manual Testing Checklist:**
+
 - [ ] Controls panel visible on load
 - [ ] Default example loads and renders
 - [ ] Zoom in button increases scale
@@ -307,6 +338,7 @@ class ExampleLoader {
 - [ ] No console errors during normal operation
 
 **Browser Compatibility:**
+
 - Target: Modern evergreen browsers
 - Chrome/Edge: 90+
 - Firefox: 88+
@@ -348,4 +380,4 @@ src/
 
 ---
 
-*Last updated: 2025-11-16 (Phase 5 UI Controls Panel completion)*
+_Last updated: 2025-11-16 (Phase 5 UI Controls Panel completion)_

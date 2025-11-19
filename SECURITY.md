@@ -19,6 +19,7 @@ This project is currently in active development (v0.1.0). Security updates will 
 **Description**: The d3-hwschematic library depends on an older version of d3, which transitively includes a vulnerable version of d3-color. This is a client-side visualization tool that does not process untrusted data in a way that would exploit this vulnerability.
 
 **Mitigation**:
+
 - The project only visualizes JSON data from trusted sources
 - No user-provided color values are processed by d3-color
 - Monitoring upstream (d3-hwschematic) for updates
@@ -56,6 +57,7 @@ If you discover a security vulnerability in this project:
 ## Responsible Disclosure
 
 We follow responsible disclosure practices:
+
 - Security issues will be addressed promptly
 - Fixes will be released as soon as practical
 - Public disclosure only after a fix is available

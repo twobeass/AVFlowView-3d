@@ -1,15 +1,18 @@
 # AVFlowView-3d: Autonomous Agent Implementation Guide
 
 ## Quick Start
+
 1. Read this document completely (it contains ALL context and maintenance info)
 2. Follow the implementation plan: docs/AVFlowView-3d-plan.md
 3. Reference technical details: docs/CONTEXT.md
 4. Validate against: avflowview-wiring.schema.json
 
 ## Project Goal
+
 Build an interactive AV wiring diagram visualizer using D3.js with custom orthogonal edge routing, driven by JSON schema.
 
 ## Technology Stack
+
 - **Runtime**: Node.js >=18.0.0
 - **Package Manager**: npm >=9.0.0
 - **Bundler**: Vite ^5.0.0 (note: do NOT forcibly upgrade beyond 6.x unless tested)
@@ -22,6 +25,7 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 - **Code Quality**: ESLint ^8.0.0+, Prettier ^3.0.0
 
 ## Dependency Management & Testing Tips
+
 - **Jest v29+ is required for ESM, Node >=18, and the provided test suite/config.** Downgrading to older Jest (v25.x) will cause cryptic test failures.
 - If you run `npm audit fix --force` and Jest breaks, restore with:
   ```bash
@@ -31,24 +35,27 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 - Some test and build transitive dependencies are not up-to-date (e.g., `inflight`, `d3-color`, `rimraf`). This is normal in the current npm ecosystem but monitor regularly.
 
 ## Known Vulnerabilities
+
 - **~~d3-hwschematic → d3 (<=6.7.0) → d3-color (<3.1.0)~~** – RESOLVED: d3-hwschematic removed (2025-11-17), custom orthogonal routing implemented
 - **Jest, Vite, and related ecosystem** – Upgrading past currently-tested versions may break ESM or config. Only update deliberately and check tests.
 - **Other transitive dependencies** – Most are not under direct project control and are considered low risk for this visualization tool.
 - Vulnerabilities and deprecation warnings should be reviewed, not ignored, but addressed only when upstream projects release safe updates. Do NOT force fixes that break working tests unless you will update code/config to match new major APIs.
 
 ## Rebuilding a Stable Environment
+
 1. To recover from a broken `npm install` or broken tests after an audit fix/force:
-    ```bash
-    rm -rf node_modules package-lock.json
-    git checkout origin/feature/initial-development -- package.json
-    npm install
-    npm test
-    ```
+   ```bash
+   rm -rf node_modules package-lock.json
+   git checkout origin/feature/initial-development -- package.json
+   npm install
+   npm test
+   ```
 2. Restore all ESM/Jest/ajv-formats lines in config/code if accidentally removed.
 
 ## Current Status: Phase 5 Complete ✅
 
 **Phase 5 completed with full ELK hierarchical support on 2025-11-17:**
+
 - Integrated ControlsPanel component with zoom, layout toggle, and example selector
 - Connected HwSchematicRenderer with zoom control methods (zoomIn, zoomOut, resetZoom, fitToView)
 - **100% ELK.js orthogonal routing** - Removed all custom fallback routing
@@ -61,6 +68,7 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 - **87 unit tests passing**
 
 **Key Features Now Available:**
+
 - ✅ Automatic schema validation with clear error messages
 - ✅ AV-to-ELK graph conversion with full hierarchy support
 - ✅ ELK.js automatic layout (LR/TB direction support)
@@ -76,12 +84,14 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 - ✅ Professional UI controls panel
 
 **Ready for Phase 6: Advanced Interactions**
+
 - Interactive selection (click devices/edges)
 - Focus/context visualization (N-hop neighborhood highlighting)
 - Search functionality (find by name, category, manufacturer)
 - Advanced filtering (category, status, area)
 
 ## Test & Build Status
+
 - **All tests passing, as of 2025-11-17**
 - See CHECKLIST.md for granular progress and task status
 - Test coverage: Schema validation, conversion logic, renderer initialization, styling, port direction resolution, and ELK integration
@@ -89,7 +99,8 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
 - All example files tested: simple.json, medium.json, complex.json, heavy.json
 
 ## Change Log
-*Agent should update this section after completing each phase/maintenance*
+
+_Agent should update this section after completing each phase/maintenance_
 
 - **2025-11-17: COMPLETED - ELK Hierarchical Coordinate System**
   - Resolved coordinate mismatches in hierarchical and nested layouts
@@ -145,6 +156,7 @@ Build an interactive AV wiring diagram visualizer using D3.js with custom orthog
   - Comprehensive unit tests
 
 ## Extra References
+
 - See README.md for installation and overview
 - See CHECKLIST.md for up-to-date progress tracking
 - See docs/PHASE5_COMPLETION.md for detailed Phase 5 documentation
@@ -179,6 +191,7 @@ Interactive Canvas + Controls Panel + Debug Panel
 ## Next Phase Preview
 
 **Phase 6: Advanced Interactions**
+
 - SelectionManager for click-to-select
 - FocusManager for N-hop neighborhood highlighting
 - SearchManager for text search and filtering

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - **Hybrid ELK + Custom Orthogonal Edge Routing** (CRITICAL FIX)
   - Successfully implemented hybrid approach using ELK's routing with custom port extensions
   - Enabled ELK's hierarchical routing (`hierarchyHandling: 'INCLUDE_CHILDREN'`)
@@ -49,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved project structure documentation
 
 ### Changed
+
 - Updated `package.json` to include Playwright and format scripts
 - Updated `docs/CHECKLIST.md` to accurately reflect completed phases:
   - Phase 1: Project Setup & Architecture - ✅ COMPLETED
@@ -64,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better project structure tree
 
 ### Fixed
+
 - **Edge Routing**: Replaced buggy custom OrthogonalRouter with ELK's native orthogonal routing
   - Fixed oscillating collision detection that caused edges to route through devices
   - Eliminated diagonal edge segments (now strictly horizontal/vertical)
@@ -77,31 +80,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-11-16
 
 ### Completed
+
 - Phase 1: Project Setup & Architecture
   - Project initialization with Vite, Jest, ESLint, Prettier
   - Directory structure for converters, renderers, validation, styling
   - Basic application shell with HTML entry point
   - Jest configuration with ESM support
-  
 - Phase 2: Schema Validation Layer
   - SchemaValidator implementation with ajv
   - JSON Schema 2020-12 support
   - Comprehensive test suite (50+ validation scenarios)
   - Cross-reference validation for nodes, areas, ports
-  
 - Phase 3: Data Transformation
   - AVToELKConverter implementation
   - Node, area, port, and edge mapping to ELK format
   - Layout direction support (LR/TB)
   - Nested area hierarchy handling
   - Comprehensive converter test suite
-  
 - Phase 4: Styling & Semantics
   - CategoryStyler with fixed color palette
   - PortDirectionResolver for bidirectional port analysis
   - Integration with AVToELKConverter
   - Unit tests for styling components
-  
 - Phase 5: Visualization
   - HwSchematicRenderer with d3-hwschematic integration
   - Custom DeviceRenderer, AreaRenderer, EdgeRenderer
@@ -111,6 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 79 passing unit tests
 
 ### Known Issues
+
 - Transitive dependency vulnerability in d3-color (low risk, monitored)
 - UI controls panel not yet implemented
 - Interactive features (selection, search, filter) pending Phase 6

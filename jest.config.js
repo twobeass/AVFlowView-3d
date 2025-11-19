@@ -4,15 +4,8 @@ export default {
   moduleNameMapper: {
     '^(.?/.*)\.js$': '$1',
   },
-  testMatch: [
-    '**/tests/**/*.test.js',
-    '**/__tests__/**/*.js',
-  ],
-  collectCoverageFrom: [
-    'src/**/*.js',
-    '!src/main.js',
-    '!src/**/*.test.js',
-  ],
+  testMatch: ['**/tests/**/*.test.js', '**/__tests__/**/*.js'],
+  collectCoverageFrom: ['src/**/*.js', '!src/main.js', '!src/**/*.test.js'],
   coverageThreshold: {
     global: {
       branches: 70,

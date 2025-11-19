@@ -22,7 +22,9 @@ export class ExampleLoader {
     try {
       const response = await fetch(this.basePath + name);
       if (!response.ok)
-        throw new Error(`Failed to fetch example: ${name} (${response.status})`);
+        throw new Error(
+          `Failed to fetch example: ${name} (${response.status})`
+        );
       const json = await response.json();
       return json;
     } catch (error) {

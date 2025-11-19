@@ -19,13 +19,13 @@ module.exports = {
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-debugger': 'warn',
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    
+
     // ES6+
     'prefer-const': 'error',
     'no-var': 'error',
     'prefer-arrow-callback': 'error',
     'prefer-template': 'error',
-    
+
     // Import rules
     'import/order': [
       'error',
@@ -44,10 +44,10 @@ module.exports = {
     ],
     'import/no-duplicates': 'error',
     'import/newline-after-import': 'error',
-    
+
     // Best practices
-    'eqeqeq': ['error', 'always'],
-    'curly': ['error', 'all'],
+    eqeqeq: ['error', 'always'],
+    curly: ['error', 'all'],
     'no-throw-literal': 'error',
     'no-return-await': 'error',
   },

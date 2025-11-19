@@ -79,13 +79,13 @@ import { AVFlowView3dApp } from './src/AVFlowView3dApp';
 // Initialize the viewer
 const viewer = new AVFlowView3dApp('#container', {
   width: 1200,
-  height: 800
+  height: 800,
 });
 
 // Load a graph
 fetch('examples/simple.json')
-  .then(res => res.json())
-  .then(graph => viewer.load(graph));
+  .then((res) => res.json())
+  .then((graph) => viewer.load(graph));
 ```
 
 ## Project Structure
@@ -182,7 +182,7 @@ See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
 ✅ **Hierarchical coordinate system** - Works with nested areas at any depth  
 ✅ **Perfect port alignment** - Edges connect precisely in all layouts  
 ✅ **Debug panel** - Comprehensive visualization and diagnostic tools  
-✅ **87 passing unit tests** - All edge cases covered  
+✅ **87 passing unit tests** - All edge cases covered
 
 ### In Progress
 
@@ -194,6 +194,7 @@ See [docs/CHECKLIST.md](docs/CHECKLIST.md) for detailed progress tracking.
 ### ELK Integration
 
 The project now features **production-ready ELK integration** for:
+
 - ✅ Flat layouts (no hierarchy)
 - ✅ Single-level hierarchies (areas with devices)
 - ✅ Multi-level nested hierarchies (areas within areas)

@@ -53,6 +53,7 @@ HwSchematicRenderer re-render with updated state
 ```
 
 ## 5. File/Data Boundaries
+
 - Only JSON input/output (see avflowview-wiring.schema.json for format)
 - ELK objects/edges enriched with `hwMeta`/`cssClass` (see TECHNICAL_SPECS.md)
 - No state leaks or global mutations allowed

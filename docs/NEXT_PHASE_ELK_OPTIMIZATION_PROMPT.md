@@ -8,7 +8,7 @@
 
 ## Starting Prompt for (Plan Mode)
 
-```
+````
 I need your expertise in Eclipse Layout Kernel (ELK) configuration to optimize graph routing for professional AV wiring diagrams. You'll need extensive knowledge of ELK's layered algorithm, orthogonal routing options, and hierarchical graph handling.
 
 ## Current Implementation Status
@@ -41,12 +41,14 @@ layoutOptions: {
   'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
   'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',
 }
-```
+````
 
 ## Problems to Solve
 
 ### 1. Fallback Edge in medium.json (Simple 3-Node Graph)
+
 **File:** `examples/medium.json`
+
 ```json
 {
   "nodes": [
@@ -66,25 +68,31 @@ layoutOptions: {
 **Hypothesis:** Port-level edges within same container might need special handling
 
 ### 2. Edge Overlapping/Bundling
+
 **Issue:** Multiple edges sharing paths overlap completely, reducing readability
 **Current State:** ELK has `spacing.edgeEdge: 55` but edges still overlap
 **Questions:**
+
 - Is there an ELK option for automatic edge bundling?
 - Should we use `org.eclipse.elk.layered.edgeRouting.splines.mode`?
 - Can ELK offset parallel edges automatically?
 
 ### 3. Extreme Routing in Some Cases
+
 **Issue:** Some edges take unnecessarily long paths (going far out of the way)
 **Visible in:** medium.json shows convoluted routing
 **Questions:**
+
 - Is there an ELK option to prefer shorter paths?
 - Can we tune the cost function for routing?
 - Should we use different `edgeRouting` modes (POLYLINE vs ORTHOGONAL)?
 
 ### 4. Scalability with Heavy Graphs
+
 **File:** `examples/heavy.json` - 80+ nodes, 200+ edges
 **Untested Performance:** Need to verify ELK handles this efficiently
 **Questions:**
+
 - Are there ELK performance optimization options?
 - Should we enable incremental layout?
 - Can we use different algorithms for large graphs?
@@ -92,6 +100,7 @@ layoutOptions: {
 ## Graph Structure Context
 
 **Hierarchy:**
+
 ```
 Root Graph
   ├─ Area: "Control Room"
@@ -106,11 +115,13 @@ Root Graph
 ```
 
 **Edge Types:**
+
 - Same-area edges (e.g., switcher → network-switch within Equipment Rack)
 - Cross-area edges (e.g., camera → switcher from Studio Floor to Equipment Rack)
 - Hierarchical edges (spanning nested areas)
 
 **Port Distribution:**
+
 - Devices have 1-8 ports
 - Ports evenly distributed on EAST/WEST sides (LR layout)
 - Custom port positioning (not ELK-controlled)
@@ -118,6 +129,7 @@ Root Graph
 ## Technical Constraints
 
 **Must Preserve:**
+
 - ✅ Custom port positions (evenly distributed on node edges)
 - ✅ Port extensions (edges must "stick out" 30px from ports)
 - ✅ Zero edges through nodes
@@ -125,6 +137,7 @@ Root Graph
 - ✅ Backward compatibility
 
 **Can Change:**
+
 - ELK configuration options
 - Spacing parameters
 - Algorithm choices
@@ -135,25 +148,30 @@ Root Graph
 To optimize this, you need deep knowledge of:
 
 ### 1. ELK Layered Algorithm Options
+
 - **Node placement strategies:** NETWORK_SIMPLEX, SIMPLE, INTERACTIVE, etc.
 - **Layer assignment:** Different strategies and their effects
 - **Crossing minimization:** LAYER_SWEEP vs BARYCENTER vs others
 - **Cycle breaking:** How it affects routing
 
 ### 2. Orthogonal Edge Routing
+
 - **Routing modes:** ORTHOGONAL vs POLYLINE vs SPLINES
 - **Edge-node spacing:** How to ensure edges don't overlap nodes
 - **Edge-edge spacing:** Making parallel edges visually distinct
 - **Junction points:** Controlling where edges can cross/meet
 
 ### 3. Hierarchical Graph Handling
+
 - **hierarchyHandling options:** INCLUDE_CHILDREN, SEPARATE_CHILDREN, etc.
 - **Cross-hierarchy edges:** How ELK routes between nested areas
 - **Port constraints:** Ensuring ports stay on correct sides
 - **Compound node handling:** Areas containing devices
 
 ### 4. Advanced Spacing Options
+
 All ELK spacing options and their interactions:
+
 - `spacing.nodeNode`
 - `spacing.edgeNode`
 - `spacing.edgeEdge`
@@ -162,12 +180,14 @@ All ELK spacing options and their interactions:
 - Individual component spacing overrides
 
 ### 5. Port Handling
+
 - **Port sides:** NORTH, SOUTH, EAST, WEST
 - **Port constraints:** Fixed vs free positioning
 - **Port ordering:** How ELK arranges ports
 - **Port offset:** Can we influence port position on node edge?
 
 ### 6. Edge Routing Specific Options
+
 - `layered.edgeRouting.selfLoopDistribution`
 - `layered.edgeRouting.selfLoopPlacement`
 - `layered.edgeRouting.splines.mode`
@@ -177,26 +197,31 @@ All ELK spacing options and their interactions:
 ## Desired Outcomes
 
 **Priority 1: All Edges Get ELK Routing**
+
 - Eliminate the 1 fallback edge in medium.json
 - 100% ELK routing coverage (or understand why not possible)
 - Identify which edge configurations prevent ELK routing
 
 **Priority 2: Better Visual Separation**
+
 - Parallel edges should be clearly distinguishable
 - Reduce/eliminate overlapping edges
 - Maintain readability even with 10+ parallel edges
 
 **Priority 3: Shorter/Cleaner Paths**
+
 - Reduce unnecessary detours
 - More direct routing where obstacles allow
 - Professional appearance (like Visio/Lucidchart quality)
 
 **Priority 4: Scalability**
+
 - Confirm heavy.json (80+ nodes) renders efficiently
 - Maintain performance with 1000+ nodes
 - No layout explosions or extreme computation times
 
 **Priority 5: Maintainability**
+
 - Well-documented ELK configuration choices
 - Clear rationale for each option
 - Tuning guide for different graph types
@@ -248,6 +273,7 @@ Create a comprehensive plan to:
 ## Success Criteria
 
 Your plan should achieve:
+
 - [ ] 100% ELK routing coverage (or explain why impossible)
 - [ ] Visual Debug Mode (activate through GUI) to let the user understand the routings better and give better feedback to the agent
 - [ ] Clear visual separation of parallel edges
@@ -259,6 +285,7 @@ Your plan should achieve:
 ## Deliverable
 
 A detailed implementation plan including:
+
 1. Specific ELK configuration changes (option by option)
 2. Testing strategy for each change
 3. Rollback plan if changes cause issues
@@ -266,4 +293,7 @@ A detailed implementation plan including:
 5. Documentation updates needed
 
 Take your time to research ELK's capabilities thoroughly. This is about leveraging ELK's full power to achieve professional-grade routing quality.
+
+```
+
 ```

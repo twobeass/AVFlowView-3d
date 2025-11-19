@@ -100,6 +100,7 @@ Interactive Canvas + Controls
 ```
 
 **Key Components:**
+
 - **AVFlowView3dApp**: Main orchestrator managing the entire pipeline
 - **ControlsPanel**: UI component for user interactions
 - **ExampleLoader**: Utility for loading and managing example graphs
@@ -114,4 +115,4 @@ Interactive Canvas + Controls
 4. **No surprises**: Validation errors are clear; controls behave predictably
 5. **Professional appearance**: Engineering aesthetic suitable for client presentations and technical documentation
 
-*Last updated: 2025-11-16 (Phase 5 UI Controls Panel completion)*
+_Last updated: 2025-11-16 (Phase 5 UI Controls Panel completion)_

@@ -1,7 +1,10 @@
 // src/ui/ControlsPanel.js
 export class ControlsPanel {
   constructor(container, callbacks) {
-    this.container = typeof container === 'string' ? document.querySelector(container) : container;
+    this.container =
+      typeof container === 'string'
+        ? document.querySelector(container)
+        : container;
     this.callbacks = callbacks || {};
     this.render();
     this.attachEventListeners();
@@ -53,12 +56,13 @@ export class ControlsPanel {
       if (this.callbacks.onReset) this.callbacks.onReset();
     };
     this._layoutChangeHandler = (e) => {
-      if (this.callbacks.onLayoutChange) this.callbacks.onLayoutChange(e.target.value);
+      if (this.callbacks.onLayoutChange)
+        this.callbacks.onLayoutChange(e.target.value);
     };
     this._exampleChangeHandler = (e) => {
       if (this.callbacks.onExampleLoad) {
         const val = e.target.value;
-        if(val) {
+        if (val) {
           this.callbacks.onExampleLoad(val);
         }
       }
@@ -68,15 +72,19 @@ export class ControlsPanel {
     this._zoomOutBtn.addEventListener('click', this._zoomOutHandler);
     this._zoomResetBtn.addEventListener('click', this._zoomResetHandler);
     this._layoutSelect.addEventListener('change', this._layoutChangeHandler);
-    this._exampleSelector.addEventListener('change', this._exampleChangeHandler);
+    this._exampleSelector.addEventListener(
+      'change',
+      this._exampleChangeHandler
+    );
   }
 
   setAvailableExamples(examples) {
     this.examples = examples;
-    if(!this._exampleSelector) return;
+    if (!this._exampleSelector) return;
     // Clear current options except placeholder
-    this._exampleSelector.innerHTML = '<option value="">Select example...</option>';
-    examples.forEach(example => {
+    this._exampleSelector.innerHTML =
+      '<option value="">Select example...</option>';
+    examples.forEach((example) => {
       const option = document.createElement('option');
       option.value = example;
       option.textContent = example;
@@ -89,8 +97,11 @@ export class ControlsPanel {
     this._zoomOutBtn.removeEventListener('click', this._zoomOutHandler);
     this._zoomResetBtn.removeEventListener('click', this._zoomResetHandler);
     this._layoutSelect.removeEventListener('change', this._layoutChangeHandler);
-    this._exampleSelector.removeEventListener('change', this._exampleChangeHandler);
-    if(this.panel && this.container.contains(this.panel)) {
+    this._exampleSelector.removeEventListener(
+      'change',
+      this._exampleChangeHandler
+    );
+    if (this.panel && this.container.contains(this.panel)) {
       this.container.removeChild(this.panel);
     }
   }

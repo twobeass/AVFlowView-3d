@@ -8,10 +8,12 @@
 ### 1. Source Maps Not Visible in DevTools ✅
 
 **Problem:**
+
 - Only `(index)` visible in Chrome DevTools Sources tab
 - Couldn't debug actual source files
 
 **Solution:**
+
 - Added `sourcemap: true` to `vite.config.mjs` build options
 - Added `sourcemapIgnoreList: false` to server config
 - Now all source files visible in DevTools for debugging
@@ -23,15 +25,18 @@
 ### 2. Nodes Overlapping (All at Same Position) ✅
 
 **Problem:**
+
 - ELK layout returned width=0, height=0 for all nodes
 - All devices rendered at same coordinates
 - Impossible to see graph structure
 
 **Root Cause:**
+
 - `AVToELKConverter` didn't provide dimensions to ELK
 - ELK couldn't compute proper spacing without knowing node sizes
 
 **Solution:**
+
 - Added `width: 140, height: 80` to device nodes
 - Added `width: 400, height: 300` to area containers
 - Added ELK spacing options:
@@ -47,15 +52,18 @@
 ### 3. Nodes Disappear When Areas Added ✅
 
 **Problem:**
+
 - When areas added to JSON, device nodes disappeared
 - Only area container visible, but empty
 
 **Root Cause:**
+
 - Original `renderFallback()` only rendered direct children of root
 - When areas exist, devices become children of areas (nested)
 - Non-recursive rendering skipped nested devices
 
 **Solution:**
+
 - Rewrote `renderFallback()` to be **fully recursive**
 - Tracks absolute coordinates through parent offset accumulation
 - Renders areas as semi-transparent containers
@@ -69,13 +77,16 @@
 ### 4. Edges Disappear After Recursive Fix ✅
 
 **Problem:**
+
 - After fixing recursive rendering, edges no longer visible
 
 **Root Cause:**
+
 - Edges rendered inside nested groups with wrong coordinate transforms
 - ELK edge coordinates are in **global/root space**, not relative to containers
 
 **Solution:**
+
 - Moved edge rendering to **after** all nodes, at root level
 - Edges now render in global coordinate space (matching ELK output)
 - Added category-based coloring to edges
@@ -91,6 +102,7 @@
 ### Category-Based Coloring ✅
 
 **Device Colors:**
+
 - Video: `#E24A6F` (pink/red)
 - Audio: `#4A90E2` (blue)
 - Network: `#50C878` (green)
@@ -101,6 +113,7 @@
 - Default: `#ddd` (light gray)
 
 **Edge Colors:**
+
 - Match category of connection (video, network, power, etc.)
 
 ### Status Visualization ✅
@@ -127,6 +140,7 @@
 ## New Example Files ✅
 
 ### simple.json
+
 - **2 nodes**: Sony camera → Samsung display
 - **1 edge**: SDI video connection
 - **0 areas**: All nodes at root level
@@ -135,6 +149,7 @@
 **Commit:** [c3a28da](https://github.com/twobeass/AVFlowView-3d/commit/c3a28da313a4b6f0ab7c4d802da41bf32ccaad56)
 
 ### medium.json
+
 - **3 nodes**: Blackmagic switcher → 2 Sony monitors
 - **2 edges**: Two SDI outputs from switcher
 - **1 area**: Studio Room containing all devices
@@ -143,6 +158,7 @@
 **Commit:** [949a99d](https://github.com/twobeass/AVFlowView-3d/commit/949a99d49bbd4a3b1f852c642d8080fb727b0b31)
 
 ### complex.json
+
 - **6 nodes**: 2 cameras, switcher, monitor, network switch, PDU
 - **6 edges**: Video (SDI), network (Ethernet), power (PowerCON)
 - **3 areas**: Control Room, Equipment Rack (nested), Studio Floor
@@ -157,15 +173,18 @@
 ## What You Should See Now
 
 ### simple.json
+
 ```
 [Sony PXW-Z450] ---(pink SDI line)---> [Samsung QM55B]
 ```
+
 - Two pink/red boxes (video category)
 - One pink edge connecting them
 - Clean left-to-right layout
 - Port circles on device edges
 
 ### medium.json
+
 ```
 ╔════════════════ Studio Room ═══════════════╗
 ║                                             ║
@@ -175,12 +194,14 @@
 ║                                             ║
 ╚═════════════════════════════════════════════╝
 ```
+
 - Semi-transparent gray area container
 - Three video devices (pink)
 - Two pink edges (SDI connections)
 - Switcher has two output ports visible
 
 ### complex.json
+
 ```
 ╔═══════════════ Studio Floor ═══════════╗
 ║  [Camera 1]                             ║
@@ -199,6 +220,7 @@
 ║  [Monitor]                                    ║
 ╚═══════════════════════════════════════════════╝
 ```
+
 - Two nested area containers
 - 6 devices with category colors:
   - Cameras, Switcher, Monitor: Pink (video)
@@ -214,6 +236,7 @@
 ## Testing Checklist
 
 ### Visual Verification
+
 - [ ] **simple.json**: Two separate boxes with connecting line
 - [ ] **medium.json**: Area container with 3 devices inside
 - [ ] **complex.json**: Nested areas with 6 devices
@@ -226,6 +249,7 @@
 - [ ] Proper spacing between elements
 
 ### Controls Verification
+
 - [ ] Zoom in: Devices get larger
 - [ ] Zoom out: Devices get smaller
 - [ ] Reset: Returns to default view
@@ -233,6 +257,7 @@
 - [ ] Example selector: Loads all three examples
 
 ### DevTools Verification
+
 - [ ] Sources tab shows `src/` folder with all files
 - [ ] Can set breakpoints in `HwSchematicRenderer.js`
 - [ ] No console errors during normal operation
@@ -249,7 +274,7 @@ renderNodes(nodes, parentG, parentOffset) {
   for each node:
     absoluteX = parentOffset.x + node.x
     absoluteY = parentOffset.y + node.y
-    
+
     if node has children:
       // It's an area
       draw area rectangle at (absoluteX, absoluteY)
@@ -289,6 +314,7 @@ renderNodes(nodes, parentG, parentOffset) {
 ## Next Steps
 
 With these fixes:
+
 1. ✅ Graphs render correctly with proper spacing
 2. ✅ Areas show as containers
 3. ✅ Category colors visible

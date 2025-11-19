@@ -20,6 +20,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 **Goals:** Repository structure, tooling, and basic docs.
 
 **Tasks:**
+
 - Initialize Node project (npm init), add core deps: `d3`, `d3-hwschematic`, `elkjs`, bundler (Vite), test libs (Jest, Playwright), linter.
 - Create base structure:
   - `src/` (code)
@@ -37,6 +38,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 **Goals:** Reliable validation of input data against the AV wiring schema.
 
 **Tasks:**
+
 - Add `ajv` for JSON Schema 2020-12 validation.
 - Implement `SchemaValidator` module:
   - `validateGraph(json: unknown): { valid: boolean; errors?: AjvError[] }`.
@@ -55,6 +57,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 **Core module:** `AVToELKConverter`.
 
 **Tasks:**
+
 1. **Node mapping**
    - Map each AV `Node` to an ELK `LNode` with:
      - `id`: node id
@@ -96,6 +99,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 **Modules:** `CategoryStyler`, `PortDirectionResolver`.
 
 **Tasks:**
+
 1. **CategoryStyler**
    - Define a fixed palette for categories:
      - Audio, Video, Network, Control, Power, Default.
@@ -188,21 +192,23 @@ The implementation is split into phases; phases run sequentially, tasks inside a
    - ✅ Added testing checklist and verification steps
 
 10. **Custom Orthogonal Edge Routing (2025-11-17)**
-   - ✅ Created `src/utils/OrthogonalRouter.js` (398 lines)
-   - ✅ Implemented `calculateOrthogonalPath()` - Manhattan-style routing with L-shape, Z-shape, and complex strategies
-   - ✅ Implemented `calculateEdgeOffset()` - 10px parallel edge separation to prevent visual stacking
-   - ✅ Implemented `collectObstacles()` - Recursive device bounding box collection with 20px padding
-   - ✅ Implemented `groupEdgesByEndpoints()` - Parallel edge detection
-   - ✅ Integrated OrthogonalRouter into HwSchematicRenderer
-   - ✅ Removed d3-hwschematic dependency completely (security vulnerability resolved)
-   - ✅ Updated package.json and ran `npm uninstall d3-hwschematic`
-   - ✅ Tested with all examples (simple, medium, complex)
-   - ✅ Created comprehensive documentation (`docs/ORTHOGONAL_ROUTING_IMPLEMENTATION.md`)
-   - ✅ Updated 7 documentation files (README.md, AGENT_README.md, TECHNICAL_SPECS.md, CONTEXT.md, CHECKLIST.md, AVFlowView-3d-plan.md, new ORTHOGONAL_ROUTING_IMPLEMENTATION.md)
+
+- ✅ Created `src/utils/OrthogonalRouter.js` (398 lines)
+- ✅ Implemented `calculateOrthogonalPath()` - Manhattan-style routing with L-shape, Z-shape, and complex strategies
+- ✅ Implemented `calculateEdgeOffset()` - 10px parallel edge separation to prevent visual stacking
+- ✅ Implemented `collectObstacles()` - Recursive device bounding box collection with 20px padding
+- ✅ Implemented `groupEdgesByEndpoints()` - Parallel edge detection
+- ✅ Integrated OrthogonalRouter into HwSchematicRenderer
+- ✅ Removed d3-hwschematic dependency completely (security vulnerability resolved)
+- ✅ Updated package.json and ran `npm uninstall d3-hwschematic`
+- ✅ Tested with all examples (simple, medium, complex)
+- ✅ Created comprehensive documentation (`docs/ORTHOGONAL_ROUTING_IMPLEMENTATION.md`)
+- ✅ Updated 7 documentation files (README.md, AGENT_README.md, TECHNICAL_SPECS.md, CONTEXT.md, CHECKLIST.md, AVFlowView-3d-plan.md, new ORTHOGONAL_ROUTING_IMPLEMENTATION.md)
 
 **Exit criteria met:** Example graph renders with devices, areas, ports, and cables; zoom/pan works smoothly; all controls functional; layout toggle works; example selector loads graphs; all tests pass; edges use 100% orthogonal routing with parallel edge separation.
 
 **Key Achievements:**
+
 - Complete validation → conversion → layout → render pipeline operational
 - Professional UI controls with engineering aesthetic
 - Smooth interactive zoom/pan with d3-zoom
@@ -223,6 +229,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 **Modules:** `FocusManager`, `SearchManager`.
 
 **Tasks:**
+
 1. **Selection**
    - Click on a node or edge → mark as selected.
    - Show details in an info panel (label, category, ports, connected edges).
@@ -248,6 +255,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 **Main class:** `AVFlowView3dApp`.
 
 **Current Status:** Partially complete (60%)
+
 - ✅ Basic initialization and configuration
 - ✅ `load(graphJson)` method implemented
 - ✅ `loadExample(name)` method implemented
@@ -256,6 +264,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 - ✅ Controls panel integrated
 
 **Remaining Tasks:**
+
 - `update(graphJson)` – re-render with incremental diffing
 - `setFocus(nodeIdOrEdgeId, distance)` – programmatic focus
 - `export(type: 'svg' | 'png')` – export diagram
@@ -272,12 +281,14 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 **Goals:** Make the project robust, documented, and ready for others (or other agents) to extend.
 
 **Current Status:** Partially complete (40%)
+
 - ✅ Unit tests for validation, conversion, styling, port resolution
 - ✅ Renderer initialization tests
 - ✅ ESLint and Prettier configured
 - ✅ Basic README and documentation
 
 **Remaining Tasks:**
+
 - Integration tests with Playwright
   - Load example graphs, click nodes, adjust focus, run search
 - Complete documentation:
@@ -296,6 +307,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 ## 3. Current Status Summary
 
 **Completed Phases:**
+
 - ✅ Phase 1: Project Setup & Architecture (100%)
 - ✅ Phase 2: Schema Validation Layer (100%)
 - ✅ Phase 3: Data Transformation (100%)
@@ -303,6 +315,7 @@ The implementation is split into phases; phases run sequentially, tasks inside a
 - ✅ Phase 5: Visualization & UI Controls (100%)
 
 **In Progress:**
+
 - ⏳ Phase 6: Interaction & Focus/Context (0% - Next)
 - ⏳ Phase 7: Application Shell & API (60%)
 - ⏳ Phase 8: Testing, Docs & Polish (40%)

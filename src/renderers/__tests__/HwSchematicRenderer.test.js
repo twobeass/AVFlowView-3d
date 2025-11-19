@@ -67,29 +67,29 @@ describe('HwSchematicRenderer', () => {
       const renderer = new HwSchematicRenderer('#test-container');
       const dataWithEdges = {
         children: [
-          { 
-            id: 'node1', 
+          {
+            id: 'node1',
             labels: [{ text: 'Device 1' }],
             width: 100,
             height: 50,
             x: 0,
-            y: 0
+            y: 0,
           },
-          { 
-            id: 'node2', 
+          {
+            id: 'node2',
             labels: [{ text: 'Device 2' }],
             width: 100,
             height: 50,
             x: 200,
-            y: 0
+            y: 0,
           },
         ],
         edges: [
-          { 
-            id: 'edge1', 
-            sources: ['node1'], 
+          {
+            id: 'edge1',
+            sources: ['node1'],
             targets: ['node2'],
-            hwMeta: { category: 'video' }
+            hwMeta: { category: 'video' },
           },
         ],
       };

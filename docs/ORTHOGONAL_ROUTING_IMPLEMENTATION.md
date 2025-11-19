@@ -9,6 +9,7 @@
 ## ✅ FINAL SOLUTION: Hybrid ELK + Custom Routing (November 17, 2025)
 
 ### Critical Bug Fixed
+
 **Problem:** Edges were routing directly through device nodes, making diagrams unreadable and incorrect.
 
 **Root Cause:** Pure custom routing was too complex and unreliable. Pure ELK routing had port alignment issues.
@@ -46,6 +47,7 @@
 ### Why This Works
 
 **ELK's Strengths:**
+
 - ✅ Proven layered graph algorithm
 - ✅ Automatically avoids all nodes
 - ✅ Optimizes crossing minimization
@@ -53,11 +55,13 @@
 - ✅ Scalable to thousands of nodes
 
 **Custom Port Extensions:**
+
 - ✅ Maintains our custom port distribution
 - ✅ Edges "stick out" from ports naturally
 - ✅ Connects to ELK routing orthogonally
 
 **Enhanced Fallback:**
+
 - ✅ Handles edges where ELK doesn't provide routing
 - ✅ Tests multiple route options, chooses collision-free one
 - ✅ 2D obstacle clearance (vertical AND horizontal)
@@ -69,16 +73,17 @@
 ### 1. ELK Configuration (`src/converters/AVToELKConverter.js`)
 
 **Critical Settings Added:**
+
 ```javascript
 layoutOptions: {
   'org.eclipse.elk.algorithm': 'layered',
   'org.eclipse.elk.direction': layoutDirection,
   'org.eclipse.elk.layered.edgeRouting': 'ORTHOGONAL',
-  
+
   // CRITICAL: Enable routing for hierarchical edges
   'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
   'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',
-  
+
   // Spacing optimizations
   'org.eclipse.elk.spacing.nodeNode': 220,
   'org.eclipse.elk.spacing.edgeNode': 88,
@@ -104,13 +109,14 @@ createPathFromELKSection(section, srcPos, tgtPos) {
 ```
 
 **Orthogonal Stub Logic:**
+
 ```javascript
 // For EAST/WEST ports: horizontal first, then vertical
-pathData += ` L ${extPoint.x} ${firstBend.y}`;  // Match Y of bend
+pathData += ` L ${extPoint.x} ${firstBend.y}`; // Match Y of bend
 pathData += ` L ${firstBend.x} ${firstBend.y}`; // Reach bend point
 
 // For NORTH/SOUTH ports: vertical first, then horizontal
-pathData += ` L ${firstBend.x} ${extPoint.y}`;  // Match X of bend
+pathData += ` L ${firstBend.x} ${extPoint.y}`; // Match X of bend
 pathData += ` L ${firstBend.x} ${firstBend.y}`; // Reach bend point
 ```
 
@@ -133,6 +139,7 @@ routeAroundLocalObstacles(startPoint, portSide, obstacles, targetPoint) {
 ```
 
 **Example for EAST port:**
+
 ```javascript
 // Route Above Option:
 startPoint →
@@ -152,25 +159,27 @@ startPoint →
 ### 3. Configurable System
 
 **Configuration Object:**
+
 ```javascript
 this.routingConfig = {
-  extensionLength: 30,          // Port extension distance
-  obstaclePadding: 2,           // Minimal padding (2px)
-  localSearchRadius: 300,       // Check obstacles within 300px
-  protectedSegmentsCount: 4,    // Segments near ports to protect
-  edgeSeparation: 8,            // Parallel edge offset
+  extensionLength: 30, // Port extension distance
+  obstaclePadding: 2, // Minimal padding (2px)
+  localSearchRadius: 300, // Check obstacles within 300px
+  protectedSegmentsCount: 4, // Segments near ports to protect
+  edgeSeparation: 8, // Parallel edge offset
   enableCollisionDetection: true,
-  visualizeObstacles: false,    // Debug: show red boxes
-  visualizeSegments: false      // Debug: show blue/yellow segments
+  visualizeObstacles: false, // Debug: show red boxes
+  visualizeSegments: false, // Debug: show blue/yellow segments
 };
 ```
 
 **User API:**
+
 ```javascript
 renderer.setRoutingConfig({
   extensionLength: 40,
   localSearchRadius: 200,
-  visualizeObstacles: true  // Enable debugging
+  visualizeObstacles: true, // Enable debugging
 });
 ```
 
@@ -181,11 +190,13 @@ renderer.setRoutingConfig({
 ### Complexity Analysis
 
 **ELK Routing:**
+
 - **Time:** Handled by ELK's optimized C++ library
 - **Space:** O(nodes + edges)
 - **Scalability:** Proven to handle 1000+ nodes
 
 **Fallback Routing:**
+
 - **Obstacle Collection:** O(n) where n = devices (cached)
 - **Local Search:** O(k) where k = nearby obstacles (~10-20)
 - **Per Edge:** O(k) collision checks
@@ -194,6 +205,7 @@ renderer.setRoutingConfig({
 **Speedup:** ~100x faster than global pathfinding for large graphs
 
 ### Benchmarks (Complex.json - 6 edges, 6 devices)
+
 - ELK Layout: ~50ms
 - Edge Rendering: <5ms total
 - **Total:** <60ms for complete graph
@@ -205,43 +217,50 @@ renderer.setRoutingConfig({
 ### Debugging Tools
 
 **Enable Obstacle Visualization:**
+
 ```javascript
 renderer.setRoutingConfig({ visualizeObstacles: true });
 ```
+
 - Shows red dashed boxes around all devices
 - Helps identify if obstacles are detected correctly
 
 **Enable Segment Visualization:**
+
 ```javascript
 renderer.setRoutingConfig({ visualizeSegments: true });
 ```
+
 - Blue segments = Protected (must avoid obstacles)
 - Yellow segments = Crossable (can cross distant nodes)
 
 ### Tuning Parameters
 
 **For Dense Graphs:**
+
 ```javascript
 renderer.setRoutingConfig({
-  localSearchRadius: 350,      // Check more obstacles
-  protectedSegmentsCount: 5,   // Protect more segments near ports
-  obstaclePadding: 5           // Larger safety margin
+  localSearchRadius: 350, // Check more obstacles
+  protectedSegmentsCount: 5, // Protect more segments near ports
+  obstaclePadding: 5, // Larger safety margin
 });
 ```
 
 **For Simple Graphs:**
+
 ```javascript
 renderer.setRoutingConfig({
-  localSearchRadius: 200,      // Check fewer obstacles
-  protectedSegmentsCount: 3,   // Fewer protected segments
-  extensionLength: 20          // Shorter extensions
+  localSearchRadius: 200, // Check fewer obstacles
+  protectedSegmentsCount: 3, // Fewer protected segments
+  extensionLength: 20, // Shorter extensions
 });
 ```
 
 **Disable Collision Detection (Debug):**
+
 ```javascript
 renderer.setRoutingConfig({
-  enableCollisionDetection: false  // Uses simple Z-routes
+  enableCollisionDetection: false, // Uses simple Z-routes
 });
 ```
 
@@ -254,12 +273,14 @@ renderer.setRoutingConfig({
 **Design Decision:** Local avoidance only (first/last N segments)
 
 **Rationale:**
+
 1. **Scalability:** O(edges × local) vs O(edges × all)
 2. **User Acceptance:** "Middle segments crossing nodes is acceptable" (user requirement)
 3. **Performance:** Critical for graphs with 1000+ nodes
 4. **Simplicity:** Easier to understand and maintain
 
 **Protected Zones:**
+
 - First 4 segments from source (configurable)
 - Last 4 segments to target (configurable)
 - Middle segments use simple Z-route (can cross)
@@ -267,12 +288,14 @@ renderer.setRoutingConfig({
 ### Route Testing Strategy
 
 **Multi-Option Approach:**
+
 1. Generate 2 complete route options (above/below or left/right)
 2. Test EVERY segment of each route against ALL nearby obstacles
 3. Choose first collision-free route
 4. Guarantees collision-free protected segments
 
 **vs Previous Greedy Approach:**
+
 - Old: Calculate one route, hope it works ❌
 - New: Test routes before using them ✅
 
@@ -281,7 +304,9 @@ renderer.setRoutingConfig({
 ## Files Modified
 
 ### Core Implementation
+
 **src/renderers/HwSchematicRenderer.js** (~1000 lines)
+
 - `createPathFromELKSection()` - Primary routing with ELK bend points
 - `createFallbackPath()` - Enhanced fallback routing
 - `routeWithLocalAvoidance()` - Orchestrates local avoidance
@@ -294,11 +319,13 @@ renderer.setRoutingConfig({
 - `segmentIntersectsObstacle()` - AABB intersection test
 
 **src/converters/AVToELKConverter.js** (~200 lines)
+
 - Added `hierarchyHandling` and root `edgeRouting` options
 - Increased spacing parameters (+10% from previous)
 - Added crossing minimization and component separation
 
 ### Test Files
+
 **All existing tests continue passing (87/87)** ✅
 
 ---
@@ -306,11 +333,13 @@ renderer.setRoutingConfig({
 ## Visual Results
 
 ### Before (Edges Through Nodes) ❌
+
 ```
 Camera ═══════[Through Switcher]═══════> Monitor
 ```
 
 ### After (Proper Routing) ✅
+
 ```
 Camera ─────┐
             ├─────> [Around Switcher]
@@ -328,11 +357,13 @@ Monitor <───┘
 ## Known Limitations
 
 ### Current State
+
 1. **Edge Overlapping:** Multiple edges on same path can overlap (visual clarity issue, not functional bug)
 2. **One Fallback Edge:** Medium.json has 1 edge using fallback (needs investigation)
 3. **No Edge Bundling:** Parallel edges don't bundle together yet
 
 ### Future Enhancements
+
 1. Edge separation/offset for parallel edges
 2. Edge bundling for common paths
 3. Investigate why some edges don't get ELK sections
@@ -349,7 +380,7 @@ Monitor <───┘
 ✅ **Orthogonal paths only** (no diagonals)  
 ✅ **Configurable system** (7 parameters)  
 ✅ **Debug tools available** (visualization toggles)  
-✅ **Scalable architecture** (ready for 1000+ nodes)  
+✅ **Scalable architecture** (ready for 1000+ nodes)
 
 ---
 
@@ -360,13 +391,14 @@ Monitor <───┘
 **Purpose:** Dynamically update routing parameters without re-instantiation
 
 **Example:**
+
 ```javascript
 const renderer = new HwSchematicRenderer('#container');
 
 // Enable debugging
 renderer.setRoutingConfig({
   visualizeObstacles: true,
-  visualizeSegments: true
+  visualizeSegments: true,
 });
 
 renderer.render(data);
@@ -374,7 +406,7 @@ renderer.render(data);
 // Later: Disable debugging
 renderer.setRoutingConfig({
   visualizeObstacles: false,
-  visualizeSegments: false
+  visualizeSegments: false,
 });
 ```
 
@@ -395,13 +427,16 @@ renderer.setRoutingConfig({
 ## Testing & Validation
 
 ### Test Files
+
 - `examples/simple.json` - 2 nodes, 1 edge ✅
 - `examples/medium.json` - 3 nodes, 2 edges ✅ (1 fallback edge)
 - `examples/complex.json` - 6 nodes, 6 edges ✅ (5 ELK + 1 fallback)
 - `examples/heavy.json` - 80+ nodes, 200+ edges ⏳ (scalability test)
 
 ### Unit Tests
+
 **87/87 passing** ✅
+
 - Schema validation
 - Converter tests
 - Renderer initialization
@@ -413,15 +448,19 @@ renderer.setRoutingConfig({
 ## Migration Notes
 
 ### Breaking Changes
+
 **None** - Fully backward compatible
 
 ### Performance Impact
+
 **Positive:**
+
 - ELK routing is faster than custom pathfinding
 - Local search prevents O(n²) complexity
 - Caching prevents redundant calculations
 
 ### Configuration Defaults
+
 All defaults chosen to work well for typical AV diagrams (6-50 nodes).
 
 ---

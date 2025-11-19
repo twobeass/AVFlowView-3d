@@ -97,7 +97,16 @@ describe('SchemaValidator', () => {
           { id: 'area2', label: 'Floor 1', parentId: 'area1' },
           { id: 'area3', label: 'Room A', parentId: 'area2' },
         ],
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -115,7 +124,12 @@ describe('SchemaValidator', () => {
             category: 'Network',
             status: 'Regular',
             ports: {
-              port1: { alignment: 'Bidirectional', label: 'Port 1', type: 'RJ45', gender: 'N/A' },
+              port1: {
+                alignment: 'Bidirectional',
+                label: 'Port 1',
+                type: 'RJ45',
+                gender: 'N/A',
+              },
             },
           },
         ],
@@ -129,7 +143,16 @@ describe('SchemaValidator', () => {
     test('should validate graph with TB layout direction', () => {
       const graph = {
         layout: { direction: 'TB' },
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -157,7 +180,16 @@ describe('SchemaValidator', () => {
 
     test('should fail when edges array is missing', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
       };
 
       const result = validator.validateGraph(graph);
@@ -174,7 +206,15 @@ describe('SchemaValidator', () => {
 
     test('should fail when node is missing required id field', () => {
       const graph = {
-        nodes: [{ manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -192,102 +232,188 @@ describe('SchemaValidator', () => {
 
     test('should fail when node is missing manufacturer', () => {
       const graph = {
-        nodes: [{ id: 'n1', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          { id: 'n1', model: 'X', category: 'A', status: 'Regular', ports: {} },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'manufacturer')).toBe(true);
+      expect(
+        result.error.details.some(
+          (d) => d.params.missingProperty === 'manufacturer'
+        )
+      ).toBe(true);
     });
 
     test('should fail when node is missing model', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'model')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'model')
+      ).toBe(true);
     });
 
     test('should fail when node is missing category', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'category')).toBe(true);
+      expect(
+        result.error.details.some(
+          (d) => d.params.missingProperty === 'category'
+        )
+      ).toBe(true);
     });
 
     test('should fail when node is missing status', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', ports: {} }],
+        nodes: [
+          { id: 'n1', manufacturer: 'M', model: 'X', category: 'A', ports: {} },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'status')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'status')
+      ).toBe(true);
     });
 
     test('should fail when node is missing ports', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular' }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+          },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'ports')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'ports')
+      ).toBe(true);
     });
 
     test('should fail when edge is missing source', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [{ id: 'e1', target: 'n1' }],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'source')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'source')
+      ).toBe(true);
     });
 
     test('should fail when edge is missing target', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [{ id: 'e1', source: 'n1' }],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'target')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'target')
+      ).toBe(true);
     });
 
     test('should fail when edge is missing id', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [{ source: 'n1', target: 'n1' }],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'id')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'id')
+      ).toBe(true);
     });
 
     test('should fail when area is missing label', () => {
       const graph = {
         areas: [{ id: 'area1' }],
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'label')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'label')
+      ).toBe(true);
     });
 
     test('should fail when port is missing alignment', () => {
@@ -307,7 +433,11 @@ describe('SchemaValidator', () => {
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'alignment')).toBe(true);
+      expect(
+        result.error.details.some(
+          (d) => d.params.missingProperty === 'alignment'
+        )
+      ).toBe(true);
     });
   });
 
@@ -321,7 +451,14 @@ describe('SchemaValidator', () => {
             model: 'X',
             category: 'A',
             status: 'Regular',
-            ports: { p1: { alignment: 'Invalid', label: 'Port 1', type: 'USB', gender: 'M' } },
+            ports: {
+              p1: {
+                alignment: 'Invalid',
+                label: 'Port 1',
+                type: 'USB',
+                gender: 'M',
+              },
+            },
           },
         ],
         edges: [],
@@ -336,7 +473,16 @@ describe('SchemaValidator', () => {
 
     test('should fail when node status has invalid enum value', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Invalid', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Invalid',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -350,7 +496,16 @@ describe('SchemaValidator', () => {
     test('should fail when layout direction has invalid enum value', () => {
       const graph = {
         layout: { direction: 'RL' },
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -370,7 +525,14 @@ describe('SchemaValidator', () => {
             model: 'X',
             category: 'A',
             status: 'Regular',
-            ports: { p1: { alignment: 'In', label: 'Port 1', type: 'USB', gender: 'X' } },
+            ports: {
+              p1: {
+                alignment: 'In',
+                label: 'Port 1',
+                type: 'USB',
+                gender: 'X',
+              },
+            },
           },
         ],
         edges: [],
@@ -387,7 +549,16 @@ describe('SchemaValidator', () => {
   describe('Invalid graphs - cross-reference errors', () => {
     test('should fail when edge references non-existent source node', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [{ id: 'e1', source: 'nonexistent', target: 'n1' }],
       };
 
@@ -406,7 +577,16 @@ describe('SchemaValidator', () => {
 
     test('should fail when edge references non-existent target node', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [{ id: 'e1', source: 'n1', target: 'nonexistent' }],
       };
 
@@ -426,7 +606,16 @@ describe('SchemaValidator', () => {
     test('should fail when area references non-existent parent area', () => {
       const graph = {
         areas: [{ id: 'area1', label: 'Area 1', parentId: 'nonexistent' }],
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -446,7 +635,16 @@ describe('SchemaValidator', () => {
     test('should fail with multiple cross-reference errors', () => {
       const graph = {
         areas: [{ id: 'area1', label: 'Area 1', parentId: 'missing-area' }],
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [
           { id: 'e1', source: 'missing-source', target: 'n1' },
           { id: 'e2', source: 'n1', target: 'missing-target' },
@@ -462,40 +660,73 @@ describe('SchemaValidator', () => {
   describe('Invalid graphs - pattern and format violations', () => {
     test('should fail when node id has invalid pattern', () => {
       const graph = {
-        nodes: [{ id: 'invalid id!', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'invalid id!',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
       expect(result.error.details).toEqual(
-        expect.arrayContaining([expect.objectContaining({ keyword: 'pattern' })])
+        expect.arrayContaining([
+          expect.objectContaining({ keyword: 'pattern' }),
+        ])
       );
     });
 
     test('should fail when edge id has invalid pattern', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [{ id: 'invalid edge!', source: 'n1', target: 'n1' }],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
       expect(result.error.details).toEqual(
-        expect.arrayContaining([expect.objectContaining({ keyword: 'pattern' })])
+        expect.arrayContaining([
+          expect.objectContaining({ keyword: 'pattern' }),
+        ])
       );
     });
 
     test('should fail when manufacturer is empty string', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: '', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: '',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
       expect(result.error.details).toEqual(
-        expect.arrayContaining([expect.objectContaining({ keyword: 'minLength' })])
+        expect.arrayContaining([
+          expect.objectContaining({ keyword: 'minLength' }),
+        ])
       );
     });
 
@@ -508,7 +739,9 @@ describe('SchemaValidator', () => {
             model: 'X',
             category: 'A',
             status: 'Regular',
-            ports: { p1: { alignment: 'In', label: '', type: 'USB', gender: 'M' } },
+            ports: {
+              p1: { alignment: 'In', label: '', type: 'USB', gender: 'M' },
+            },
           },
         ],
         edges: [],
@@ -517,7 +750,9 @@ describe('SchemaValidator', () => {
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
       expect(result.error.details).toEqual(
-        expect.arrayContaining([expect.objectContaining({ keyword: 'minLength' })])
+        expect.arrayContaining([
+          expect.objectContaining({ keyword: 'minLength' }),
+        ])
       );
     });
   });
@@ -552,7 +787,16 @@ describe('SchemaValidator', () => {
 
     test('should fail when edges is not an array', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: 'not-an-array',
       };
 
@@ -565,7 +809,16 @@ describe('SchemaValidator', () => {
 
     test('should fail when ports is not an object', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: [] }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: [],
+          },
+        ],
         edges: [],
       };
 
@@ -586,8 +839,12 @@ describe('SchemaValidator', () => {
     test('should handle empty object', () => {
       const result = validator.validateGraph({});
       expect(result.success).toBe(false);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'nodes')).toBe(true);
-      expect(result.error.details.some((d) => d.params.missingProperty === 'edges')).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'nodes')
+      ).toBe(true);
+      expect(
+        result.error.details.some((d) => d.params.missingProperty === 'edges')
+      ).toBe(true);
     });
 
     test('should handle graph with empty arrays', () => {
@@ -598,7 +855,18 @@ describe('SchemaValidator', () => {
 
     test('should handle malformed nodes array', () => {
       const graph = {
-        nodes: [null, undefined, { id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          null,
+          undefined,
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
       };
 
@@ -608,7 +876,16 @@ describe('SchemaValidator', () => {
 
     test('should handle malformed edges array for cross-reference checks', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [null, { id: 'e1', source: 'n1', target: 'n1' }],
       };
 
@@ -619,7 +896,16 @@ describe('SchemaValidator', () => {
 
     test('should handle additional properties correctly', () => {
       const graph = {
-        nodes: [{ id: 'n1', manufacturer: 'M', model: 'X', category: 'A', status: 'Regular', ports: {} }],
+        nodes: [
+          {
+            id: 'n1',
+            manufacturer: 'M',
+            model: 'X',
+            category: 'A',
+            status: 'Regular',
+            ports: {},
+          },
+        ],
         edges: [],
         unknownField: 'should fail',
       };
@@ -627,7 +913,9 @@ describe('SchemaValidator', () => {
       const result = validator.validateGraph(graph);
       expect(result.success).toBe(false);
       expect(result.error.details).toEqual(
-        expect.arrayContaining([expect.objectContaining({ keyword: 'additionalProperties' })])
+        expect.arrayContaining([
+          expect.objectContaining({ keyword: 'additionalProperties' }),
+        ])
       );
     });
   });

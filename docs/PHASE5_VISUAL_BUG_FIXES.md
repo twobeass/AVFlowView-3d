@@ -9,9 +9,11 @@
 ## CRITICAL BUG: Edges Routing Through Nodes
 
 ### Problem Statement
+
 Edges were routing **directly through device nodes**, making diagrams unreadable and functionally incorrect. This was the most critical visual and functional bug in Phase 5.
 
 ### Root Cause Analysis
+
 1. **Initial Approach:** Pure custom routing was too complex and unreliable
 2. **ELK Not Used:** We were ignoring ELK's routing data (sections/bendPoints)
 3. **Missing Configuration:** ELK wasn't configured to route hierarchical edges
@@ -22,6 +24,7 @@ Edges were routing **directly through device nodes**, making diagrams unreadable
 **Key Insight:** Use ELK's proven routing algorithm, enhance with our port extensions.
 
 **Implementation:**
+
 1. **Enable ELK Routing:** Added `hierarchyHandling: 'INCLUDE_CHILDREN'` to ELK config
 2. **Use ELK's Bend Points:** Primary routing now uses ELK's generated paths
 3. **Add Port Extensions:** 30px extensions from ports in natural direction
@@ -35,6 +38,7 @@ Edges were routing **directly through device nodes**, making diagrams unreadable
 ### File: `src/converters/AVToELKConverter.js`
 
 **Added:**
+
 ```javascript
 'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
 'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',
@@ -43,6 +47,7 @@ Edges were routing **directly through device nodes**, making diagrams unreadable
 **Result:** ELK now generates routing data for cross-area edges
 
 **Spacing Increases:**
+
 - Node-to-node: 120px → 220px (+10% iteratively)
 - Layer spacing: 50px → 110px
 - Better node placement reduces routing conflicts
@@ -50,6 +55,7 @@ Edges were routing **directly through device nodes**, making diagrams unreadable
 ### File: `src/renderers/HwSchematicRenderer.js`
 
 **New Primary Routing:**
+
 ```javascript
 if (edge.sections && edge.sections[0].bendPoints) {
   // Use ELK routing with port extensions
@@ -61,6 +67,7 @@ if (edge.sections && edge.sections[0].bendPoints) {
 ```
 
 **Port Extension Logic:**
+
 ```javascript
 getExtensionPoint(portPos) {
   switch (portPos.side) {
@@ -72,11 +79,13 @@ getExtensionPoint(portPos) {
 ```
 
 **Orthogonal Stub Connections:**
+
 - EAST/WEST ports: Go horizontal to bend.y, then vertical to bend
 - NORTH/SOUTH ports: Go vertical to bend.x, then horizontal to bend
 - Ensures no diagonal lines
 
 **Enhanced Fallback with Route Verification:**
+
 ```javascript
 // Generate 2 route options (above/below or left/right)
 // TEST each complete route against all obstacles
@@ -89,23 +98,29 @@ getExtensionPoint(portPos) {
 ## Debug Tools Developed
 
 ### 1. Obstacle Visualization
+
 ```javascript
 renderer.setRoutingConfig({ visualizeObstacles: true });
 ```
+
 - Shows red dashed rectangles around all devices
 - Reveals exact collision detection zones
 - Critical for debugging routing issues
 
 ### 2. Segment Visualization
+
 ```javascript
 renderer.setRoutingConfig({ visualizeSegments: true });
 ```
+
 - **Blue segments:** Protected (must avoid obstacles)
 - **Yellow segments:** Crossable (can go through distant nodes)
 - Helped identify which segments were failing
 
 ### 3. These Tools Were Essential
+
 The visualization tools allowed us to:
+
 - Identify overlapping obstacle zones
 - See exactly which segments were crossing nodes
 - Verify that fixes were working
@@ -116,31 +131,37 @@ The visualization tools allowed us to:
 ## Iterations and Lessons Learned
 
 ### Iteration 1: Pure Custom Routing
+
 **Attempt:** Implement complete custom obstacle avoidance  
 **Result:** Too complex, routes still crossing nodes ❌  
 **Learning:** Need simpler approach
 
 ### Iteration 2: Increase Obstacle Padding
+
 **Attempt:** Enlarge obstacle zones to 30px  
 **Result:** Overlapping zones, impossible to route ❌  
 **Learning:** Node placement is the real issue
 
 ### Iteration 3: 2D Obstacle Clearance
+
 **Attempt:** Route around obstacles in both dimensions  
 **Result:** Extreme detours, visually poor ❌  
 **Learning:** Too aggressive avoidance
 
 ### Iteration 4: Debug Visualizations
+
 **Attempt:** Add red boxes and blue/yellow segments  
 **Result:** Revealed the actual problems clearly ✅  
 **Learning:** Visualization is key to debugging
 
 ### Iteration 5: Discover ELK Routing
+
 **Attempt:** Check if ELK provides routing data  
 **Result:** ELK wasn't configured properly! ✅  
 **Learning:** Use existing tools before building custom
 
 ### Iteration 6: Hybrid Approach (FINAL)
+
 **Attempt:** Use ELK routing + custom port extensions  
 **Result:** Perfect! No edges through nodes ✅  
 **Learning:** Hybrid solutions often best
@@ -151,37 +172,38 @@ The visualization tools allowed us to:
 
 ### Routing Parameters (All Configurable)
 
-| Parameter | Default | Purpose |
-|-----------|---------|---------|
-| extensionLength | 30px | Port extension distance |
-| obstaclePadding | 2px | Obstacle safety margin |
-| localSearchRadius | 300px | How far to search for obstacles |
-| protectedSegmentsCount | 4 | Segments near ports to protect |
-| edgeSeparation | 8px | Offset for parallel edges |
-| enableCollisionDetection | true | Toggle avoidance on/off |
-| visualizeObstacles | false | Debug: show red boxes |
-| visualizeSegments | false | Debug: show blue/yellow |
+| Parameter                | Default | Purpose                         |
+| ------------------------ | ------- | ------------------------------- |
+| extensionLength          | 30px    | Port extension distance         |
+| obstaclePadding          | 2px     | Obstacle safety margin          |
+| localSearchRadius        | 300px   | How far to search for obstacles |
+| protectedSegmentsCount   | 4       | Segments near ports to protect  |
+| edgeSeparation           | 8px     | Offset for parallel edges       |
+| enableCollisionDetection | true    | Toggle avoidance on/off         |
+| visualizeObstacles       | false   | Debug: show red boxes           |
+| visualizeSegments        | false   | Debug: show blue/yellow         |
 
 ### Usage Example
+
 ```javascript
 const renderer = new HwSchematicRenderer('#container');
 
 // For debugging
 renderer.setRoutingConfig({
   visualizeObstacles: true,
-  visualizeSegments: true
+  visualizeSegments: true,
 });
 
 // For dense graphs
 renderer.setRoutingConfig({
   localSearchRadius: 350,
-  protectedSegmentsCount: 5
+  protectedSegmentsCount: 5,
 });
 
 // For performance
 renderer.setRoutingConfig({
   localSearchRadius: 200,
-  enableCollisionDetection: false  // Simple Z-routes
+  enableCollisionDetection: false, // Simple Z-routes
 });
 ```
 
@@ -190,19 +212,23 @@ renderer.setRoutingConfig({
 ## Test Results
 
 ### Visual Verification
+
 ✅ **simple.json** - Clean orthogonal routing  
 ✅ **medium.json** - 2 edges properly separated (1 fallback)  
 ✅ **complex.json** - 6 edges, 5 using ELK routing, all avoid nodes  
 ⏳ **heavy.json** - 80+ nodes, 200+ edges (scalability test pending)
 
 ### Unit Tests
+
 ✅ **87/87 tests passing**
+
 - All schema validation tests
-- All converter tests  
+- All converter tests
 - All renderer tests
 - No regressions introduced
 
 ### Performance
+
 - **ELK Layout:** ~50-100ms for complex graphs
 - **Edge Rendering:** <5ms per graph
 - **Scalable:** O(edges × localObstacles) complexity
@@ -226,32 +252,37 @@ renderer.setRoutingConfig({
 ## Remaining Polish (Non-Critical)
 
 ### Visual Clarity
+
 - Edge separation for parallel edges (currently configured but not applied)
 - Edge bundling for common paths
 - Rounded corners for aesthetics
 
 ### Edge Cases
+
 - Investigate why medium.json has 1 fallback edge
 - Optimize heavy.json rendering
 - Handle extremely dense node clusters
 
 ### Future Features
+
 - Interactive edge highlighting
 - Edge selection/filtering
 - Dynamic rerouting on layout changes
-- A* pathfinding for specific scenarios
+- A\* pathfinding for specific scenarios
 
 ---
 
 ## Code Quality Improvements
 
 ### Before This Fix
+
 - Routing logic scattered across multiple methods
 - No clear separation of concerns
 - Hard to debug (no visualization)
 - Greedy approach without verification
 
 ### After This Fix
+
 - Clear hybrid strategy (ELK primary, fallback secondary)
 - Modular functions with single responsibilities
 - Debug visualization toggles
@@ -265,6 +296,7 @@ renderer.setRoutingConfig({
 **Ready for Production:** ✅
 
 **Verification Steps:**
+
 1. All unit tests pass ✅
 2. Visual verification on all example files ✅
 3. No edges routing through nodes ✅

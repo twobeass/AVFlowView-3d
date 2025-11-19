@@ -25,6 +25,7 @@ npm run dev
 ```
 
 ## Agent Notes
+
 - If validation fails, error details will print with JSON paths.
 - Work phase-by-phase as in AGENT_README.md.
 - To upgrade dependencies or patch a renderer, see docs/TECHNICAL_SPECS.md.
