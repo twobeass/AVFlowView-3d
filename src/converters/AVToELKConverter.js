@@ -4,6 +4,8 @@
 // into an ELK JSON structure suitable for use with ELK's layered algorithm
 // and d3-hwschematic.
 
+import { NodeSizeCalculator } from '../utils/NodeSizeCalculator.js';
+
 function computeLayoutDirection(layout = {}) {
   return layout.direction === 'TB' ? 'DOWN' : 'RIGHT';
 }
@@ -68,7 +70,7 @@ function createAreaNodes(graph, elkGraph) {
   return areaNodeMap;
 }
 
-function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
+function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection, sizeCalculator) {
   const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
   const nodeMap = new Map();
 
@@ -82,11 +84,15 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
       `${node.manufacturer ?? ''} ${node.model ?? ''}`.trim() ||
       node.id;
 
+    // Calculate dynamic node size based on port count and layout
+    const layoutDir = layoutDirection === 'DOWN' ? 'TB' : 'LR';
+    const nodeSize = sizeCalculator.calculateNodeSize(node, layoutDir);
+
     const elkNode = {
       id: node.id,
       labels: [{ text: label }],
-      width: 140, // Default device width
-      height: 80, // Default device height
+      width: nodeSize.width,
+      height: nodeSize.height,
       children: [],
       ports: [],
       properties: {
@@ -179,13 +185,21 @@ function createEdges(graph, elkGraph) {
 
 export class AVToELKConverter {
   /**
+   * Create a new AVToELKConverter instance
+   * @param {object} config - Configuration options
+   * @param {object} config.nodeSizing - NodeSizeCalculator configuration
+   */
+  constructor(config = {}) {
+    this.sizeCalculator = new NodeSizeCalculator(config.nodeSizing);
+  }
+
+  /**
    * Convert a validated AV wiring graph JSON object into an ELK JSON graph
    * suitable for ELK's layered algorithm and d3-hwschematic.
    *
    * @param {unknown} json
    * @returns {object} ELK graph JSON
    */
-  // eslint-disable-next-line class-methods-use-this
   convert(json) {
     if (!json || typeof json !== 'object' || Array.isArray(json)) {
       throw new Error('AVToELKConverter.convert expects a non-null object');
@@ -207,7 +221,11 @@ export class AVToELKConverter {
         // ========== HIERARCHY & PORT HANDLING ==========
         'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
         'org.eclipse.elk.portConstraints': 'FIXED_SIDE',
+        // ========== NODE SIZING ==========
+        'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS',
+        'org.eclipse.elk.nodeSize.options': 'UNIFORM_PORT_SPACING',
         // ========== SPACING ==========
+        'org.eclipse.elk.spacing.portPort': 20,
         'org.eclipse.elk.spacing.nodeNode': 220,
         'org.eclipse.elk.spacing.edgeNode': 88,
         'org.eclipse.elk.spacing.edgeEdge': 55,
@@ -254,7 +272,7 @@ export class AVToELKConverter {
       elkGraph.layoutOptions['org.eclipse.elk.spacing.edgeNode'] = 60;
     }
     const areaNodeMap = createAreaNodes(graph, elkGraph);
-    createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection);
+    createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection, this.sizeCalculator);
     createEdges(graph, elkGraph);
     return elkGraph;
   }
