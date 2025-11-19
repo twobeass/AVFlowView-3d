@@ -211,7 +211,8 @@ export class AVToELKConverter {
       throw new Error('AVToELKConverter.convert expects a non-null object');
     }
 
-    const graph = json;
+    // Handle both formats: direct graph object or wrapped in {graph: ...}
+    const graph = json.graph || json;
 
     const layoutDirection = computeLayoutDirection(graph.layout || {});
 

@@ -653,6 +653,7 @@ class HwSchematicRenderer {
 
   /**
    * Find the best position for a label on an SVG path (middle of longest segment).
+   * When multiple segments have equal length, prefers middle segments over edge segments.
    *
    * @param {string} pathData - SVG path data string
    * @returns {object} {x, y} coordinates for label placement
@@ -683,6 +684,7 @@ class HwSchematicRenderer {
         Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)
       );
       segments.push({
+        index: i,
         start: p1,
         end: p2,
         length,
@@ -692,14 +694,53 @@ class HwSchematicRenderer {
     }
 
     // Find longest segment
-    const longestSegment = segments.reduce((longest, current) =>
-      current.length > longest.length ? current : longest
+    let maxLength = 0;
+    segments.forEach((seg) => {
+      maxLength = Math.max(maxLength, seg.length);
+    });
+
+    // Get all segments with maximum length
+    const longestSegments = segments.filter((seg) => seg.length === maxLength);
+
+    // If only one segment, use it
+    if (longestSegments.length === 1) {
+      return {
+        x: longestSegments[0].midX,
+        y: longestSegments[0].midY,
+      };
+    }
+
+    // If multiple segments have max length, prefer ones not at start/end
+    // For better UX, avoid putting label too close to connection points
+    const centerSegmentIndex = Math.floor((segments.length - 1) / 2);
+    const minDistanceFromEnd = Math.min(
+      centerSegmentIndex,
+      segments.length - 1 - centerSegmentIndex
     );
 
-    // Return midpoint of longest segment
+    // Find segments at least minDistanceFromEnd from start/end
+    const viableSegments = longestSegments.filter(
+      (seg) =>
+        seg.index >= minDistanceFromEnd &&
+        seg.index < segments.length - minDistanceFromEnd
+    );
+
+    if (viableSegments.length > 0) {
+      // Pick the middle-most viable segment
+      const middleViable =
+        viableSegments[Math.floor(viableSegments.length / 2)];
+      return {
+        x: middleViable.midX,
+        y: middleViable.midY,
+      };
+    }
+
+    // Fallback: pick the middle segment from all longest segments
+    const middleSegment =
+      longestSegments[Math.floor(longestSegments.length / 2)];
     return {
-      x: longestSegment.midX,
-      y: longestSegment.midY,
+      x: middleSegment.midX,
+      y: middleSegment.midY,
     };
   }
 

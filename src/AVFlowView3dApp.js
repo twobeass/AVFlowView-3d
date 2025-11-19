@@ -183,7 +183,7 @@ export class AVFlowView3dApp {
     }
     this.currentLayoutDirection = direction;
     this.currentGraph.layout.direction = direction;
-    await this.load(this.currentGraph);
+    return this.load(this.currentGraph);
   }
 
   zoomIn() {
@@ -232,10 +232,11 @@ export class AVFlowView3dApp {
 
   toggleDebugPanel() {
     if (this.debugPanel) {
+      this.debugPanel.isVisible = !this.debugPanel.isVisible;
       if (this.debugPanel.isVisible) {
-        this.debugPanel.hide();
-      } else {
         this.debugPanel.show();
+      } else {
+        this.debugPanel.hide();
       }
     }
   }

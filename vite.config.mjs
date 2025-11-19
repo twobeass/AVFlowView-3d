@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['d3', 'd3-hwschematic', 'elkjs'],
+    include: ['d3', 'elkjs'],
     esbuildOptions: {
       define: {
         global: 'globalThis',
