@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   root: '.',
-  base: '/AVFlowView-3d/',
+  base: './'
   build: {
     outDir: 'dist',
     sourcemap: true,
