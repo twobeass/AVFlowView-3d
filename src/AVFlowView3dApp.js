@@ -117,6 +117,11 @@ export class AVFlowView3dApp {
     // Panel is visible by default (isVisible = false in constructor of DebugPanel)
     // No explicit hide() needed here, DebugPanel controls its own initial visibility.
     this.debugPanelVisible = false; 
+    
+    // Initialize debug panel with TopBar's current debug state
+    if (this.topBar) {
+      this.debugPanel.updateDebugState(this.topBar.debugState);
+    }
   }
 
   /**

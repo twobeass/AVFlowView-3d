@@ -9,7 +9,7 @@ export class TopBar {
     this.callbacks = callbacks || {};
     this.examples = [];
     this.debugState = {
-      showELKHighlight: true,
+      showELKHighlight: false,
       showBendPoints: false,
       showPortExtensions: false,
       showParallelEdges: false,
@@ -120,7 +120,7 @@ export class TopBar {
                 <div class="dropdown-section">
                   <div class="dropdown-label">Visualizations</div>
                   <label class="dropdown-checkbox">
-                    <input type="checkbox" id="debug-elk-highlight" checked>
+                    <input type="checkbox" id="debug-elk-highlight">
                     <span>
                       <span class="indicator elk-indicator">■</span> ELK / 
                       <span class="indicator fallback-indicator">■</span> Fallback Highlight
