@@ -116,6 +116,25 @@ export class AVFlowView3dApp {
     }
     this.currentGraph = graphJson;
     const elkGraph = this.converter.convert(graphJson);
+    // PERFORMANCE PATCH: Overwrite ELK options if node count is high
+    const nodeCount = (function countNodes(node) {
+      let count = 0;
+      function traverse(n) {
+        if (n.children) {
+          count += n.children.length;
+          n.children.forEach(traverse);
+        }
+      }
+      traverse(node);
+      return count;
+    })(elkGraph);
+    if (nodeCount > 100) {
+      console.warn(`⚠️ Large graph detected (${nodeCount} nodes) - applying fast ELK layout options.`);
+      elkGraph.layoutOptions['org.eclipse.elk.layered.nodePlacement.strategy'] = 'SIMPLE';
+      elkGraph.layoutOptions['org.eclipse.elk.layered.crossingMinimization.strategy'] = 'INTERACTIVE';
+      elkGraph.layoutOptions['org.eclipse.elk.spacing.nodeNode'] = 150;
+      elkGraph.layoutOptions['org.eclipse.elk.spacing.edgeNode'] = 60;
+    }
     try {
       const layoutStart = performance.now();
       const laidOutGraph = await this.elk.layout(elkGraph);
