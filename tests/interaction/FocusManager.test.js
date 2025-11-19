@@ -20,11 +20,7 @@ describe('FocusManager', () => {
 
   describe('focus method', () => {
     const mockGraph = {
-      nodes: [
-        { id: 'node1' },
-        { id: 'node2' },
-        { id: 'node3' },
-      ],
+      nodes: [{ id: 'node1' }, { id: 'node2' }, { id: 'node3' }],
       edges: [
         { source: 'node1', target: 'node2' },
         { source: 'node2', target: 'node3' },

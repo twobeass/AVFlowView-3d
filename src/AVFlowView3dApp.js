@@ -183,7 +183,7 @@ export class AVFlowView3dApp {
     }
     this.currentLayoutDirection = direction;
     this.currentGraph.layout.direction = direction;
-    return await this.load(this.currentGraph);
+    return this.load(this.currentGraph);
   }
 
   zoomIn() {

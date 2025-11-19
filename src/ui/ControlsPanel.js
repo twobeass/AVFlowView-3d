@@ -112,7 +112,10 @@ export class ControlsPanel {
       this._zoomResetBtn.removeEventListener('click', this._zoomResetHandler);
     }
     if (this._layoutSelect) {
-      this._layoutSelect.removeEventListener('change', this._layoutChangeHandler);
+      this._layoutSelect.removeEventListener(
+        'change',
+        this._layoutChangeHandler
+      );
     }
     if (this._exampleSelector) {
       this._exampleSelector.removeEventListener(

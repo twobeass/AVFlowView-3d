@@ -146,17 +146,32 @@ describe('ControlsPanel', () => {
     it('should remove event listeners', () => {
       const zoomInSpy = jest.spyOn(panel._zoomInBtn, 'removeEventListener');
       const zoomOutSpy = jest.spyOn(panel._zoomOutBtn, 'removeEventListener');
-      const zoomResetSpy = jest.spyOn(panel._zoomResetBtn, 'removeEventListener');
+      const zoomResetSpy = jest.spyOn(
+        panel._zoomResetBtn,
+        'removeEventListener'
+      );
       const layoutSpy = jest.spyOn(panel._layoutSelect, 'removeEventListener');
-      const exampleSpy = jest.spyOn(panel._exampleSelector, 'removeEventListener');
+      const exampleSpy = jest.spyOn(
+        panel._exampleSelector,
+        'removeEventListener'
+      );
 
       panel.destroy();
 
       expect(zoomInSpy).toHaveBeenCalledWith('click', panel._zoomInHandler);
       expect(zoomOutSpy).toHaveBeenCalledWith('click', panel._zoomOutHandler);
-      expect(zoomResetSpy).toHaveBeenCalledWith('click', panel._zoomResetHandler);
-      expect(layoutSpy).toHaveBeenCalledWith('change', panel._layoutChangeHandler);
-      expect(exampleSpy).toHaveBeenCalledWith('change', panel._exampleChangeHandler);
+      expect(zoomResetSpy).toHaveBeenCalledWith(
+        'click',
+        panel._zoomResetHandler
+      );
+      expect(layoutSpy).toHaveBeenCalledWith(
+        'change',
+        panel._layoutChangeHandler
+      );
+      expect(exampleSpy).toHaveBeenCalledWith(
+        'change',
+        panel._exampleChangeHandler
+      );
     });
   });
 });

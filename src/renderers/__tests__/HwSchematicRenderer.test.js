@@ -221,10 +221,14 @@ describe('HwSchematicRenderer', () => {
         ],
       };
 
-      const result = renderer.findPortAbsolutePosition('device1', 'port1', data);
+      const result = renderer.findPortAbsolutePosition(
+        'device1',
+        'port1',
+        data
+      );
       expect(result).toBeDefined();
       expect(result.x).toBe(150); // 50 + 100
-      expect(result.y).toBe(55);  // 30 + 25
+      expect(result.y).toBe(55); // 30 + 25
       expect(result.side).toBe('EAST');
     });
 
@@ -248,7 +252,11 @@ describe('HwSchematicRenderer', () => {
         ],
       };
 
-      const result = renderer.findPortAbsolutePosition('device1', 'port1', data);
+      const result = renderer.findPortAbsolutePosition(
+        'device1',
+        'port1',
+        data
+      );
       expect(result).toBeDefined();
       expect(result.x).toBe(200); // 100 + 25 + 75
       expect(result.y).toBe(105); // 50 + 35 + 20
@@ -268,7 +276,10 @@ describe('HwSchematicRenderer', () => {
       const renderer = new HwSchematicRenderer('#test-container');
       const section = {
         startPoint: { x: 10, y: 20 },
-        bendPoints: [{ x: 50, y: 20 }, { x: 50, y: 60 }],
+        bendPoints: [
+          { x: 50, y: 20 },
+          { x: 50, y: 60 },
+        ],
         endPoint: { x: 90, y: 60 },
       };
       const srcPos = { x: 10, y: 20, side: 'EAST' };
@@ -292,7 +303,7 @@ describe('HwSchematicRenderer', () => {
   describe('findLabelPosition method', () => {
     test('should find position on longest segment', () => {
       const renderer = new HwSchematicRenderer('#test-container');
-      const pathData = 'M 0 0 L 100 0 L 200 0';  // Longest segment from (100,0) to (200,0)
+      const pathData = 'M 0 0 L 100 0 L 200 0'; // Longest segment from (100,0) to (200,0)
 
       const position = renderer.findLabelPosition(pathData);
 
@@ -375,11 +386,7 @@ describe('HwSchematicRenderer', () => {
 
       const point = { x: 75, y: 75 };
       const radius = 100;
-      const obstacles = renderer.collectNearbyObstacles(
-        point,
-        radius,
-        data
-      );
+      const obstacles = renderer.collectNearbyObstacles(point, radius, data);
 
       expect(obstacles.length).toBe(1);
       expect(obstacles[0].id).toBe('obstacle1');
@@ -401,12 +408,9 @@ describe('HwSchematicRenderer', () => {
 
       const point = { x: 75, y: 75 };
       const radius = 100;
-      const obstacles = renderer.collectNearbyObstacles(
-        point,
-        radius,
-        data,
-        ['srcNode']
-      );
+      const obstacles = renderer.collectNearbyObstacles(point, radius, data, [
+        'srcNode',
+      ]);
 
       expect(obstacles.length).toBe(0);
     });

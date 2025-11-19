@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+
 import { DebugPanel } from '../../src/ui/DebugPanel.js';
 
 describe('DebugPanel', () => {
@@ -154,8 +155,22 @@ describe('DebugPanel', () => {
     it('should update statistics with edge data', () => {
       const mockData = {
         edges: [
-          { id: 'e1', sources: ['node1/port1'], targets: ['node2/port1'], sections: [{ startPoint: { x: 0, y: 0 }, endPoint: { x: 10, y: 0 } }] },
-          { id: 'e2', sources: ['node3/port1'], targets: ['node4/port1'], sections: [{ startPoint: { x: 0, y: 10 }, endPoint: { x: 10, y: 10 } }] },
+          {
+            id: 'e1',
+            sources: ['node1/port1'],
+            targets: ['node2/port1'],
+            sections: [
+              { startPoint: { x: 0, y: 0 }, endPoint: { x: 10, y: 0 } },
+            ],
+          },
+          {
+            id: 'e2',
+            sources: ['node3/port1'],
+            targets: ['node4/port1'],
+            sections: [
+              { startPoint: { x: 0, y: 10 }, endPoint: { x: 10, y: 10 } },
+            ],
+          },
         ],
       };
 
@@ -170,8 +185,20 @@ describe('DebugPanel', () => {
     it('should classify fallback edges correctly', () => {
       const mockData = {
         edges: [
-          { id: 'e1', sources: ['node1/port1'], targets: ['node2/port1'], sections: [{ startPoint: { x: 0, y: 0 }, endPoint: { x: 10, y: 0 } }] },
-          { id: 'e2', sources: ['node3/port1'], targets: ['node4/port1'], sections: [] },
+          {
+            id: 'e1',
+            sources: ['node1/port1'],
+            targets: ['node2/port1'],
+            sections: [
+              { startPoint: { x: 0, y: 0 }, endPoint: { x: 10, y: 0 } },
+            ],
+          },
+          {
+            id: 'e2',
+            sources: ['node3/port1'],
+            targets: ['node4/port1'],
+            sections: [],
+          },
         ],
       };
 
@@ -187,10 +214,16 @@ describe('DebugPanel', () => {
       const mockData = { edges: [] };
       debugPanel.update(mockData, 100);
 
-      expect(document.getElementById('debug-total-edges').textContent).toBe('0');
+      expect(document.getElementById('debug-total-edges').textContent).toBe(
+        '0'
+      );
       expect(document.getElementById('debug-elk-edges').textContent).toBe('0');
-      expect(document.getElementById('debug-fallback-edges').textContent).toBe('0');
-      expect(document.getElementById('debug-layout-time').textContent).toBe('100.00ms');
+      expect(document.getElementById('debug-fallback-edges').textContent).toBe(
+        '0'
+      );
+      expect(document.getElementById('debug-layout-time').textContent).toBe(
+        '100.00ms'
+      );
     });
 
     it('should handle empty data', () => {
@@ -211,7 +244,9 @@ describe('DebugPanel', () => {
 
     it('should clear console when clear button clicked', () => {
       const clearBtn = document.getElementById('debug-clear-console');
-      const consoleClearSpy = jest.spyOn(console, 'clear').mockImplementation(() => {});
+      const consoleClearSpy = jest
+        .spyOn(console, 'clear')
+        .mockImplementation(() => {});
 
       clearBtn.click();
 
@@ -233,7 +268,12 @@ describe('DebugPanel', () => {
             x: 10,
             y: 20,
             ports: [
-              { id: 'p1', x: 5, y: 0, properties: { 'org.eclipse.elk.portSide': 'EAST' } },
+              {
+                id: 'p1',
+                x: 5,
+                y: 0,
+                properties: { 'org.eclipse.elk.portSide': 'EAST' },
+              },
             ],
           },
         ],

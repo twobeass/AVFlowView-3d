@@ -3,11 +3,7 @@ import { breadthFirstSearch } from '../../src/utils/graph-traversal.js';
 describe('graph-traversal', () => {
   describe('breadthFirstSearch', () => {
     const mockGraph = {
-      nodes: [
-        { id: 'node1' },
-        { id: 'node2' },
-        { id: 'node3' },
-      ],
+      nodes: [{ id: 'node1' }, { id: 'node2' }, { id: 'node3' }],
       edges: [
         { source: 'node1', target: 'node2' },
         { source: 'node2', target: 'node3' },

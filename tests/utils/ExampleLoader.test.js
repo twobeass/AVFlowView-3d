@@ -119,7 +119,7 @@ describe('ExampleLoader', () => {
 
     it('should load different example files', async () => {
       const examples = ['simple.json', 'medium.json', 'complex.json'];
-      
+
       for (const example of examples) {
         global.fetch.mockResolvedValue({
           ok: true,

@@ -695,12 +695,12 @@ class HwSchematicRenderer {
 
     // Find longest segment
     let maxLength = 0;
-    segments.forEach(seg => {
+    segments.forEach((seg) => {
       maxLength = Math.max(maxLength, seg.length);
     });
 
     // Get all segments with maximum length
-    const longestSegments = segments.filter(seg => seg.length === maxLength);
+    const longestSegments = segments.filter((seg) => seg.length === maxLength);
 
     // If only one segment, use it
     if (longestSegments.length === 1) {
@@ -719,13 +719,16 @@ class HwSchematicRenderer {
     );
 
     // Find segments at least minDistanceFromEnd from start/end
-    const viableSegments = longestSegments.filter(seg =>
-      seg.index >= minDistanceFromEnd && seg.index < segments.length - minDistanceFromEnd
+    const viableSegments = longestSegments.filter(
+      (seg) =>
+        seg.index >= minDistanceFromEnd &&
+        seg.index < segments.length - minDistanceFromEnd
     );
 
     if (viableSegments.length > 0) {
       // Pick the middle-most viable segment
-      const middleViable = viableSegments[Math.floor(viableSegments.length / 2)];
+      const middleViable =
+        viableSegments[Math.floor(viableSegments.length / 2)];
       return {
         x: middleViable.midX,
         y: middleViable.midY,
@@ -733,7 +736,8 @@ class HwSchematicRenderer {
     }
 
     // Fallback: pick the middle segment from all longest segments
-    const middleSegment = longestSegments[Math.floor(longestSegments.length / 2)];
+    const middleSegment =
+      longestSegments[Math.floor(longestSegments.length / 2)];
     return {
       x: middleSegment.midX,
       y: middleSegment.midY,
