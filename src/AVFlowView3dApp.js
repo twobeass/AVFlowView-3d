@@ -129,9 +129,14 @@ export class AVFlowView3dApp {
       return count;
     })(elkGraph);
     if (nodeCount > 100) {
-      console.warn(`⚠️ Large graph detected (${nodeCount} nodes) - applying fast ELK layout options.`);
-      elkGraph.layoutOptions['org.eclipse.elk.layered.nodePlacement.strategy'] = 'SIMPLE';
-      elkGraph.layoutOptions['org.eclipse.elk.layered.crossingMinimization.strategy'] = 'INTERACTIVE';
+      console.warn(
+        `⚠️ Large graph detected (${nodeCount} nodes) - applying fast ELK layout options.`
+      );
+      elkGraph.layoutOptions['org.eclipse.elk.layered.nodePlacement.strategy'] =
+        'SIMPLE';
+      elkGraph.layoutOptions[
+        'org.eclipse.elk.layered.crossingMinimization.strategy'
+      ] = 'INTERACTIVE';
       elkGraph.layoutOptions['org.eclipse.elk.spacing.nodeNode'] = 150;
       elkGraph.layoutOptions['org.eclipse.elk.spacing.edgeNode'] = 60;
     }

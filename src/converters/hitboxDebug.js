@@ -5,7 +5,9 @@ function validateELKGraphForHitboxIssues(elkGraph) {
   const issues = [];
   function traverse(node) {
     if (node.ports && node.ports.length > 20) {
-      issues.push(`Node ${node.id} has ${node.ports.length} ports - may cause hitbox issues`);
+      issues.push(
+        `Node ${node.id} has ${node.ports.length} ports - may cause hitbox issues`
+      );
     }
     if (node.width && node.width < 50) {
       issues.push(`Node ${node.id} width ${node.width} is very small`);

@@ -216,10 +216,12 @@ export class AVToELKConverter {
         'org.eclipse.elk.layered.spacing.baseValue': 55,
         // ========== NODE PLACEMENT ==========
         'org.eclipse.elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
-        'org.eclipse.elk.layered.nodePlacement.bk.edgeStraightening': 'IMPROVE_STRAIGHTNESS',
+        'org.eclipse.elk.layered.nodePlacement.bk.edgeStraightening':
+          'IMPROVE_STRAIGHTNESS',
         'org.eclipse.elk.layered.nodePlacement.favorStraightEdges': true,
         // ========== CROSSING & ORDERING ==========
-        'org.eclipse.elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
+        'org.eclipse.elk.layered.considerModelOrder.strategy':
+          'NODES_AND_EDGES',
         'org.eclipse.elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
         // ========== EDGE PRIORITIES ==========
         'org.eclipse.elk.layered.priority.shortness': 10,
@@ -243,8 +245,11 @@ export class AVToELKConverter {
     })(elkGraph);
     if (nodeCount > 100) {
       // PERFORMANCE OPTIONS for large graphs
-      elkGraph.layoutOptions['org.eclipse.elk.layered.nodePlacement.strategy'] = 'SIMPLE';
-      elkGraph.layoutOptions['org.eclipse.elk.layered.crossingMinimization.strategy'] = 'INTERACTIVE';
+      elkGraph.layoutOptions['org.eclipse.elk.layered.nodePlacement.strategy'] =
+        'SIMPLE';
+      elkGraph.layoutOptions[
+        'org.eclipse.elk.layered.crossingMinimization.strategy'
+      ] = 'INTERACTIVE';
       elkGraph.layoutOptions['org.eclipse.elk.spacing.nodeNode'] = 150;
       elkGraph.layoutOptions['org.eclipse.elk.spacing.edgeNode'] = 60;
     }
