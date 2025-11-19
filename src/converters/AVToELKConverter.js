@@ -3,15 +3,6 @@
 // Converts an AV wiring graph (validated against av-wiring-graph.schema.json)
 // into an ELK JSON structure suitable for use with ELK's layered algorithm
 // and d3-hwschematic.
-//
-// Phase 3 focuses on:
-// - Mapping Areas → container nodes
-// - Mapping Nodes → ELK nodes with ports
-// - Mapping Edges → ELK edges referencing nodes/ports
-// - Applying basic layout options (direction, orthogonal routing)
-//
-// Later phases will enrich this with CategoryStyler, PortDirectionResolver,
-// and d3-hwschematic-specific metadata.
 
 function computeLayoutDirection(layout = {}) {
   return layout.direction === 'TB' ? 'DOWN' : 'RIGHT';
@@ -108,7 +99,6 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     // Ports
     const ports =
       node.ports && typeof node.ports === 'object' ? node.ports : {};
-
     // Group ports by side first (critical for correct distribution)
     const portEntries = Object.entries(ports);
     const portsBySide = {
@@ -117,7 +107,6 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
       NORTH: [],
       SOUTH: [],
     };
-
     // First pass: group ports by their side
     portEntries.forEach(([portKey, port]) => {
       if (!port) {
@@ -126,7 +115,6 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
       const side = computePortSide(port.alignment, layoutDirection);
       portsBySide[side].push({ portKey, port });
     });
-
     // Second pass: create ELK ports with correct distribution per side
     let globalIndex = 0;
     Object.entries(portsBySide).forEach(([side, portsOnSide]) => {
@@ -146,13 +134,10 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
             'hwMeta.gender': port.gender,
           },
         });
-
         globalIndex++;
       });
     });
-
     nodeMap.set(node.id, elkNode);
-
     if (node.areaId && areaNodeMap.has(node.areaId)) {
       const areaContainer = areaNodeMap.get(node.areaId);
       areaContainer.children.push(elkNode);
@@ -160,18 +145,15 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
       elkGraph.children.push(elkNode);
     }
   });
-
   return nodeMap;
 }
 
 function createEdges(graph, elkGraph) {
   const edges = Array.isArray(graph.edges) ? graph.edges : [];
-
   edges.forEach((edge) => {
     if (!edge || !edge.id || !edge.source || !edge.target) {
       return;
     }
-
     const sourcePortId =
       edge.sourcePortKey !== null && edge.sourcePortKey !== undefined
         ? `${edge.source}/${edge.sourcePortKey}`
@@ -180,7 +162,6 @@ function createEdges(graph, elkGraph) {
       edge.targetPortKey !== null && edge.targetPortKey !== undefined
         ? `${edge.target}/${edge.targetPortKey}`
         : undefined;
-
     const elkEdge = {
       id: edge.id,
       sources: [sourcePortId || edge.source],
@@ -192,7 +173,6 @@ function createEdges(graph, elkGraph) {
         'hwMeta.wireId': edge.wireId,
       },
     };
-
     elkGraph.edges.push(elkEdge);
   });
 }
@@ -210,12 +190,9 @@ export class AVToELKConverter {
     if (!json || typeof json !== 'object' || Array.isArray(json)) {
       throw new Error('AVToELKConverter.convert expects a non-null object');
     }
-
     // Handle both formats: direct graph object or wrapped in {graph: ...}
     const graph = json.graph || json;
-
     const layoutDirection = computeLayoutDirection(graph.layout || {});
-
     const elkGraph = {
       id: 'root',
       children: [],
@@ -224,57 +201,61 @@ export class AVToELKConverter {
         // ========== CORE ALGORITHM ==========
         'org.eclipse.elk.algorithm': 'layered',
         'org.eclipse.elk.direction': layoutDirection,
-
         // ========== EDGE ROUTING ==========
         'org.eclipse.elk.layered.edgeRouting': 'ORTHOGONAL',
-        'org.eclipse.elk.edgeRouting': 'ORTHOGONAL', // CRITICAL: Root-level edge routing
-
+        'org.eclipse.elk.edgeRouting': 'ORTHOGONAL',
         // ========== HIERARCHY & PORT HANDLING ==========
-        'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN', // Back to INCLUDE_CHILDREN, testing without padding
-        'org.eclipse.elk.portConstraints': 'FIXED_SIDE', // Ports stay on assigned sides, ELK positions them
-
-        // ========== SPACING (Optimized for AV diagrams) ==========
+        'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+        'org.eclipse.elk.portConstraints': 'FIXED_SIDE',
+        // ========== SPACING ==========
         'org.eclipse.elk.spacing.nodeNode': 220,
         'org.eclipse.elk.spacing.edgeNode': 88,
         'org.eclipse.elk.spacing.edgeEdge': 55,
         'org.eclipse.elk.layered.spacing.edgeNodeBetweenLayers': 110,
-        'org.eclipse.elk.layered.spacing.edgeEdgeBetweenLayers': 15, // NEW: Better parallel edge separation
+        'org.eclipse.elk.layered.spacing.edgeEdgeBetweenLayers': 15,
         'org.eclipse.elk.layered.spacing.baseValue': 55,
-
         // ========== NODE PLACEMENT ==========
         'org.eclipse.elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
         'org.eclipse.elk.layered.nodePlacement.bk.edgeStraightening':
-          'IMPROVE_STRAIGHTNESS', // NEW: Straighter edges
-        'org.eclipse.elk.layered.nodePlacement.favorStraightEdges': true, // NEW: Prefer straight edges
-
+          'IMPROVE_STRAIGHTNESS',
+        'org.eclipse.elk.layered.nodePlacement.favorStraightEdges': true,
         // ========== CROSSING & ORDERING ==========
         'org.eclipse.elk.layered.considerModelOrder.strategy':
           'NODES_AND_EDGES',
         'org.eclipse.elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
-
         // ========== EDGE PRIORITIES ==========
-        'org.eclipse.elk.layered.priority.shortness': 10, // NEW: Prioritize shorter edges
-        'org.eclipse.elk.layered.priority.straightness': 5, // NEW: Secondary: straight edges
-        'org.eclipse.elk.layered.priority.direction': 0, // Tertiary: flow direction
-
-        // ========== COMPACTION ==========
-        'org.eclipse.elk.layered.compaction.connectedComponents': true, // NEW: Reduce whitespace
-        'org.eclipse.elk.layered.compaction.postCompaction.strategy':
-          'EDGE_LENGTH', // NEW: Better edge separation
-        'org.eclipse.elk.layered.compaction.postCompaction.constraints':
-          'SCANLINE', // NEW: Constraint handling
-
+        'org.eclipse.elk.layered.priority.shortness': 10,
+        'org.eclipse.elk.layered.priority.straightness': 5,
+        'org.eclipse.elk.layered.priority.direction': 0,
         // ========== COMPONENT SEPARATION ==========
         'org.eclipse.elk.separateConnectedComponents': true,
       },
     };
-
+    // PERFORMANCE FIX for large graphs
+    const nodeCount = (function countNodes(node) {
+      let count = 0;
+      function traverse(n) {
+        if (n.children) {
+          count += n.children.length;
+          n.children.forEach(traverse);
+        }
+      }
+      traverse(node);
+      return count;
+    })(elkGraph);
+    if (nodeCount > 100) {
+      // PERFORMANCE OPTIONS for large graphs
+      elkGraph.layoutOptions['org.eclipse.elk.layered.nodePlacement.strategy'] =
+        'SIMPLE';
+      elkGraph.layoutOptions[
+        'org.eclipse.elk.layered.crossingMinimization.strategy'
+      ] = 'INTERACTIVE';
+      elkGraph.layoutOptions['org.eclipse.elk.spacing.nodeNode'] = 150;
+      elkGraph.layoutOptions['org.eclipse.elk.spacing.edgeNode'] = 60;
+    }
     const areaNodeMap = createAreaNodes(graph, elkGraph);
-
     createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection);
-
     createEdges(graph, elkGraph);
-
     return elkGraph;
   }
 }
