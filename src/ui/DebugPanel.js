@@ -1,8 +1,4 @@
-// DebugPanel.js
-// ------------------
-// Visual debugging panel for ELK routing diagnostics
-// Provides real-time visualization of routing methods, edge metadata, and performance metrics
-
+// src/ui/DebugPanel.js
 import * as d3 from 'd3';
 
 export class DebugPanel {
@@ -13,7 +9,7 @@ export class DebugPanel {
 
     // Debug state
     this.debugState = {
-      showELKHighlight: true,
+      showELKHighlight: false, // Changed to false as per user request
       showBendPoints: false,
       showPortExtensions: false,
       showParallelEdges: false,
