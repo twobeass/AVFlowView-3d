@@ -1246,29 +1246,139 @@ class HwSchematicRenderer {
     return colors[category?.toLowerCase()] || colors.default;
   }
 
+    /**
+   * Zoom in by 30%
+   */
   zoomIn() {
-    /* unchanged */
+    const newScale = this.currentTransform.k * 1.3;
+    this.zoomToScale(newScale);
   }
+
+  /**
+   * Zoom out by 30%
+   */
   zoomOut() {
-    /* unchanged */
+    const newScale = this.currentTransform.k / 1.3;
+    this.zoomToScale(newScale);
   }
-  zoomToScale(_scale) {
-    /* unchanged */
+
+  /**
+   * Zoom to a specific scale factor
+   * @param {number} scale - Target zoom scale
+   */
+  zoomToScale(scale) {
+    const bounded = Math.max(0.1, Math.min(10, scale));
+    const svgNode = this.svg.node();
+    const bounds = svgNode.getBoundingClientRect();
+    const centerX = bounds.width / 2;
+    const centerY = bounds.height / 2;
+
+    this.svg
+      .transition()
+      .duration(300)
+      .call(
+        this.zoom.transform,
+        d3.zoomIdentity
+          .translate(centerX, centerY)
+          .scale(bounded)
+          .translate(
+            -centerX / this.currentTransform.k,
+            -centerY / this.currentTransform.k
+          )
+      );
   }
+
+  /**
+   * Reset zoom to identity (1:1 scale, no translation)
+   */
   resetZoom() {
-    /* unchanged */
+    this.svg
+      .transition()
+      .duration(500)
+      .call(this.zoom.transform, d3.zoomIdentity);
   }
+
+  /**
+   * Automatically fit the rendered content to the viewport
+   */
   fitToView() {
-    /* unchanged */
+    try {
+      const svgNode = this.svg.node();
+      const contentBounds = this.g.node().getBBox();
+
+      if (contentBounds.width === 0 || contentBounds.height === 0) return;
+
+      const svgBounds = svgNode.getBoundingClientRect();
+      const padding = 50;
+
+      const scaleX = (svgBounds.width - padding * 2) / contentBounds.width;
+      const scaleY = (svgBounds.height - padding * 2) / contentBounds.height;
+      const scale = Math.min(scaleX, scaleY, 1.5);
+
+      const translateX =
+        (svgBounds.width - contentBounds.width * scale) / 2 -
+        contentBounds.x * scale;
+      const translateY =
+        (svgBounds.height - contentBounds.height * scale) / 2 -
+        contentBounds.y * scale;
+
+      this.svg
+        .transition()
+        .duration(500)
+        .call(
+          this.zoom.transform,
+          d3.zoomIdentity.translate(translateX, translateY).scale(scale)
+        );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('fitToView failed:', error);
+    }
   }
-  DeviceRenderer(_selection) {
-    /* unchanged */
+  DeviceRenderer(selection) {
+    selection
+      .append('rect')
+      .attr('class', 'device-box')
+      .attr('width', 120)
+      .attr('height', 60)
+      .attr('rx', 5)
+      .attr('ry', 5)
+      .attr('fill', '#ddd');
+
+    selection
+      .append('text')
+      .attr('class', 'device-header')
+      .attr('x', 10)
+      .attr('y', 20)
+      .text((d) => d.name || 'Device');
   }
-  AreaRenderer(_selection) {
-    /* unchanged */
+
+  AreaRenderer(selection) {
+    selection
+      .append('rect')
+      .attr('class', 'area-container')
+      .attr('width', (d) => d.width || 200)
+      .attr('height', (d) => d.height || 150)
+      .attr('rx', 8)
+      .attr('ry', 8)
+      .attr('fill', '#f7f7f7')
+      .attr('stroke', '#999');
+
+    selection
+      .append('text')
+      .attr('class', 'area-label')
+      .attr('x', 10)
+      .attr('y', 20)
+      .text((d) => d.label || 'Area');
   }
-  EdgeRenderer(_selection) {
-    /* unchanged */
+
+  EdgeRenderer(selection) {
+    selection
+      .append('path')
+      .attr('class', 'edge-path')
+      .attr('stroke', (d) => d.color || '#333')
+      .attr('fill', 'none')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '5,5');
   }
 }
 
