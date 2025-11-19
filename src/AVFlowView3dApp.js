@@ -35,7 +35,7 @@ export class AVFlowView3dApp {
     this.currentGraph = null;
     this.currentLayoutDirection = 'LR';
     this.layoutTime = 0;
-    this.debugPanelVisible = false;
+    this.debugPanelVisible = false; 
 
     this._initializeUI();
     this._initializeRenderer();
@@ -83,7 +83,6 @@ export class AVFlowView3dApp {
       onDebugStateChange: (state) => this.handleDebugStateChange(state),
       onExportELK: () => this.exportELKGraph(),
       onExportStats: () => this.exportStatistics(),
-      onToggleDebugPanel: () => this.toggleDebugPanel(),
     });
 
     // Load available examples
@@ -115,8 +114,9 @@ export class AVFlowView3dApp {
     this.debugPanel = new DebugPanel(this.renderer, '#debug-panel-container');
     window.debugPanel = this.debugPanel;
     
-    // Start hidden
-    this.debugPanel.hide();
+    // Panel is visible by default (isVisible = false in constructor of DebugPanel)
+    // No explicit hide() needed here, DebugPanel controls its own initial visibility.
+    this.debugPanelVisible = false; 
   }
 
   /**
@@ -125,8 +125,7 @@ export class AVFlowView3dApp {
    */
   handleDebugStateChange(state) {
     if (this.debugPanel) {
-      this.debugPanel.debugState = state;
-      this.debugPanel.updateVisualization();
+      this.debugPanel.updateDebugState(state);
     }
   }
 
@@ -318,13 +317,12 @@ export class AVFlowView3dApp {
   }
 
   toggleDebugPanel() {
-    const panel = document.querySelector('.debug-panel');
-    if (panel) {
+    if (this.debugPanel) {
       this.debugPanelVisible = !this.debugPanelVisible;
       if (this.debugPanelVisible) {
-        panel.classList.remove('hidden');
+        this.debugPanel.show();
       } else {
-        panel.classList.add('hidden');
+        this.debugPanel.hide();
       }
     }
   }
