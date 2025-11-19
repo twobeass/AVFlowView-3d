@@ -189,6 +189,7 @@ export class DebugPanel {
     // Export tools
     d3.select('#debug-export-elk').on('click', () => this.exportELKGraph());
     d3.select('#debug-export-stats').on('click', () => this.exportStatistics());
+    // eslint-disable-next-line no-console
     d3.select('#debug-clear-console').on('click', () => console.clear());
     d3.select('#debug-copy-diagnostics').on('click', () =>
       this.copyDiagnostics()
@@ -268,12 +269,12 @@ export class DebugPanel {
    * Update visual debugging overlays
    */
   updateVisualization() {
-    if (!this.renderer || !this.renderer.g) return;
+    if (!this.renderer || !this.renderer.g) {return;}
 
     // Remove existing debug overlays
     this.renderer.g.selectAll('.debug-overlay').remove();
 
-    if (!this.currentData) return;
+    if (!this.currentData) {return;}
 
     // Restore labels and arrows when NOT highlighting
     if (!this.debugState.showELKHighlight) {
@@ -316,8 +317,8 @@ export class DebugPanel {
    * Highlight edges by routing method (ELK = green, Fallback = red)
    * Hides arrows and labels for cleaner path visualization
    */
-  highlightRoutingMethods(group) {
-    if (!this.currentData || !this.currentData.edges) return;
+  highlightRoutingMethods(_group) {
+    if (!this.currentData || !this.currentData.edges) {return;}
 
     // Hide edge labels and arrows for cleaner visualization
     this.renderer.g.selectAll('.edge-label').style('opacity', 0);
@@ -355,7 +356,7 @@ export class DebugPanel {
    * Visualize ELK bend points as circles
    */
   visualizeBendPoints(group) {
-    if (!this.currentData || !this.currentData.edges) return;
+    if (!this.currentData || !this.currentData.edges) {return;}
 
     this.currentData.edges.forEach((edge) => {
       if (edge.sections && edge.sections[0] && edge.sections[0].bendPoints) {
@@ -385,11 +386,11 @@ export class DebugPanel {
    * Visualize port extensions as yellow lines
    */
   visualizePortExtensions(group) {
-    if (!this.currentData) return;
+    if (!this.currentData) {return;}
 
     // Find all ports and draw extension indicators
     const traverseNodes = (nodes, offset = { x: 0, y: 0 }) => {
-      if (!nodes) return;
+      if (!nodes) {return;}
 
       nodes.forEach((node) => {
         const absX = offset.x + (node.x || 0);
@@ -472,8 +473,8 @@ export class DebugPanel {
   /**
    * Highlight parallel edges (same source/target)
    */
-  highlightParallelEdges(group) {
-    if (!this.currentData || !this.currentData.edges) return;
+  highlightParallelEdges(_group) {
+    if (!this.currentData || !this.currentData.edges) {return;}
 
     // Detect parallel edge groups
     const parallelGroups = new Map();
@@ -490,7 +491,7 @@ export class DebugPanel {
     const colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
     let colorIndex = 0;
 
-    parallelGroups.forEach((edges, key) => {
+    parallelGroups.forEach((edges, _key) => {
       if (edges.length > 1) {
         const color = colors[colorIndex % colors.length];
         colorIndex++;
@@ -511,21 +512,21 @@ export class DebugPanel {
    * Show edge metadata as text labels
    */
   showEdgeMetadata(group) {
-    if (!this.currentData || !this.currentData.edges) return;
+    if (!this.currentData || !this.currentData.edges) {return;}
 
     this.currentData.edges.forEach((edge) => {
       const edgePath = this.renderer.g.select(
         `.edge-path[data-id="${edge.id}"]`
       );
-      if (edgePath.empty()) return;
+      if (edgePath.empty()) {return;}
 
       // Get path data to find midpoint
       const pathData = edgePath.attr('d');
-      if (!pathData) return;
+      if (!pathData) {return;}
 
       // Parse path to get approximate midpoint
       const points = this.parsePathPoints(pathData);
-      if (points.length === 0) return;
+      if (points.length === 0) {return;}
 
       const midIndex = Math.floor(points.length / 2);
       const midPoint = points[midIndex];
@@ -582,6 +583,7 @@ export class DebugPanel {
     a.click();
     URL.revokeObjectURL(url);
 
+    // eslint-disable-next-line no-console
     console.log('✅ ELK graph exported');
   }
 
@@ -606,6 +608,7 @@ export class DebugPanel {
     a.click();
     URL.revokeObjectURL(url);
 
+    // eslint-disable-next-line no-console
     console.log('✅ Statistics exported');
   }
 
@@ -613,10 +616,10 @@ export class DebugPanel {
    * Inspect specific edge (called when user clicks edge)
    */
   inspectEdge(edgeId) {
-    if (!this.currentData || !this.currentData.edges) return;
+    if (!this.currentData || !this.currentData.edges) {return;}
 
     const edge = this.currentData.edges.find((e) => e.id === edgeId);
-    if (!edge) return;
+    if (!edge) {return;}
 
     this.selectedEdge = edge;
 
@@ -694,7 +697,7 @@ export class DebugPanel {
    * Update diagnostic data panel with comprehensive debugging information
    */
   updateDiagnosticData(data) {
-    if (!data) return;
+    if (!data) {return;}
 
     let diagnosticText = '=== DIAGNOSTIC DATA ===\n\n';
 
@@ -816,7 +819,7 @@ export class DebugPanel {
         }
       });
     };
-    if (data.children) traverse(data.children);
+    if (data.children) {traverse(data.children);}
     return ports;
   }
 
@@ -826,6 +829,7 @@ export class DebugPanel {
   copyDiagnostics() {
     const text = d3.select('#debug-diagnostic-data pre').text();
     navigator.clipboard.writeText(text).then(() => {
+      // eslint-disable-next-line no-console
       console.log('✅ Diagnostic data copied to clipboard');
     });
   }

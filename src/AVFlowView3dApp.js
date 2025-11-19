@@ -1,11 +1,11 @@
 import ELK from 'elkjs';
 
 import { AVToELKConverter } from './converters/index.js';
-import { SchemaValidator } from './validation/index.js';
+import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
 import { ControlsPanel } from './ui/ControlsPanel.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { ExampleLoader } from './utils/ExampleLoader.js';
-import HwSchematicRenderer from './renderers/HwSchematicRenderer.js';
+import { SchemaValidator } from './validation/index.js';
 
 export class AVFlowView3dApp {
   /**
@@ -178,7 +178,7 @@ export class AVFlowView3dApp {
   }
 
   async changeLayout(direction) {
-    if (!this.currentGraph) return;
+    if (!this.currentGraph) {return;}
     this.currentLayoutDirection = direction;
     this.currentGraph.layout.direction = direction;
     await this.load(this.currentGraph);
@@ -217,10 +217,10 @@ export class AVFlowView3dApp {
             });
           });
         }
-        if (node.children) traverse(node.children);
+        if (node.children) {traverse(node.children);}
       });
     };
-    if (data.children) traverse(data.children);
+    if (data.children) {traverse(data.children);}
     return portInfo;
   }
 

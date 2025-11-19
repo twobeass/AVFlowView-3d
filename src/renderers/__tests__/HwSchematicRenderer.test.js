@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 // Note: d3-hwschematic removed November 17, 2025
 // HwSchematicRenderer now uses custom D3-based rendering with OrthogonalRouter
 

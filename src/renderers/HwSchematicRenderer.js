@@ -99,27 +99,11 @@ class HwSchematicRenderer {
       this._cachedObstacles = this._getAllDeviceObstacles(data);
     }
 
-    // Helper to find area offset by id
-    const findAreaAbsOffset = (areaId) => {
-      function search(nodes, offset) {
-        for (const n of nodes) {
-          const x = offset.x + (n.x || 0);
-          const y = offset.y + (n.y || 0);
-          if (n.id === areaId && n.children) return { x, y };
-          if (n.children) {
-            const found = search(n.children, { x, y });
-            if (found) return found;
-          }
-        }
-        return { x: 0, y: 0 };
-      }
-      return search(data.children || [], { x: 0, y: 0 }) || { x: 0, y: 0 };
-    };
-
     // Helper to recursively render children
     const renderNodes = (nodes, parentG, parentOffset = { x: 0, y: 0 }) => {
       nodes.forEach((node) => {
         // DEBUG: Log what ELK is providing
+        // eslint-disable-next-line no-console
         console.log(
           `🔍 Node ${node.id}: ELK x=${node.x}, y=${node.y}, hasChildren=${!!(node.children && node.children.length)}, parentOffset=(${parentOffset.x}, ${parentOffset.y})`
         );
@@ -129,6 +113,7 @@ class HwSchematicRenderer {
         const absoluteX = parentOffset.x + (node.x || 0);
         const absoluteY = parentOffset.y + (node.y || 0);
 
+        // eslint-disable-next-line no-console
         console.log(`   → Calculated absolute: (${absoluteX}, ${absoluteY})`);
 
         if (node.children && node.children.length) {
@@ -210,6 +195,7 @@ class HwSchematicRenderer {
               const py = absoluteY + (port.y !== undefined ? port.y : 0);
 
               // DEBUG: Log port rendering positions
+              // eslint-disable-next-line no-console
               console.log(
                 `📍 Rendering port ${port.id} at (${px.toFixed(1)}, ${py.toFixed(1)}) - ELK port: (${port.x}, ${port.y}), node at (${absoluteX}, ${absoluteY})`
               );
@@ -274,6 +260,7 @@ class HwSchematicRenderer {
             data
           );
 
+          // eslint-disable-next-line no-console
           console.log(
             `🔗 Edge ${edge.id}: container offset (${containerOffset.x}, ${containerOffset.y})`
           );
@@ -506,7 +493,7 @@ class HwSchematicRenderer {
 
         if (node.children) {
           const found = search(node.children, newPath);
-          if (found) return found;
+          if (found) {return found;}
         }
       }
       return null;
@@ -534,7 +521,7 @@ class HwSchematicRenderer {
 
         if (node.children) {
           const found = search(node.children, { x: absX, y: absY });
-          if (found) return found;
+          if (found) {return found;}
         }
       }
       return null;
@@ -605,6 +592,7 @@ class HwSchematicRenderer {
     // Performance logging
     if (this.routingConfig.logPerformance) {
       const elapsed = (performance.now() - startTime).toFixed(2);
+      // eslint-disable-next-line no-console
       console.log(`⚡ Edge ${edge.id}: ${elapsed}ms`);
     }
 
@@ -620,7 +608,7 @@ class HwSchematicRenderer {
    * @returns {object|null} {x, y, side} or null if not found
    */
   findPortAbsolutePosition(nodeId, portKey, data) {
-    const search = (nodes, offset, isArea) => {
+    const search = (nodes, offset, _isArea) => {
       for (const node of nodes) {
         // Add parent offset to node position
         const x = offset.x + (node.x || 0);
@@ -635,6 +623,7 @@ class HwSchematicRenderer {
               const portSide =
                 port.properties?.['org.eclipse.elk.portSide'] || 'EAST';
 
+              // eslint-disable-next-line no-console
               console.log(
                 `🎯 Port ${port.id}: offset=(${offset.x}, ${offset.y}), node=(${node.x}, ${node.y}), port=(${port.x}, ${port.y}) → absolute=(${px}, ${py})`
               );
@@ -647,7 +636,7 @@ class HwSchematicRenderer {
         if (node.children) {
           // Recurse with cumulative offset
           const found = search(node.children, { x, y }, true);
-          if (found) return found;
+          if (found) {return found;}
         }
       }
       return null;
@@ -819,7 +808,7 @@ class HwSchematicRenderer {
   detectLocalCollisions(waypoints, obstacles, checkSegments = null) {
     const collisions = [];
 
-    if (waypoints.length < 2) return collisions;
+    if (waypoints.length < 2) {return collisions;}
 
     // Use config value if not specified
     const segmentsToCheck =
@@ -993,7 +982,7 @@ class HwSchematicRenderer {
             break;
           }
         }
-        if (hasCollision) break;
+        if (hasCollision) {break;}
       }
 
       if (!hasCollision) {
@@ -1212,7 +1201,7 @@ class HwSchematicRenderer {
   zoomOut() {
     /* unchanged */
   }
-  zoomToScale(scale) {
+  zoomToScale(_scale) {
     /* unchanged */
   }
   resetZoom() {
@@ -1221,13 +1210,13 @@ class HwSchematicRenderer {
   fitToView() {
     /* unchanged */
   }
-  DeviceRenderer(selection) {
+  DeviceRenderer(_selection) {
     /* unchanged */
   }
-  AreaRenderer(selection) {
+  AreaRenderer(_selection) {
     /* unchanged */
   }
-  EdgeRenderer(selection) {
+  EdgeRenderer(_selection) {
     /* unchanged */
   }
 }

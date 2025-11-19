@@ -120,7 +120,7 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
 
     // First pass: group ports by their side
     portEntries.forEach(([portKey, port]) => {
-      if (!port) return;
+      if (!port) {return;}
       const side = computePortSide(port.alignment, layoutDirection);
       portsBySide[side].push({ portKey, port });
     });
@@ -128,34 +128,10 @@ function createDeviceNodes(graph, elkGraph, areaNodeMap, layoutDirection) {
     // Second pass: create ELK ports with correct distribution per side
     let globalIndex = 0;
     Object.entries(portsBySide).forEach(([side, portsOnSide]) => {
-      const portCountOnSide = portsOnSide.length;
-
-      portsOnSide.forEach(({ portKey, port }, sideIndex) => {
-        const nodeWidth = elkNode.width || 140;
-        const nodeHeight = elkNode.height || 80;
-        let anchorX = 0;
-        let anchorY = 0;
-
+      portsOnSide.forEach(({ portKey, port }) => {
         // Calculate position based on ports ON THIS SIDE only
-        switch (side) {
-          case 'WEST':
-            anchorX = 0;
-            anchorY = (nodeHeight / (portCountOnSide + 1)) * (sideIndex + 1);
-            break;
-          case 'EAST':
-            anchorX = nodeWidth;
-            anchorY = (nodeHeight / (portCountOnSide + 1)) * (sideIndex + 1);
-            break;
-          case 'NORTH':
-            anchorX = (nodeWidth / (portCountOnSide + 1)) * (sideIndex + 1);
-            anchorY = 0;
-            break;
-          case 'SOUTH':
-            anchorX = (nodeWidth / (portCountOnSide + 1)) * (sideIndex + 1);
-            anchorY = nodeHeight;
-            break;
-        }
-
+        // Note: ELK will automatically position ports on the specified side
+        
         elkNode.ports.push({
           id: `${node.id}/${portKey}`,
           labels: port.label ? [{ text: port.label }] : [],
